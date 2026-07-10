@@ -67,4 +67,32 @@ describe("PlayerState", () => {
     player.land();
     expect(player.jump()).toBe(true);
   });
+
+  it("starts in the road Lane", () => {
+    const player = new PlayerState();
+    expect(player.getLane()).toBe("road");
+  });
+
+  it("switchLane toggles between road and lawn", () => {
+    const player = new PlayerState();
+    player.switchLane();
+    expect(player.getLane()).toBe("lawn");
+    player.switchLane();
+    expect(player.getLane()).toBe("road");
+  });
+
+  it("switchLane does not affect the vertical state", () => {
+    const player = new PlayerState();
+    player.jump();
+    player.switchLane();
+    expect(player.getState()).toBe("jumping");
+  });
+
+  it("jump and duck are unaffected by which Lane the player is in", () => {
+    const player = new PlayerState();
+    player.switchLane();
+    expect(player.jump()).toBe(true);
+    player.land();
+    expect(player.duck()).toBe(true);
+  });
 });
