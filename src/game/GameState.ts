@@ -20,15 +20,16 @@ export class GameState {
     return this.lives <= 0;
   }
 
+  /** Score is the death count (see CONTEXT.md) — always +1, never an arbitrary amount. */
   getScore(): number {
     return this.score;
   }
 
-  addScore(amount: number): void {
-    this.score += amount;
+  recordDeath(): void {
+    this.score += 1;
   }
 
-  reset(): void {
+  resetForNewAttempt(): void {
     this.lives = MAX_LIVES;
     this.score = 0;
   }

@@ -49,18 +49,18 @@ describe("GameState", () => {
     expect(state.getScore()).toBe(0);
   });
 
-  it("addScore increases the Score", () => {
+  it("recordDeath increases the Score by 1 per call", () => {
     const state = new GameState();
-    state.addScore(5);
-    state.addScore(3);
-    expect(state.getScore()).toBe(8);
+    state.recordDeath();
+    state.recordDeath();
+    expect(state.getScore()).toBe(2);
   });
 
-  it("reset restores Lives and Score to their starting values", () => {
+  it("resetForNewAttempt restores Lives and Score to their starting values", () => {
     const state = new GameState();
     state.loseLife();
-    state.addScore(10);
-    state.reset();
+    state.recordDeath();
+    state.resetForNewAttempt();
     expect(state.getLives()).toBe(3);
     expect(state.getScore()).toBe(0);
   });

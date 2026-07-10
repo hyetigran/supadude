@@ -15,7 +15,7 @@ const BACKGROUND_TILE_WIDTH = 160;
  * end-to-end. Real art, obstacles, and dodge mechanics land in later tickets.
  */
 export class GameScene extends Phaser.Scene {
-  /** Public so future tickets (dodge mechanics, boss fights) can read/mutate it. */
+  /** Public: the acceptance criterion for this ticket is that it exists, ready for later tickets to drive. */
   readonly gameState = new GameState();
   private readonly playerInput = new InputManager();
   private keyboardAdapter?: KeyboardAdapter;
@@ -52,10 +52,14 @@ export class GameScene extends Phaser.Scene {
    * TileSprite produces a visible, scrollable pattern — a flat single-color
    * background would make the auto-run scroll invisible.
    */
+  private getGroundY(): number {
+    return this.scale.height * GROUND_Y_RATIO;
+  }
+
   private createBackgroundTexture(): void {
     const width = BACKGROUND_TILE_WIDTH;
     const height = this.scale.height;
-    const groundY = height * GROUND_Y_RATIO;
+    const groundY = this.getGroundY();
 
     const graphics = this.add.graphics();
     graphics.fillStyle(0x87ceeb, 1);
@@ -72,8 +76,8 @@ export class GameScene extends Phaser.Scene {
     graphics.destroy();
   }
 
-  private createCharacterPlaceholder(): Phaser.GameObjects.Container {
-    const groundY = this.scale.height * GROUND_Y_RATIO;
+  private createCharacterPlaceholder(): void {
+    const groundY = this.getGroundY();
 
     const head = this.add.circle(0, -40, 12, 0x000000);
     const body = this.add.rectangle(0, -10, 6, 40, 0x000000);
@@ -81,15 +85,16 @@ export class GameScene extends Phaser.Scene {
 
     const character = this.add.container(CHARACTER_X, groundY, [cape, body, head]);
 
+    // A quick, slightly-tilting bounce reads as a running stride; final
+    // sprite-sheet animation replaces this in the art-integration ticket.
     this.tweens.add({
       targets: character,
-      y: groundY - 10,
-      duration: 220,
+      y: groundY - 14,
+      angle: { from: -4, to: 4 },
+      duration: 130,
       yoyo: true,
       repeat: -1,
       ease: "Sine.easeInOut",
     });
-
-    return character;
   }
 }
