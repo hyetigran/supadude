@@ -1,0 +1,3 @@
+# Use Supabase for the global leaderboard backend
+
+Supa Dude needs a global leaderboard (cross-device best scores), which requires a backend and database beyond the static Phaser client. We considered Firebase/Firestore (mature, similarly generous free tier, but NoSQL and a different mental model from SQL) and a custom Node/Express + Postgres API (maximum control, but we'd own hosting, auth, and migrations ourselves for no real benefit at this scale). We chose Supabase because it gives us hosted Postgres with an auto-generated REST/realtime API and row-level security out of the box, letting us enforce basic score-validation rules declaratively instead of writing custom backend code, while staying on a generous free tier.

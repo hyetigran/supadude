@@ -1,0 +1,3 @@
+# Use Phaser 3 as the game engine
+
+Supa Dude is a 2D browser-based arcade runner (single-lane jump/duck, procedural obstacle spawning, keyboard + touch input). We considered Kaplay (minimal but less mature ecosystem), PixiJS (renderer-only, would require building physics/input/collision from scratch), and Godot's HTML5 export (powerful but heavier WASM payload and a GDScript/C# context switch away from web tooling). We chose Phaser 3 because it's purpose-built for exactly this genre, ships with arcade physics and touch+keyboard input handling out of the box, and has the deepest tutorial/community base for runner-style games — minimizing custom infrastructure so effort goes toward game feel and content.
