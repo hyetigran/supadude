@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { GameState } from "../game/GameState";
 import { InputManager } from "../game/InputManager";
 import { KeyboardAdapter } from "../game/KeyboardAdapter";
-import { PlayerState } from "../game/PlayerState";
+import { PlayerState, type PowerColor } from "../game/PlayerState";
 import { ObstacleField } from "../game/ObstacleField";
 import { CollectibleField } from "../game/CollectibleField";
 import type { Lane } from "../game/Lane";
@@ -19,6 +19,7 @@ const JUMP_DURATION_MS = 420;
 const DUCK_DURATION_MS = 500;
 const DUCK_SCALE_Y = 0.55;
 const LANE_SWITCH_DURATION_MS = 150;
+const POWER_DURATION_MS = 5000;
 
 /**
  * Two-lane dodge core loop: Left/Right switches Road/Lawn Lane independently
@@ -26,8 +27,9 @@ const LANE_SWITCH_DURATION_MS = 150;
  * ObstacleField) in whichever Lane the player currently occupies. A miss
  * costs a Life, and 0 Lives shows a Game Over screen with restart. Hearts
  * and Coins (spawned by CollectibleField) restore Lives and add to a
- * completion count respectively. Power-ups and boss fights land in later
- * tickets.
+ * completion count respectively. Clearing a Power-up Car grants a held
+ * Power, which the activation input arms to destroy a matching Blocker
+ * Obstacle on contact. Boss fights land in a later ticket.
  */
 export class GameScene extends Phaser.Scene {
   readonly gameState = new GameState();
@@ -38,7 +40,9 @@ export class GameScene extends Phaser.Scene {
   private keyboardAdapter?: KeyboardAdapter;
   private background?: Phaser.GameObjects.TileSprite;
   private character?: Phaser.GameObjects.Container;
+  private powerIndicator?: Phaser.GameObjects.Arc;
   private idleTween?: Phaser.Tweens.Tween;
+  private powerExpiryTimer?: Phaser.Time.TimerEvent;
   private isGameOver = false;
 
   constructor() {
@@ -49,6 +53,7 @@ export class GameScene extends Phaser.Scene {
     this.gameState.resetForNewAttempt();
     this.playerInput = new InputManager();
     this.playerState = new PlayerState();
+    this.powerExpiryTimer?.remove();
     this.isGameOver = false;
 
     this.createBackgroundTexture();
@@ -63,7 +68,10 @@ export class GameScene extends Phaser.Scene {
       characterX: CHARACTER_X,
       scrollSpeed: SCROLL_SPEED,
       getPlayerPose: () => ({ lane: this.playerState.getLane(), verticalState: this.playerState.getState() }),
+      getActivePower: () => (this.playerState.isPowerActivated() ? this.playerState.getPower() : null),
       onMissed: () => this.handleCollision(),
+      onPowerCollected: (color) => this.handlePowerCollected(color),
+      onBlockerDestroyed: () => this.playerState.clearPower(),
     });
     this.obstacleField.start();
 
@@ -81,6 +89,7 @@ export class GameScene extends Phaser.Scene {
     this.playerInput.on("duck", () => this.handleDuck());
     this.playerInput.on("laneLeft", () => this.handleLaneSwitch());
     this.playerInput.on("laneRight", () => this.handleLaneSwitch());
+    this.playerInput.on("powerActivate", () => this.handlePowerActivate());
 
     if (this.input.keyboard) {
       this.keyboardAdapter = new KeyboardAdapter(this.input.keyboard, this.playerInput);
@@ -94,6 +103,7 @@ export class GameScene extends Phaser.Scene {
       this.background.tilePositionX += (SCROLL_SPEED * delta) / 1000;
     }
     if (this.isGameOver) return;
+    this.updatePowerIndicator();
     this.obstacleField.update(delta);
     this.collectibleField.update(delta);
   }
@@ -139,11 +149,38 @@ export class GameScene extends Phaser.Scene {
     const head = this.add.circle(0, -40, 12, 0x000000);
     const body = this.add.rectangle(0, -10, 6, 40, 0x000000);
     const cape = this.add.triangle(-4, -20, 0, -20, -10, 20, 4, 20, 0xd62828);
+    this.powerIndicator = this.add.circle(0, -62, 8, 0xffffff, 0).setVisible(false);
 
-    const character = this.add.container(CHARACTER_X, groundY, [cape, body, head]);
+    const character = this.add.container(CHARACTER_X, groundY, [cape, body, head, this.powerIndicator]);
     this.startIdleTween(character, groundY);
 
     return character;
+  }
+
+  /** Shows a small dot above Supa Dude's head while a Power is held (dim) or activated (bright) — no Power, no dot. */
+  private updatePowerIndicator(): void {
+    if (!this.powerIndicator) return;
+
+    const power = this.playerState.getPower();
+    if (!power) {
+      this.powerIndicator.setVisible(false);
+      return;
+    }
+
+    const color = power === "fire" ? 0xff6a00 : 0x00b4ff;
+    const alpha = this.playerState.isPowerActivated() ? 1 : 0.5;
+    this.powerIndicator.setVisible(true).setFillStyle(color, alpha);
+  }
+
+  private handlePowerCollected(color: PowerColor): void {
+    this.playerState.collectPower(color);
+    this.powerExpiryTimer?.remove();
+    this.powerExpiryTimer = this.time.delayedCall(POWER_DURATION_MS, () => this.playerState.clearPower());
+  }
+
+  private handlePowerActivate(): void {
+    if (this.isGameOver) return;
+    this.playerState.activatePower();
   }
 
   // A quick, slightly-tilting bounce reads as a running stride; final

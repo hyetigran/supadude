@@ -95,4 +95,70 @@ describe("PlayerState", () => {
     player.land();
     expect(player.duck()).toBe(true);
   });
+
+  it("starts with no Power held", () => {
+    const player = new PlayerState();
+    expect(player.getPower()).toBeNull();
+    expect(player.isPowerActivated()).toBe(false);
+  });
+
+  it("collectPower holds a Power, not yet activated", () => {
+    const player = new PlayerState();
+    player.collectPower("fire");
+    expect(player.getPower()).toBe("fire");
+    expect(player.isPowerActivated()).toBe(false);
+  });
+
+  it("collectPower replaces a previously held Power", () => {
+    const player = new PlayerState();
+    player.collectPower("fire");
+    player.collectPower("water");
+    expect(player.getPower()).toBe("water");
+  });
+
+  it("collecting a new Power resets activation, even if the old one was activated", () => {
+    const player = new PlayerState();
+    player.collectPower("fire");
+    player.activatePower();
+    player.collectPower("water");
+    expect(player.isPowerActivated()).toBe(false);
+  });
+
+  it("activatePower arms a held Power and returns true", () => {
+    const player = new PlayerState();
+    player.collectPower("fire");
+    expect(player.activatePower()).toBe(true);
+    expect(player.isPowerActivated()).toBe(true);
+  });
+
+  it("activatePower is a no-op returning false when no Power is held", () => {
+    const player = new PlayerState();
+    expect(player.activatePower()).toBe(false);
+    expect(player.isPowerActivated()).toBe(false);
+  });
+
+  it("activatePower is a no-op returning false when already activated", () => {
+    const player = new PlayerState();
+    player.collectPower("fire");
+    player.activatePower();
+    expect(player.activatePower()).toBe(false);
+    expect(player.isPowerActivated()).toBe(true);
+  });
+
+  it("clearPower drops the held Power and its activation", () => {
+    const player = new PlayerState();
+    player.collectPower("fire");
+    player.activatePower();
+    player.clearPower();
+    expect(player.getPower()).toBeNull();
+    expect(player.isPowerActivated()).toBe(false);
+  });
+
+  it("Power is independent of vertical state and Lane", () => {
+    const player = new PlayerState();
+    player.collectPower("water");
+    player.jump();
+    player.switchLane();
+    expect(player.getPower()).toBe("water");
+  });
 });
