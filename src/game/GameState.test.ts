@@ -64,4 +64,30 @@ describe("GameState", () => {
     expect(state.getLives()).toBe(3);
     expect(state.getScore()).toBe(0);
   });
+
+  it("starts with 0 Coins collected", () => {
+    const state = new GameState();
+    expect(state.getCoinsCollected()).toBe(0);
+  });
+
+  it("collectCoin increments the Coins-collected counter", () => {
+    const state = new GameState();
+    state.collectCoin();
+    state.collectCoin();
+    expect(state.getCoinsCollected()).toBe(2);
+  });
+
+  it("collectCoin does not affect Score or Lives", () => {
+    const state = new GameState();
+    state.collectCoin();
+    expect(state.getScore()).toBe(0);
+    expect(state.getLives()).toBe(3);
+  });
+
+  it("resetForNewAttempt also resets Coins collected", () => {
+    const state = new GameState();
+    state.collectCoin();
+    state.resetForNewAttempt();
+    expect(state.getCoinsCollected()).toBe(0);
+  });
 });

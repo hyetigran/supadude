@@ -2,12 +2,10 @@ import Phaser from "phaser";
 import { shouldTakeDamage, type ObstacleKind } from "./DodgeRule";
 import type { VerticalState } from "./PlayerState";
 import type { Lane } from "./Lane";
+import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
 
 const OBSTACLE_MIN_INTERVAL_MS = 1200;
 const OBSTACLE_MAX_INTERVAL_MS = 2000;
-const OBSTACLE_SPAWN_MARGIN = 40;
-const OBSTACLE_DESPAWN_MARGIN = 60;
-const OBSTACLE_RESOLVE_TOLERANCE = 14;
 const GROUND_OBSTACLE_WIDTH = 22;
 const GROUND_OBSTACLE_HEIGHT = 36;
 const OVERHEAD_OBSTACLE_WIDTH = 20;
@@ -44,18 +42,14 @@ export interface PlayerPose {
   verticalState: VerticalState;
 }
 
-export interface ObstacleFieldOptions {
-  laneGroundY: (lane: Lane) => number;
-  characterX: number;
-  scrollSpeed: number;
+export interface ObstacleFieldOptions extends ScrollingFieldOptions {
   getPlayerPose: () => PlayerPose;
   onMissed: () => void;
 }
 
 /**
- * Owns obstacle spawning, scrolling, dodge-resolution, and cleanup — the
- * one responsibility GameScene would otherwise accrete alongside pose
- * handling and game-over UI.
+ * Owns obstacle spawning, geometry, and dodge-resolution. The scroll/cleanup
+ * lifecycle lives in ScrollingField.
  *
  * Spawns are randomly timed/kinded/laned. That's placeholder test-track
  * scaffolding for exercising the dodge and lane-switch mechanics in
@@ -64,71 +58,12 @@ export interface ObstacleFieldOptions {
  * with that authored Level (see the ticket's own "replaces the test track
  * used in prior tickets" scope note).
  */
-export class ObstacleField {
-  private obstacles: SpawnedObstacle[] = [];
-  private stopped = false;
-
-  constructor(
-    private readonly scene: Phaser.Scene,
-    private readonly options: ObstacleFieldOptions,
-  ) {}
-
-  start(): void {
-    this.scheduleNext();
+export class ObstacleField extends ScrollingField<SpawnedObstacle, ObstacleFieldOptions> {
+  protected nextSpawnDelayMs(): number {
+    return Phaser.Math.Between(OBSTACLE_MIN_INTERVAL_MS, OBSTACLE_MAX_INTERVAL_MS);
   }
 
-  stop(): void {
-    this.stopped = true;
-  }
-
-  update(delta: number): void {
-    if (this.stopped) return;
-
-    const dx = (this.options.scrollSpeed * delta) / 1000;
-    const { characterX, getPlayerPose, onMissed } = this.options;
-
-    for (let i = this.obstacles.length - 1; i >= 0; i--) {
-      const obstacle = this.obstacles[i];
-      obstacle.gameObject.x -= dx;
-
-      if (!obstacle.resolved && obstacle.gameObject.x <= characterX + OBSTACLE_RESOLVE_TOLERANCE) {
-        obstacle.resolved = true;
-        const pose = getPlayerPose();
-
-        if (obstacle.pairedWith) {
-          // A forced pair is one decision point: being in this Lane at all
-          // is the miss, regardless of pose — see FORCED_PAIR_PROBABILITY.
-          obstacle.pairedWith.resolved = true;
-          if (obstacle.lane === pose.lane) onMissed();
-        } else {
-          const hit = shouldTakeDamage({
-            obstacleLane: obstacle.lane,
-            obstacleKind: obstacle.kind,
-            playerLane: pose.lane,
-            playerState: pose.verticalState,
-          });
-          if (hit) onMissed();
-        }
-      }
-
-      if (obstacle.gameObject.x < -OBSTACLE_DESPAWN_MARGIN) {
-        obstacle.gameObject.destroy();
-        this.obstacles.splice(i, 1);
-      }
-    }
-  }
-
-  private scheduleNext(): void {
-    if (this.stopped) return;
-    const delay = Phaser.Math.Between(OBSTACLE_MIN_INTERVAL_MS, OBSTACLE_MAX_INTERVAL_MS);
-    this.scene.time.delayedCall(delay, () => {
-      if (this.stopped) return;
-      this.spawn();
-      this.scheduleNext();
-    });
-  }
-
-  private spawn(): void {
+  protected spawn(): void {
     const lane = Phaser.Utils.Array.GetRandom(LANES);
 
     if (Math.random() < FORCED_PAIR_PROBABILITY) {
@@ -143,9 +78,30 @@ export class ObstacleField {
     this.spawnObstacle(lane, kind);
   }
 
+  protected resolve(obstacle: SpawnedObstacle): boolean {
+    const pose = this.options.getPlayerPose();
+
+    if (obstacle.pairedWith) {
+      // A forced pair is one decision point: being in this Lane at all
+      // is the miss, regardless of pose — see FORCED_PAIR_PROBABILITY.
+      obstacle.pairedWith.resolved = true;
+      if (obstacle.lane === pose.lane) this.options.onMissed();
+    } else {
+      const hit = shouldTakeDamage({
+        obstacleLane: obstacle.lane,
+        obstacleKind: obstacle.kind,
+        playerLane: pose.lane,
+        playerState: pose.verticalState,
+      });
+      if (hit) this.options.onMissed();
+    }
+
+    return false; // obstacles always scroll off naturally, never removed early
+  }
+
   private spawnObstacle(lane: Lane, kind: ObstacleKind): SpawnedObstacle {
     const groundY = this.options.laneGroundY(lane);
-    const x = this.scene.scale.width + OBSTACLE_SPAWN_MARGIN;
+    const x = this.spawnX();
 
     const gameObject =
       kind === "ground"
@@ -157,7 +113,7 @@ export class ObstacleField {
             .setOrigin(0.5, 1);
 
     const obstacle: SpawnedObstacle = { gameObject, lane, kind, resolved: false };
-    this.obstacles.push(obstacle);
+    this.items.push(obstacle);
     return obstacle;
   }
 }

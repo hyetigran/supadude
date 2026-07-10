@@ -4,6 +4,7 @@ import { InputManager } from "../game/InputManager";
 import { KeyboardAdapter } from "../game/KeyboardAdapter";
 import { PlayerState } from "../game/PlayerState";
 import { ObstacleField } from "../game/ObstacleField";
+import { CollectibleField } from "../game/CollectibleField";
 import type { Lane } from "../game/Lane";
 
 const CHARACTER_X = 200;
@@ -23,14 +24,17 @@ const LANE_SWITCH_DURATION_MS = 150;
  * Two-lane dodge core loop: Left/Right switches Road/Lawn Lane independently
  * of Jump/Duck, which still clear Ground/Overhead Obstacles (spawned by
  * ObstacleField) in whichever Lane the player currently occupies. A miss
- * costs a Life, and 0 Lives shows a Game Over screen with restart.
- * Hearts/coins and power-ups land in later tickets.
+ * costs a Life, and 0 Lives shows a Game Over screen with restart. Hearts
+ * and Coins (spawned by CollectibleField) restore Lives and add to a
+ * completion count respectively. Power-ups and boss fights land in later
+ * tickets.
  */
 export class GameScene extends Phaser.Scene {
   readonly gameState = new GameState();
   private playerInput!: InputManager;
   private playerState!: PlayerState;
   private obstacleField!: ObstacleField;
+  private collectibleField!: CollectibleField;
   private keyboardAdapter?: KeyboardAdapter;
   private background?: Phaser.GameObjects.TileSprite;
   private character?: Phaser.GameObjects.Container;
@@ -63,6 +67,16 @@ export class GameScene extends Phaser.Scene {
     });
     this.obstacleField.start();
 
+    this.collectibleField = new CollectibleField(this, {
+      laneGroundY: (lane) => this.getGroundYForLane(lane),
+      characterX: CHARACTER_X,
+      scrollSpeed: SCROLL_SPEED,
+      getLane: () => this.playerState.getLane(),
+      onHeartCollected: () => this.gameState.gainLife(),
+      onCoinCollected: () => this.gameState.collectCoin(),
+    });
+    this.collectibleField.start();
+
     this.playerInput.on("jump", () => this.handleJump());
     this.playerInput.on("duck", () => this.handleDuck());
     this.playerInput.on("laneLeft", () => this.handleLaneSwitch());
@@ -81,6 +95,7 @@ export class GameScene extends Phaser.Scene {
     }
     if (this.isGameOver) return;
     this.obstacleField.update(delta);
+    this.collectibleField.update(delta);
   }
 
   /** Road sits below Lawn on screen — the street is nearer the viewer than the sidewalk. */
@@ -219,6 +234,7 @@ export class GameScene extends Phaser.Scene {
     this.isGameOver = true;
     this.idleTween?.pause();
     this.obstacleField.stop();
+    this.collectibleField.stop();
     this.showGameOverOverlay();
   }
 
