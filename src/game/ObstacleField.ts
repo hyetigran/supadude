@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { carPowerGranted, shouldDestroyBlocker, shouldTakeDamage, type ObstacleKind } from "./ObstacleRules";
+import { carPowerGranted, shouldDestroyBlocker, shouldTakeDamage, type Material, type ObstacleKind } from "./ObstacleRules";
 import type { PowerColor, VerticalState } from "./PlayerState";
 import type { Lane } from "./Lane";
 import type { ObstacleEvent, ObstacleVariant } from "./Level";
@@ -13,16 +13,23 @@ const CAR_HEIGHT = 24;
 const TRUNK_WIDTH = 8;
 const TRUNK_COLOR = 0x6b4226;
 const CANOPY_RADIUS = 20;
+const POLE_WIDTH = 8;
+const POLE_HEIGHT = 150; // well past both the Jump and Duck clearance zones — ungapped by pose alone
+const POLE_LAMP_RADIUS = 9;
+const POLE_LAMP_COLOR = 0xfff2a8;
+const WOOD_COLOR = 0xa97449;
+const ELECTRIC_COLOR = 0x00c2d1; // shared by Electric Blocker Obstacles and the Light Pole (always Electric — see CONTEXT.md)
 
-interface SpawnedObstacle {
-  gameObject: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container;
-  lane: Lane;
-  kind: ObstacleKind;
-  resolved: boolean;
-  variant: ObstacleVariant;
-  /** Set for both halves of a forced pair — resolving one resolves both as a single decision. */
-  pairedWith?: SpawnedObstacle;
-}
+type SpawnedObstacle =
+  | {
+      gameObject: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container;
+      lane: Lane;
+      resolved: boolean;
+      shape: "single";
+      kind: ObstacleKind;
+      variant: ObstacleVariant;
+    }
+  | { gameObject: Phaser.GameObjects.Container; lane: Lane; resolved: boolean; shape: "pole" };
 
 export interface PlayerPose {
   lane: Lane;
@@ -39,18 +46,13 @@ export interface ObstacleFieldOptions extends ScrollingFieldOptions {
 
 /**
  * Owns obstacle geometry and dodge/power/blocker-resolution for the
- * authored Level's Obstacle/Car events (see Level.ts, ADR-0003). The
- * spawn-timing/scroll/cleanup lifecycle lives in ScrollingField.
+ * authored Level's Obstacle/Car/Light Pole events (see Level.ts, ADR-0003).
+ * The spawn-timing/scroll/cleanup lifecycle lives in ScrollingField.
  */
 export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle, ObstacleFieldOptions> {
   protected spawnEvent(event: ObstacleEvent): void {
-    if (event.shape === "pair") {
-      // A forced pair is one authored decision point that produces two game
-      // objects — see the pairedWith handling in resolve() below.
-      const ground = this.spawnObstacle(event.lane, "ground", { type: "plain" });
-      const overhead = this.spawnObstacle(event.lane, "overhead", { type: "plain" });
-      ground.pairedWith = overhead;
-      overhead.pairedWith = ground;
+    if (event.shape === "pole") {
+      this.spawnPole(event.lane);
       return;
     }
 
@@ -61,25 +63,19 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
     const pose = this.options.getPlayerPose();
     const sameLane = obstacle.lane === pose.lane;
 
-    if (obstacle.pairedWith) {
-      // A forced pair is one decision point: being in this Lane at all
-      // is the miss, regardless of pose.
-      obstacle.pairedWith.resolved = true;
-      if (sameLane) this.options.onMissed();
+    if (obstacle.shape === "pole") {
+      // Spans the full clearance height — Jump/Duck never clear it, only a
+      // Lane switch does. Always Electric material (see CONTEXT.md Light
+      // Pole), so a same-Lane hit can still be shortcut by Water Power.
+      if (!sameLane) return false;
+      if (this.tryDestroyBlocker(obstacle.lane, pose.lane, "electric")) return true;
+
+      this.options.onMissed();
       return false;
     }
 
-    if (obstacle.variant.type === "blocker") {
-      const destroyed = shouldDestroyBlocker({
-        obstacleLane: obstacle.lane,
-        playerLane: pose.lane,
-        material: obstacle.variant.material,
-        activePower: this.options.getActivePower(),
-      });
-      if (destroyed) {
-        this.options.onBlockerDestroyed();
-        return true; // destroyed on contact: gone immediately, not a normal scroll-off
-      }
+    if (obstacle.variant.type === "blocker" && this.tryDestroyBlocker(obstacle.lane, pose.lane, obstacle.variant.material)) {
+      return true; // destroyed on contact: gone immediately, not a normal scroll-off
     }
 
     const hit = shouldTakeDamage({
@@ -102,14 +98,30 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
     return false; // never removed early — scrolls off naturally like any obstacle
   }
 
-  private spawnObstacle(lane: Lane, kind: ObstacleKind, variant: ObstacleVariant): SpawnedObstacle {
+  /** Shared by both the Light Pole and Blocker Obstacle resolve() branches — same "matching Power, same Lane" destroy check either way. */
+  private tryDestroyBlocker(obstacleLane: Lane, playerLane: Lane, material: Material): boolean {
+    const destroyed = shouldDestroyBlocker({
+      obstacleLane,
+      playerLane,
+      material,
+      activePower: this.options.getActivePower(),
+    });
+    if (destroyed) this.options.onBlockerDestroyed();
+    return destroyed;
+  }
+
+  private spawnObstacle(lane: Lane, kind: ObstacleKind, variant: ObstacleVariant): void {
     const groundY = this.options.laneGroundY(lane);
     const x = this.spawnX();
     const gameObject = this.createGameObject(kind, x, groundY, variant);
+    this.items.push({ gameObject, lane, resolved: false, shape: "single", kind, variant });
+  }
 
-    const obstacle: SpawnedObstacle = { gameObject, lane, kind, resolved: false, variant };
-    this.items.push(obstacle);
-    return obstacle;
+  private spawnPole(lane: Lane): void {
+    const groundY = this.options.laneGroundY(lane);
+    const x = this.spawnX();
+    const gameObject = this.createPoleGameObject(x, groundY);
+    this.items.push({ gameObject, lane, resolved: false, shape: "pole" });
   }
 
   private createGameObject(
@@ -146,6 +158,13 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
     return this.scene.add.container(x, groundY, [trunk, canopy]);
   }
 
+  /** The Light Pole (see CONTEXT.md): one grounded pole tall enough to clearly read as ungapped by Jump or Duck, topped with a lamp. */
+  private createPoleGameObject(x: number, groundY: number): Phaser.GameObjects.Container {
+    const pole = this.scene.add.rectangle(0, 0, POLE_WIDTH, POLE_HEIGHT, ELECTRIC_COLOR).setOrigin(0.5, 1);
+    const lamp = this.scene.add.circle(0, -POLE_HEIGHT, POLE_LAMP_RADIUS, POLE_LAMP_COLOR);
+    return this.scene.add.container(x, groundY, [pole, lamp]);
+  }
+
   private colorFor(kind: ObstacleKind, variant: ObstacleVariant): number {
     switch (variant.type) {
       case "car":
@@ -153,7 +172,7 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
         if (variant.carColor === "blue") return 0x1d4ed8;
         return 0x9ca3af; // grey
       case "blocker":
-        return variant.material === "wood" ? 0xa97449 : 0x00c2d1;
+        return variant.material === "wood" ? WOOD_COLOR : ELECTRIC_COLOR;
       case "plain":
         return kind === "ground" ? 0x4a4a4a : 0x3f7d3f; // leafy green canopy for a plain tree
     }

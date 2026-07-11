@@ -9,14 +9,14 @@ export type ObstacleVariant =
   | { type: "blocker"; material: Material };
 
 /**
- * "pair" mirrors ObstacleField's old forced-pair concept (a Ground + Overhead
- * Obstacle in the same Lane at the same spot — survivable only by being in
- * the other Lane) as a single authored event, since it's one placement
- * decision that happens to produce two game objects.
+ * "pole" is the Light Pole (see CONTEXT.md): a single obstacle spanning the
+ * full Ground-to-Overhead height, so neither Jump nor Duck clears it —
+ * survivable only by being in the other Lane, or by destroying it with
+ * Water Power (its material is always Electric).
  */
 export type ObstacleEvent =
   | { distance: number; shape: "single"; lane: Lane; kind: ObstacleKind; variant: ObstacleVariant }
-  | { distance: number; shape: "pair"; lane: Lane };
+  | { distance: number; shape: "pole"; lane: Lane };
 
 export interface CollectibleEvent {
   distance: number;
@@ -41,7 +41,7 @@ export interface Level {
 
 type ChunkToken =
   | { chunk: "single"; lane: Lane; kind: ObstacleKind }
-  | { chunk: "pair"; lane: Lane }
+  | { chunk: "pole"; lane: Lane }
   | { chunk: "blocker"; lane: Lane; kind: ObstacleKind; material: Material }
   | { chunk: "car"; carColor: CarColor }
   | { chunk: "breather"; gap: number }
@@ -51,7 +51,7 @@ type ChunkToken =
 /** Distance (world px) the cursor advances after placing each chunk kind — the pacing knob for that shape. */
 const SPACING = {
   single: 420,
-  pair: 520,
+  pole: 520,
   blocker: 470,
   car: 540,
 } as const;
@@ -67,19 +67,25 @@ const POST_BOSS_GAP = 700; // breathing room after the Final Boss before the clo
  * Boss Fight pauses auto-run, so it happens once, near the climax, not
  * repeatedly through the middle of the Level), then a closing stretch to
  * the finish line.
+ *
+ * The Lawn Lane's obstacle vocabulary is deliberately narrow — only plain
+ * Ground (trash can, jump), plain Overhead (tree, duck), and Light Pole
+ * (switch Lanes or Water Power) ever appear there, each mapping to exactly
+ * one dodge action. Wood/Electric Blocker variants (Fire/Water-destroyable
+ * but still Jump/Duck-dodgeable) are Road-Lane-only.
  */
 const ACT_1: ChunkToken[] = [
   { chunk: "single", lane: "road", kind: "ground" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "breather", gap: 400 },
-  { chunk: "pair", lane: "road" },
+  { chunk: "pole", lane: "road" },
   { chunk: "single", lane: "lawn", kind: "ground" },
   { chunk: "car", carColor: "grey" },
-  { chunk: "blocker", lane: "lawn", kind: "ground", material: "wood" },
+  { chunk: "single", lane: "lawn", kind: "ground" },
   { chunk: "single", lane: "road", kind: "overhead" },
   { chunk: "breather", gap: 350 },
   { chunk: "car", carColor: "red" },
-  { chunk: "pair", lane: "lawn" },
+  { chunk: "pole", lane: "lawn" },
   { chunk: "single", lane: "road", kind: "ground" },
   { chunk: "blocker", lane: "road", kind: "overhead", material: "electric" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
@@ -92,13 +98,13 @@ const ACT_2: ChunkToken[] = [
   { chunk: "blocker", lane: "road", kind: "ground", material: "electric" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "breather", gap: 400 },
-  { chunk: "pair", lane: "road" },
+  { chunk: "pole", lane: "road" },
   { chunk: "single", lane: "lawn", kind: "ground" },
   { chunk: "single", lane: "road", kind: "overhead" },
-  { chunk: "blocker", lane: "lawn", kind: "overhead", material: "wood" },
+  { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "car", carColor: "grey" },
   { chunk: "breather", gap: 350 },
-  { chunk: "pair", lane: "lawn" },
+  { chunk: "pole", lane: "lawn" },
   { chunk: "single", lane: "road", kind: "ground" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "car", carColor: "red" },
@@ -109,12 +115,12 @@ const ACT_3: ChunkToken[] = [
   { chunk: "blocker", lane: "road", kind: "ground", material: "wood" },
   { chunk: "single", lane: "lawn", kind: "ground" },
   { chunk: "breather", gap: 400 },
-  { chunk: "pair", lane: "road" },
+  { chunk: "pole", lane: "road" },
   { chunk: "car", carColor: "blue" },
-  { chunk: "blocker", lane: "lawn", kind: "overhead", material: "electric" },
+  { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "single", lane: "road", kind: "overhead" },
   { chunk: "breather", gap: 350 },
-  { chunk: "pair", lane: "lawn" },
+  { chunk: "pole", lane: "lawn" },
   { chunk: "single", lane: "road", kind: "ground" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "car", carColor: "grey" },
@@ -124,11 +130,11 @@ const ACT_3: ChunkToken[] = [
 const FINAL_STRETCH: ChunkToken[] = [
   { chunk: "single", lane: "road", kind: "ground" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "pair", lane: "road" },
+  { chunk: "pole", lane: "road" },
   { chunk: "breather", gap: 400 },
   { chunk: "car", carColor: "grey" },
   { chunk: "single", lane: "lawn", kind: "ground" },
-  { chunk: "blocker", lane: "lawn", kind: "overhead", material: "wood" },
+  { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "single", lane: "road", kind: "ground" },
 ];
 
@@ -162,9 +168,9 @@ function buildObstacleTrack(script: ChunkToken[]): ObstacleTrack {
         obstacles.push({ distance: cursor, shape: "single", lane: token.lane, kind: token.kind, variant: { type: "plain" } });
         cursor += SPACING.single;
         break;
-      case "pair":
-        obstacles.push({ distance: cursor, shape: "pair", lane: token.lane });
-        cursor += SPACING.pair;
+      case "pole":
+        obstacles.push({ distance: cursor, shape: "pole", lane: token.lane });
+        cursor += SPACING.pole;
         break;
       case "blocker":
         obstacles.push({

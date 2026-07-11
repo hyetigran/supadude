@@ -18,7 +18,7 @@ A fixed save point in the Level (placed immediately before the Final Boss) that 
 One continuous playthrough of the Level from either the start or the most recent Checkpoint, ending in either reaching the end of the Level or losing all Lives (triggering a respawn at the last Checkpoint).
 
 **Road Lane** / **Lawn Lane**:
-The two parallel paths Supa Dude can switch between. Both carry a comparable density of Ground and Overhead Obstacles; power-up Cars only appear in the Road Lane.
+The two parallel paths Supa Dude can switch between. Power-up Cars only appear in the Road Lane. The Lawn Lane's obstacle vocabulary is narrower than the Road Lane's — only plain Ground Obstacles, plain Overhead Obstacles, and Light Poles appear there, each mapping to exactly one dodge action (jump, duck, switch Lanes respectively); Wood/Electric Blocker Obstacles are Road-Lane-only.
 
 **Ground Obstacle**:
 An obstacle positioned at ground level that Supa Dude must jump over to avoid. Appears in either Lane.
@@ -29,7 +29,11 @@ An obstacle positioned above ground level that Supa Dude must duck under to avoi
 _Avoid_: High obstacle, duck obstacle
 
 **Blocker Obstacle**:
-A Ground or Overhead Obstacle made of Wood (e.g. a tree) or Electric material (e.g. a light pole) that can still be dodged normally (jump/duck), but can alternatively be destroyed by the matching Power for a bonus/shortcut.
+A Ground or Overhead Obstacle made of Wood (e.g. a tree) that can still be dodged normally (jump/duck), but can alternatively be destroyed by the matching Power for a bonus/shortcut. Distinct from a Light Pole, which is never dodgeable by pose alone.
+
+**Light Pole**:
+A single obstacle spanning the full Ground-to-Overhead height in one Lane — Jump and Duck don't clear it, so the only way past is switching Lanes, unless destroyed with Water Power (its material is always Electric) as a shortcut that lets Supa Dude stay in-Lane.
+_Avoid_: Forced pair, pole obstacle
 
 **Power-up Car**:
 A car in the Road Lane that Supa Dude can jump on top of to collect a Power. Comes in three colors: red (grants Fire Power), blue (grants Water Power), grey (no power — behaves as a plain Ground Obstacle).
