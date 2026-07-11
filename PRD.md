@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-Supa Dude is a 2D browser-based side-scrolling auto-runner. The player controls Supa Dude, a stick-figure superhero, as he auto-runs through a single, finite, hand-authored neighborhood level — roughly the length of a long Geometry Dash level (~2-4 minutes of gameplay). The player dodges obstacles, collects power-ups, and defeats three mini-bosses to reach the end.
+Supa Dude is a 2D browser-based side-scrolling auto-runner. The player controls Supa Dude, a stick-figure superhero, as he auto-runs through a single, finite, hand-authored neighborhood level — roughly the length of a long Geometry Dash level (~2-4 minutes of gameplay). The player dodges obstacles, collects power-ups, and defeats a Final Boss to reach the end.
 
 This is a personal/portfolio project. No monetization.
 
@@ -34,7 +34,7 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 - Supa Dude has **3 Lives**, capped at 3. Colliding with an obstacle costs 1 Life.
 - **Hearts** are collectibles that restore 1 Life, up to the cap.
-- Reaching 0 Lives respawns the player at the most recent **Checkpoint** with Lives reset to 3. Checkpoints are placed immediately before each of the 3 Mini-Bosses.
+- Reaching 0 Lives respawns the player at the most recent **Checkpoint** with Lives reset to 3. The Checkpoint is placed immediately before the Final Boss.
 - This is a shared life pool — Boss Fights use the same 3 Lives as the rest of the level.
 
 ### 2.4 Power-up Cars
@@ -51,12 +51,12 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 - Optional collectibles scattered through the level. Tracked as a "collected / total" completion stat shown on the results screen.
 - Do **not** affect Score or Leaderboard ranking — collection-only, for completionists.
 
-### 2.6 Mini-Bosses
+### 2.6 Final Boss
 
-- 3 fixed encounters placed at deliberate points in the level. Reaching one **stops auto-run** and starts a **Boss Fight**.
+- A single fixed encounter placed near the end of the level, immediately before the finish line. Reaching it **stops auto-run** and starts a **Boss Fight**. See ADR-0004 for why this is one encounter rather than several distributed through the level.
 - **Combat loop (dodge-and-riposte):** the boss telegraphs an attack → player dodges with Jump/Duck → enough consecutive successful dodges opens a **Vulnerable Window** → player uses **Punch** (a new input, active only during this window) to deal damage → repeat until the boss's HP (~3-5 hits) reaches 0.
-- Getting hit by a boss attack costs a Life exactly like a normal obstacle collision. 0 Lives mid-fight respawns at the Checkpoint immediately before that boss.
-- Specific boss identities, visual themes, and per-boss attack patterns are **not yet designed** — flagged as follow-up creative/level-design work (see §7).
+- Getting hit by a boss attack costs a Life exactly like a normal obstacle collision. 0 Lives mid-fight respawns at the Checkpoint immediately before the boss.
+- The boss's identity, visual theme, and attack pattern are **not yet finalized** — flagged as follow-up creative/level-design work (see §7).
 
 ### 2.7 Scoring & completion
 
@@ -92,7 +92,7 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 - **Character:** Supa Dude is a classic stick figure (circle head, line limbs) with a small cape and chest emblem/mask, nodding at the "Supa" name.
 - **Environment:** single seamless looping neighborhood background (houses, sidewalk, trees) — no zone transitions.
-- **Asset pipeline:** hand-drawn/vector sprite sheets (Aseprite, Figma, or Illustrator), exported as PNG sprite sheets + JSON atlas. Needed poses: run, jump, duck, lane-switch, hit, punch, idle/game-over, plus the 3 mini-bosses (poses TBD once designed).
+- **Asset pipeline:** hand-drawn/vector sprite sheets (Aseprite, Figma, or Illustrator), exported as PNG sprite sheets + JSON atlas. Needed poses: run, jump, duck, lane-switch, hit, punch, idle/game-over, plus the Final Boss (poses TBD once designed).
 - **Audio:** basic SFX (jump, duck, coin pickup, heart pickup, hit, punch, boss defeat, game over) plus one looping background music track. Royalty-free/CC or custom.
 
 ## 6. Technical
@@ -105,7 +105,7 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 ## 7. Open follow-up work (not blocking PRD sign-off)
 
-- Mini-boss identities, visual themes, and specific attack patterns.
+- The Final Boss's identity, visual theme, and specific attack pattern.
 - Exact level length/pacing and precise obstacle/power-up/coin placement (level design pass).
 - Tuning values: Power duration, boss HP, dodge-streak length required to open a Vulnerable Window, obstacle spawn density/pacing curve.
 - Password-reset flow and any account-management UI beyond signup/login.
@@ -116,3 +116,4 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 - `docs/adr/0001-phaser-3-as-game-engine.md`
 - `docs/adr/0002-supabase-for-leaderboard-backend.md`
 - `docs/adr/0003-finite-authored-level-not-endless-runner.md`
+- `docs/adr/0004-single-final-boss-not-three-mini-bosses.md`

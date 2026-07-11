@@ -7,13 +7,15 @@ import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
 
 const GROUND_OBSTACLE_WIDTH = 22;
 const GROUND_OBSTACLE_HEIGHT = 36;
-const OVERHEAD_OBSTACLE_WIDTH = 20;
 const OVERHEAD_GAP = 50; // must satisfy duckHeight < OVERHEAD_GAP < standHeight
 const CAR_WIDTH = 34;
 const CAR_HEIGHT = 24;
+const TRUNK_WIDTH = 8;
+const TRUNK_COLOR = 0x6b4226;
+const CANOPY_RADIUS = 20;
 
 interface SpawnedObstacle {
-  gameObject: Phaser.GameObjects.Rectangle;
+  gameObject: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container;
   lane: Lane;
   kind: ObstacleKind;
   resolved: boolean;
@@ -115,18 +117,33 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
     x: number,
     groundY: number,
     variant: ObstacleVariant,
-  ): Phaser.GameObjects.Rectangle {
+  ): Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container {
     const color = this.colorFor(kind, variant);
 
     if (variant.type === "car") {
       return this.scene.add.rectangle(x, groundY, CAR_WIDTH, CAR_HEIGHT, color).setOrigin(0.5, 1);
     }
 
-    return kind === "ground"
-      ? this.scene.add.rectangle(x, groundY, GROUND_OBSTACLE_WIDTH, GROUND_OBSTACLE_HEIGHT, color).setOrigin(0.5, 1)
-      : this.scene.add
-          .rectangle(x, groundY - OVERHEAD_GAP, OVERHEAD_OBSTACLE_WIDTH, groundY - OVERHEAD_GAP, color)
-          .setOrigin(0.5, 1);
+    if (kind === "ground") {
+      return this.scene.add.rectangle(x, groundY, GROUND_OBSTACLE_WIDTH, GROUND_OBSTACLE_HEIGHT, color).setOrigin(0.5, 1);
+    }
+
+    return this.createTreeGameObject(x, groundY, color);
+  }
+
+  /**
+   * An Overhead Obstacle reads as a tree planted in the ground — a trunk
+   * rooted at Lane level, topped with a wider leafy canopy that sits
+   * entirely above the duck-clearance line (never dipping into it), rather
+   * than a bar hanging disconnected from the top of the screen. Purely
+   * visual: the dodge rule itself is pose-based (see ObstacleRules.isCleared),
+   * not pixel geometry, but the canopy's placement is chosen so "duck the
+   * leafy part" reads as literally true, not just roughly tree-shaped.
+   */
+  private createTreeGameObject(x: number, groundY: number, canopyColor: number): Phaser.GameObjects.Container {
+    const trunk = this.scene.add.rectangle(0, 0, TRUNK_WIDTH, OVERHEAD_GAP, TRUNK_COLOR).setOrigin(0.5, 1);
+    const canopy = this.scene.add.circle(0, -OVERHEAD_GAP - CANOPY_RADIUS, CANOPY_RADIUS, canopyColor);
+    return this.scene.add.container(x, groundY, [trunk, canopy]);
   }
 
   private colorFor(kind: ObstacleKind, variant: ObstacleVariant): number {
@@ -138,7 +155,7 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
       case "blocker":
         return variant.material === "wood" ? 0xa97449 : 0x00c2d1;
       case "plain":
-        return kind === "ground" ? 0x4a4a4a : 0x8b5a2b;
+        return kind === "ground" ? 0x4a4a4a : 0x3f7d3f; // leafy green canopy for a plain tree
     }
   }
 }

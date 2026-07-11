@@ -2,8 +2,8 @@ import { isCleared, type ObstacleKind } from "./ObstacleRules";
 import type { VerticalState } from "./PlayerState";
 
 /**
- * A telegraphed Mini-Boss attack has the exact same shape as an Obstacle
- * for dodge purposes (see CONTEXT.md Mini-Boss/Boss Fight): a "ground"
+ * A telegraphed Final Boss attack has the exact same shape as an Obstacle
+ * for dodge purposes (see CONTEXT.md Final Boss/Boss Fight): a "ground"
  * attack is dodged by jumping, an "overhead" attack by ducking — the same
  * rule ObstacleRules.isCleared already encodes for Obstacles.
  */
@@ -15,7 +15,7 @@ export type BossFightPhase =
   | { type: "defeated" };
 
 /**
- * Pure dodge-and-riposte state machine for one Mini-Boss encounter (see
+ * Pure dodge-and-riposte state machine for the Final Boss encounter (see
  * CONTEXT.md Boss Fight, Vulnerable Window, Punch): the boss telegraphs an
  * attack, the player dodges with Jump/Duck, and a streak of
  * dodgeStreakRequired consecutive dodges opens a Vulnerable Window in which

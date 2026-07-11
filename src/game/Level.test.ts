@@ -20,38 +20,15 @@ describe("buildLevel", () => {
     expect(seconds).toBeLessThanOrEqual(260);
   });
 
-  it("has exactly 3 Checkpoints", () => {
+  it("places the Checkpoint immediately before the Final Boss marker (ADR-0004)", () => {
     const level = buildLevel();
-    expect(level.checkpoints).toHaveLength(3);
+    expect(level.bossMarker).toBeGreaterThan(level.checkpoint);
+    expect(level.bossMarker - level.checkpoint).toBeLessThan(300);
   });
 
-  it("has exactly 3 Mini-Boss placeholder markers", () => {
+  it("keeps the Checkpoint and Final Boss marker within the Level bounds", () => {
     const level = buildLevel();
-    expect(level.bossMarkers).toHaveLength(3);
-  });
-
-  it("places each Checkpoint immediately before its Mini-Boss marker", () => {
-    const level = buildLevel();
-    level.checkpoints.forEach((checkpointDistance, i) => {
-      const bossDistance = level.bossMarkers[i];
-      expect(bossDistance).toBeGreaterThan(checkpointDistance);
-      expect(bossDistance - checkpointDistance).toBeLessThan(300);
-    });
-  });
-
-  it("orders Checkpoints and boss markers strictly ascending", () => {
-    const level = buildLevel();
-    for (let i = 1; i < level.checkpoints.length; i++) {
-      expect(level.checkpoints[i]).toBeGreaterThan(level.checkpoints[i - 1]);
-    }
-    for (let i = 1; i < level.bossMarkers.length; i++) {
-      expect(level.bossMarkers[i]).toBeGreaterThan(level.bossMarkers[i - 1]);
-    }
-  });
-
-  it("keeps all Checkpoints and boss markers within the Level bounds", () => {
-    const level = buildLevel();
-    for (const d of [...level.checkpoints, ...level.bossMarkers]) {
+    for (const d of [level.checkpoint, level.bossMarker]) {
       expect(d).toBeGreaterThan(0);
       expect(d).toBeLessThan(level.length);
     }

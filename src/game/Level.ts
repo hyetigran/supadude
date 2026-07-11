@@ -29,10 +29,10 @@ export interface Level {
   obstacles: ObstacleEvent[];
   /** Ascending by distance. */
   collectibles: CollectibleEvent[];
-  /** Ascending; one immediately before each entry in bossMarkers. */
-  checkpoints: number[];
-  /** Ascending; placeholder Mini-Boss encounter points — real boss content is a later ticket (see issue #6). */
-  bossMarkers: number[];
+  /** The Checkpoint immediately before the Final Boss (see CONTEXT.md, ADR-0004 — one Boss, not several, so one Checkpoint). */
+  checkpoint: number;
+  /** The Final Boss's encounter distance (see ADR-0004). */
+  bossMarker: number;
   /** Total Level distance in world px (finish line). */
   length: number;
   /** Count of Coin (not Heart) collectibles — the results screen's "collected/total" denominator. */
@@ -57,14 +57,16 @@ const SPACING = {
 } as const;
 
 const CHECKPOINT_TO_BOSS_GAP = 170; // "immediately before" per issue #6
-const POST_BOSS_GAP = 700; // breathing room after a boss placeholder before the next Act's content
+const POST_BOSS_GAP = 700; // breathing room after the Final Boss before the closing stretch to the finish line
 
 /**
  * The authored Level, hand-written as an explicit, fixed token sequence — no
- * Math.random or other runtime source of variation (ADR-0003). Structured as
- * 3 Acts, each ending in a Checkpoint immediately followed by a Mini-Boss
- * placeholder marker (the boss encounters themselves are a later ticket —
- * see issue #6/#7), plus a closing stretch to the finish line.
+ * Math.random or other runtime source of variation (ADR-0003). 3 Acts of
+ * continuous Obstacle/Collectible content run back-to-back, ending in a
+ * single Checkpoint immediately followed by the Final Boss (ADR-0004 — a
+ * Boss Fight pauses auto-run, so it happens once, near the climax, not
+ * repeatedly through the middle of the Level), then a closing stretch to
+ * the finish line.
  */
 const ACT_1: ChunkToken[] = [
   { chunk: "single", lane: "road", kind: "ground" },
@@ -133,12 +135,9 @@ const FINAL_STRETCH: ChunkToken[] = [
 const SCRIPT: ChunkToken[] = [
   { chunk: "breather", gap: 600 }, // intro buffer before the first Obstacle
   ...ACT_1,
-  { chunk: "checkpoint" },
-  { chunk: "boss" },
   ...ACT_2,
-  { chunk: "checkpoint" },
-  { chunk: "boss" },
   ...ACT_3,
+  { chunk: "breather", gap: 1500 }, // tension-building lull before the Checkpoint/Final Boss
   { chunk: "checkpoint" },
   { chunk: "boss" },
   ...FINAL_STRETCH,
@@ -146,16 +145,16 @@ const SCRIPT: ChunkToken[] = [
 
 interface ObstacleTrack {
   obstacles: ObstacleEvent[];
-  checkpoints: number[];
-  bossMarkers: number[];
+  checkpoint: number;
+  bossMarker: number;
   length: number;
 }
 
 function buildObstacleTrack(script: ChunkToken[]): ObstacleTrack {
   let cursor = 0;
   const obstacles: ObstacleEvent[] = [];
-  const checkpoints: number[] = [];
-  const bossMarkers: number[] = [];
+  let checkpoint: number | undefined;
+  let bossMarker: number | undefined;
 
   for (const token of script) {
     switch (token.chunk) {
@@ -192,17 +191,23 @@ function buildObstacleTrack(script: ChunkToken[]): ObstacleTrack {
         cursor += token.gap;
         break;
       case "checkpoint":
-        checkpoints.push(cursor);
+        checkpoint = cursor;
         cursor += CHECKPOINT_TO_BOSS_GAP;
         break;
       case "boss":
-        bossMarkers.push(cursor);
+        bossMarker = cursor;
         cursor += POST_BOSS_GAP;
         break;
     }
   }
 
-  return { obstacles, checkpoints, bossMarkers, length: cursor };
+  if (checkpoint === undefined || bossMarker === undefined) {
+    // Authored-content invariant, not user input — SCRIPT always has exactly
+    // one checkpoint/boss token (ADR-0004), so this can only mean SCRIPT itself was edited wrong.
+    throw new Error("Level SCRIPT must include exactly one checkpoint and one boss token");
+  }
+
+  return { obstacles, checkpoint, bossMarker, length: cursor };
 }
 
 const COIN_STEP = 260;
@@ -227,11 +232,11 @@ function buildCollectibleTrack(length: number): CollectibleEvent[] {
 }
 
 export function buildLevel(): Level {
-  const { obstacles, checkpoints, bossMarkers, length } = buildObstacleTrack(SCRIPT);
+  const { obstacles, checkpoint, bossMarker, length } = buildObstacleTrack(SCRIPT);
   const collectibles = buildCollectibleTrack(length);
   const totalCoins = collectibles.filter((c) => c.kind === "coin").length;
 
-  return { obstacles, collectibles, checkpoints, bossMarkers, length, totalCoins };
+  return { obstacles, collectibles, checkpoint, bossMarker, length, totalCoins };
 }
 
 export const LEVEL: Level = buildLevel();
