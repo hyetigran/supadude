@@ -7,7 +7,6 @@ import { ObstacleField } from "../game/ObstacleField";
 import { CollectibleField } from "../game/CollectibleField";
 import { MarkerField, type MarkerEvent } from "../game/MarkerField";
 import { BossFightController } from "../game/BossFightController";
-import { BOSSES } from "../game/Bosses";
 import { LEVEL } from "../game/Level";
 import { LevelProgress } from "../game/LevelProgress";
 import { formatCompletionTime } from "../game/formatCompletionTime";
@@ -39,10 +38,10 @@ const BOSS_X_OFFSET = 220; // distance right of Supa Dude the boss placeholder s
  * completion count respectively. Clearing a Power-up Car grants a held
  * Power, which the activation input arms to destroy a matching Blocker
  * Obstacle on contact. Reaching the end of the Level shows a results screen
- * with Score and the Coin completion stat. Reaching a Mini-Boss marker
+ * with Score and the Coin completion stat. Reaching the Final Boss marker
  * stops auto-run and hands off to BossFightController for the
- * dodge-and-riposte Boss Fight (CONTEXT.md), using that Mini-Boss's
- * authored attack pattern (see Bosses.ts).
+ * dodge-and-riposte Boss Fight (CONTEXT.md) — a single climactic encounter
+ * near the end of the Level, not several spread through it (ADR-0004).
  */
 export class GameScene extends Phaser.Scene {
   readonly gameState = new GameState();
@@ -64,8 +63,7 @@ export class GameScene extends Phaser.Scene {
   private attemptStartTimeMs = 0;
   private isComplete = false;
   private inBossFight = false;
-  /** Index into LEVEL.bossMarkers / Bosses.BOSSES of the next undefeated Mini-Boss. Only ever advances on a defeat — see startBossFight. */
-  private nextBossIndex = 0;
+  private bossDefeated = false;
 
   constructor() {
     super("GameScene");
@@ -75,7 +73,7 @@ export class GameScene extends Phaser.Scene {
     this.gameState.resetForNewAttempt();
     this.playerInput = new InputManager();
     this.playerState = new PlayerState();
-    this.levelProgress = new LevelProgress(LEVEL.checkpoints, LEVEL.length);
+    this.levelProgress = new LevelProgress(LEVEL.checkpoint, LEVEL.length);
     this.powerExpiryTimer?.remove();
     this.bossFightController?.destroy();
     this.bossFightController = undefined;
@@ -83,7 +81,7 @@ export class GameScene extends Phaser.Scene {
     this.attemptStartTimeMs = this.time.now;
     this.isComplete = false;
     this.inBossFight = false;
-    this.nextBossIndex = 0;
+    this.bossDefeated = false;
 
     this.createBackgroundTexture();
     this.background = this.add
@@ -155,7 +153,7 @@ export class GameScene extends Phaser.Scene {
     this.updatePowerIndicator();
     this.updateHud();
 
-    // A Boss Fight stops auto-run entirely (CONTEXT.md Mini-Boss): traveled
+    // A Boss Fight stops auto-run entirely (CONTEXT.md Final Boss): traveled
     // distance, the background, and the Obstacle/Collectible/Marker fields
     // all freeze. BossFightController runs on its own Phaser timers, so it
     // keeps ticking even though this frame returns early.
@@ -171,9 +169,8 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    const nextBossDistance = LEVEL.bossMarkers[this.nextBossIndex];
-    if (nextBossDistance !== undefined && this.traveledDistance >= nextBossDistance) {
-      this.startBossFight(this.nextBossIndex);
+    if (!this.bossDefeated && this.traveledDistance >= LEVEL.bossMarker) {
+      this.startBossFight();
       return;
     }
 
@@ -354,27 +351,23 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Reaching a Mini-Boss marker: stops auto-run and the
-   * Obstacle/Collectible/Marker fields, hands off to a BossFightController
-   * running that Mini-Boss's own attack pattern (see Bosses.ts). Getting
-   * hit costs a Life via the same handleCollision as a normal Obstacle —
-   * 0 Lives mid-fight respawns at the Checkpoint before this boss exactly
-   * like any other death (see respawnAtCheckpoint).
+   * Reaching the Final Boss marker: stops auto-run and the
+   * Obstacle/Collectible/Marker fields, hands off to a BossFightController.
+   * Getting hit costs a Life via the same handleCollision as a normal
+   * Obstacle — 0 Lives mid-fight respawns at the Checkpoint before the boss
+   * exactly like any other death (see respawnAtCheckpoint).
    */
-  private startBossFight(bossIndex: number): void {
+  private startBossFight(): void {
     this.inBossFight = true;
     this.idleTween?.pause();
     this.obstacleField.stop();
     this.collectibleField.stop();
     this.markerField.stop();
 
-    const boss = BOSSES[bossIndex];
     const groundY = this.getGroundYForLane(this.playerState.getLane());
     this.bossFightController = new BossFightController(this, {
       x: CHARACTER_X + BOSS_X_OFFSET,
       groundY,
-      attackSequence: boss.attackSequence,
-      color: boss.color,
       getPlayerState: () => this.playerState.getState(),
       onHit: () => this.handleCollision(),
       onDefeated: () => this.handleBossDefeated(),
@@ -382,7 +375,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleBossDefeated(): void {
-    this.nextBossIndex += 1;
+    this.bossDefeated = true;
     this.exitBossFight();
   }
 
@@ -477,11 +470,10 @@ export class GameScene extends Phaser.Scene {
   }
 }
 
-/** Merges LEVEL's Checkpoint and Mini-Boss distances into one ascending queue for MarkerField. */
+/** LEVEL's Checkpoint and Final Boss distances as an ascending queue for MarkerField — the Checkpoint always precedes the Boss (see Level.ts). */
 function buildMarkerEvents(): MarkerEvent[] {
-  const events: MarkerEvent[] = [
-    ...LEVEL.checkpoints.map((distance): MarkerEvent => ({ distance, kind: "checkpoint" })),
-    ...LEVEL.bossMarkers.map((distance): MarkerEvent => ({ distance, kind: "boss" })),
+  return [
+    { distance: LEVEL.checkpoint, kind: "checkpoint" },
+    { distance: LEVEL.bossMarker, kind: "boss" },
   ];
-  return events.sort((a, b) => a.distance - b.distance);
 }

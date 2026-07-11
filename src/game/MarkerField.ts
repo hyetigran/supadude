@@ -17,11 +17,10 @@ const MARKER_WIDTH = 10;
 const MARKER_HEIGHT = 90;
 
 /**
- * Purely decorative flags marking each Checkpoint and Mini-Boss encounter
- * point (see Level.ts) so they're visible during play — the Mini-Boss
- * encounters themselves are a later ticket (see issue #6/#7); this only
- * marks where they'll go. Planted at the Lawn baseline so a single flag
- * reads across both Lanes. Never affects gameplay: resolve() is a no-op.
+ * Purely decorative flags marking the Checkpoint and the Final Boss
+ * encounter point (see Level.ts, ADR-0004) so they're visible during play.
+ * Planted at the Lawn baseline so a single flag reads across both Lanes.
+ * Never affects gameplay: resolve() is a no-op.
  */
 export class MarkerField extends ScrollingField<MarkerEvent, SpawnedMarker, ScrollingFieldOptions> {
   protected spawnEvent(event: MarkerEvent): void {
