@@ -37,10 +37,10 @@ const PROGRESS_BAR_FILL_COLOR = 0x4ade80;
  * ADR-0003): Left/Right switches Road/Lawn Lane independently of Jump/Duck,
  * which still clear Ground/Overhead Obstacles in whichever Lane the player
  * currently occupies. A miss costs a Life; 0 Lives respawns at the most
- * recent Checkpoint with Lives reset to 3 and the death recorded as Score
- * (see CONTEXT.md Attempt/Score) — there is no terminal "Game Over" in this
- * loop, only retries. Hearts and Coins restore Lives and add to a
- * completion count respectively. Clearing a Power-up Car grants a held
+ * recent Checkpoint with Lives reset to 3 — there is no terminal "Game
+ * Over" in this loop, only retries (see CONTEXT.md Attempt). Score is the
+ * running Coins-collected count (ADR-0005) and is unaffected by dying.
+ * Hearts restore Lives. Clearing a Power-up Car grants a held
  * Power, which the activation input arms to destroy a matching Blocker
  * Obstacle on contact. Reaching the end of the Level shows a results screen
  * with Score and the Coin completion stat. Reaching the Final Boss marker
@@ -415,10 +415,11 @@ export class GameScene extends Phaser.Scene {
   /**
    * 0 Lives mid-Level: respawn at the most recent Checkpoint with Lives
    * reset to 3 (see CONTEXT.md Checkpoint) rather than ending the Attempt —
-   * the death is recorded as Score and the Level keeps going. If this
-   * happened mid-Boss Fight, that fight is abandoned; traveled distance
-   * rewinds to the Checkpoint immediately before the boss, so reaching the
-   * marker again naturally restarts a fresh attempt at it.
+   * the Level keeps going. Score (Coins collected) is untouched by this;
+   * dying never costs it (see ADR-0005). If this happened mid-Boss Fight,
+   * that fight is abandoned; traveled distance rewinds to the Checkpoint
+   * immediately before the boss, so reaching the marker again naturally
+   * restarts a fresh attempt at it.
    */
   private respawnAtCheckpoint(): void {
     this.gameState.respawnAtCheckpoint();
@@ -460,7 +461,7 @@ export class GameScene extends Phaser.Scene {
       .text(width / 2, height / 2 - 70, "LEVEL COMPLETE", { fontSize: "32px", color: "#ffffff" })
       .setOrigin(0.5);
     const scoreLine = this.add
-      .text(width / 2, height / 2 - 20, `Score (deaths): ${this.gameState.getScore()}`, {
+      .text(width / 2, height / 2 - 20, `Score (Coins): ${this.gameState.getScore()}`, {
         fontSize: "18px",
         color: "#ffffff",
       })

@@ -12,7 +12,7 @@ The single, finite, hand-authored playthrough content — start to end, includin
 _Avoid_: Run, stage
 
 **Checkpoint**:
-A fixed save point in the Level (placed immediately before the Final Boss) that a respawn returns to after Lives reach 0. Resets Lives to full; does not reset Score (death count).
+A fixed save point in the Level (placed immediately before the Final Boss) that a respawn returns to after Lives reach 0. Resets Lives to full; does not reset Score (Coins collected) — see ADR-0005.
 
 **Attempt**:
 One continuous playthrough of the Level from either the start or the most recent Checkpoint, ending in either reaching the end of the Level or losing all Lives (triggering a respawn at the last Checkpoint).
@@ -57,7 +57,7 @@ A brief period after the Final Boss is successfully dodged enough times in a row
 Supa Dude's melee attack input, usable only during the Final Boss's Vulnerable Window. Not available/used outside the Boss Fight.
 
 **Lives**:
-Supa Dude's remaining hit points for the current Attempt. Starts at 3, capped at 3. Colliding with an Obstacle costs one Life; reaching 0 triggers a respawn at the last Checkpoint (see Score for the cost of this).
+Supa Dude's remaining hit points for the current Attempt. Starts at 3, capped at 3. Colliding with an Obstacle costs one Life; reaching 0 triggers a respawn at the last Checkpoint. Losing Lives never costs Score (see ADR-0005).
 _Avoid_: Health, HP
 
 **Heart**:
@@ -65,14 +65,14 @@ A collectible on the track that restores one Life, up to the cap of 3.
 _Avoid_: Health pickup, life pickup
 
 **Coin**:
-An optional collectible in the Level. Contributes to a "collected / total" completion stat shown on the results screen; does not affect Score or Leaderboard ranking.
+A collectible scattered through the Level. Contributes to a "collected / total" completion stat shown on the results screen, and is the basis of Score — collecting one increments Score by 1 (see ADR-0005). Not required to reach the end of the Level.
 
 **Score**:
-The number of deaths (Checkpoint respawns) accumulated while completing the Level, tie-broken by total completion time. Lower is better. Only recorded once the Level is completed end-to-end.
+The number of Coins collected while completing the Level, tie-broken by total completion time. Higher is better. Only recorded once the Level is completed end-to-end. Dying (a Checkpoint respawn) never costs Score — see ADR-0005 for why this changed from an earlier deaths-based definition.
 _Avoid_: Distance, points
 
 **Leaderboard**:
-The global, cross-device ranking of completed Level attempts by fewest deaths (tie-broken by completion time), backed by Supabase. Only Accounts (not Guests) can submit a completed Score.
+The global, cross-device ranking of completed Level attempts by most Coins collected (tie-broken by completion time), backed by Supabase. Only Accounts (not Guests) can submit a completed Score.
 
 **Account**:
 An email/password identity created via Supabase Auth. Optional — a player can play as a Guest indefinitely; an Account is only needed to submit a Score to the Leaderboard.

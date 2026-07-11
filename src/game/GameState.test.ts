@@ -49,17 +49,25 @@ describe("GameState", () => {
     expect(state.getScore()).toBe(0);
   });
 
-  it("recordDeath increases the Score by 1 per call", () => {
+  it("collectCoin increases the Score by 1 per call (see ADR-0005: Score is Coins collected)", () => {
     const state = new GameState();
-    state.recordDeath();
-    state.recordDeath();
+    state.collectCoin();
+    state.collectCoin();
     expect(state.getScore()).toBe(2);
+  });
+
+  it("Score always equals Coins collected", () => {
+    const state = new GameState();
+    state.collectCoin();
+    state.collectCoin();
+    state.collectCoin();
+    expect(state.getScore()).toBe(state.getCoinsCollected());
   });
 
   it("resetForNewAttempt restores Lives and Score to their starting values", () => {
     const state = new GameState();
     state.loseLife();
-    state.recordDeath();
+    state.collectCoin();
     state.resetForNewAttempt();
     expect(state.getLives()).toBe(3);
     expect(state.getScore()).toBe(0);
@@ -77,10 +85,9 @@ describe("GameState", () => {
     expect(state.getCoinsCollected()).toBe(2);
   });
 
-  it("collectCoin does not affect Score or Lives", () => {
+  it("collectCoin does not affect Lives", () => {
     const state = new GameState();
     state.collectCoin();
-    expect(state.getScore()).toBe(0);
     expect(state.getLives()).toBe(3);
   });
 
@@ -100,23 +107,11 @@ describe("GameState", () => {
     expect(state.getLives()).toBe(3);
   });
 
-  it("respawnAtCheckpoint records a death (increments Score by 1)", () => {
-    const state = new GameState();
-    state.respawnAtCheckpoint();
-    expect(state.getScore()).toBe(1);
-  });
-
-  it("respawnAtCheckpoint accumulates Score across multiple respawns, unlike resetForNewAttempt", () => {
-    const state = new GameState();
-    state.respawnAtCheckpoint();
-    state.respawnAtCheckpoint();
-    expect(state.getScore()).toBe(2);
-  });
-
-  it("respawnAtCheckpoint does not touch Coins collected", () => {
+  it("respawnAtCheckpoint does not affect Score or Coins collected — dying doesn't cost Score", () => {
     const state = new GameState();
     state.collectCoin();
     state.respawnAtCheckpoint();
+    expect(state.getScore()).toBe(1);
     expect(state.getCoinsCollected()).toBe(1);
   });
 });

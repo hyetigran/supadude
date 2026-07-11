@@ -48,8 +48,8 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 ### 2.5 Coins
 
-- Optional collectibles scattered through the level. Tracked as a "collected / total" completion stat shown on the results screen.
-- Do **not** affect Score or Leaderboard ranking — collection-only, for completionists.
+- Collectibles scattered through the level. Tracked as a "collected / total" completion stat shown on the results screen. Not required to reach the end of the level.
+- Each Coin collected is the basis of **Score** — see §2.7. See ADR-0005 for why this changed from an earlier deaths-based Score.
 
 ### 2.6 Final Boss
 
@@ -60,7 +60,7 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 ### 2.7 Scoring & completion
 
-- **Score** = number of deaths (Checkpoint respawns) accumulated over the course of completing the level, tie-broken by total completion time. Lower is better.
+- **Score** = number of Coins collected over the course of completing the level, tie-broken by total completion time. Higher is better. Losing Lives/dying never costs Score.
 - Score is only recorded once the level is completed end-to-end — there's no partial-progress score.
 
 ## 3. Meta systems
@@ -74,7 +74,7 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 ### 3.2 Leaderboard
 
-- Global, cross-device ranking of completed attempts, sorted by fewest deaths, tie-broken by completion time.
+- Global, cross-device ranking of completed attempts, sorted by most Coins collected, tie-broken by completion time.
 - Backed by Supabase (Postgres + auto-generated API + row-level security for basic score validation). See ADR-0002.
 - Only Accounts (not Guests) can appear on it.
 
@@ -117,3 +117,4 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 - `docs/adr/0002-supabase-for-leaderboard-backend.md`
 - `docs/adr/0003-finite-authored-level-not-endless-runner.md`
 - `docs/adr/0004-single-final-boss-not-three-mini-bosses.md`
+- `docs/adr/0005-score-is-coins-not-deaths.md`
