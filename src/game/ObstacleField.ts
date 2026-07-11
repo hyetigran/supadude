@@ -1,56 +1,16 @@
 import Phaser from "phaser";
-import {
-  carPowerGranted,
-  shouldDestroyBlocker,
-  shouldTakeDamage,
-  type CarColor,
-  type Material,
-  type ObstacleKind,
-} from "./ObstacleRules";
+import { carPowerGranted, shouldDestroyBlocker, shouldTakeDamage, type ObstacleKind } from "./ObstacleRules";
 import type { PowerColor, VerticalState } from "./PlayerState";
 import type { Lane } from "./Lane";
+import type { ObstacleEvent, ObstacleVariant } from "./Level";
 import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
 
-const OBSTACLE_MIN_INTERVAL_MS = 1200;
-const OBSTACLE_MAX_INTERVAL_MS = 2000;
 const GROUND_OBSTACLE_WIDTH = 22;
 const GROUND_OBSTACLE_HEIGHT = 36;
 const OVERHEAD_OBSTACLE_WIDTH = 20;
 const OVERHEAD_GAP = 50; // must satisfy duckHeight < OVERHEAD_GAP < standHeight
-const LANES: Lane[] = ["road", "lawn"];
-const KINDS: ObstacleKind[] = ["ground", "overhead"];
-const MATERIALS: Material[] = ["wood", "electric"];
-const CAR_COLORS: CarColor[] = ["red", "blue", "grey"];
 const CAR_WIDTH = 34;
 const CAR_HEIGHT = 24;
-
-/**
- * Fraction of spawn events that force a lane switch: a Ground + Overhead
- * Obstacle paired in the same Lane at the same x. For every VerticalState
- * (grounded/jumping/ducking), at least one half of the pair always hits —
- * jumping clears the ground half but not the overhead half, ducking clears
- * the overhead half but not the ground half, grounded clears neither — so a
- * forced pair is only survivable by being in the other Lane. This is what
- * makes lane-switching load-bearing rather than a purely cosmetic choice
- * (see issue #3's "switching lanes is the only way to avoid some obstacle
- * placements"). Named distinctly from CONTEXT.md's "Blocker Obstacle" (a
- * Wood/Electric obstacle destroyed by a Power) — unrelated concept, same
- * area of the codebase, easy to confuse if named similarly.
- */
-const FORCED_PAIR_PROBABILITY = 0.3;
-
-/** Fraction of spawn events that are a Power-up Car instead of a regular obstacle. Cars only ever spawn in the Road Lane per issue #5. */
-const CAR_PROBABILITY = 0.2;
-
-/** Fraction of regular (non-car, non-paired) obstacles that are also a Blocker Obstacle. */
-const BLOCKER_PROBABILITY = 0.25;
-
-/**
- * A spawn is exactly one of these — never a car AND a Blocker at once. A
- * discriminated union instead of two optional fields makes that illegal
- * combination unrepresentable, rather than merely undocumented.
- */
-type ObstacleVariant = { type: "plain" } | { type: "car"; carColor: CarColor } | { type: "blocker"; material: Material };
 
 interface SpawnedObstacle {
   gameObject: Phaser.GameObjects.Rectangle;
@@ -76,44 +36,23 @@ export interface ObstacleFieldOptions extends ScrollingFieldOptions {
 }
 
 /**
- * Owns obstacle spawning, geometry, and dodge/power/blocker-resolution. The
- * scroll/cleanup lifecycle lives in ScrollingField.
- *
- * Spawns are randomly timed/kinded/laned. That's placeholder test-track
- * scaffolding for exercising the dodge, lane-switch, and power mechanics in
- * isolation, not the intended final content — ADR-0003 commits the real
- * Level to deliberate, hand-authored placement. Ticket #6 replaces this
- * with that authored Level (see the ticket's own "replaces the test track
- * used in prior tickets" scope note).
+ * Owns obstacle geometry and dodge/power/blocker-resolution for the
+ * authored Level's Obstacle/Car events (see Level.ts, ADR-0003). The
+ * spawn-timing/scroll/cleanup lifecycle lives in ScrollingField.
  */
-export class ObstacleField extends ScrollingField<SpawnedObstacle, ObstacleFieldOptions> {
-  protected nextSpawnDelayMs(): number {
-    return Phaser.Math.Between(OBSTACLE_MIN_INTERVAL_MS, OBSTACLE_MAX_INTERVAL_MS);
-  }
-
-  protected spawn(): void {
-    if (Math.random() < CAR_PROBABILITY) {
-      const carColor = Phaser.Utils.Array.GetRandom(CAR_COLORS);
-      this.spawnObstacle("road", "ground", { type: "car", carColor });
-      return;
-    }
-
-    const lane = Phaser.Utils.Array.GetRandom(LANES);
-
-    if (Math.random() < FORCED_PAIR_PROBABILITY) {
-      const ground = this.spawnObstacle(lane, "ground");
-      const overhead = this.spawnObstacle(lane, "overhead");
+export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle, ObstacleFieldOptions> {
+  protected spawnEvent(event: ObstacleEvent): void {
+    if (event.shape === "pair") {
+      // A forced pair is one authored decision point that produces two game
+      // objects — see the pairedWith handling in resolve() below.
+      const ground = this.spawnObstacle(event.lane, "ground", { type: "plain" });
+      const overhead = this.spawnObstacle(event.lane, "overhead", { type: "plain" });
       ground.pairedWith = overhead;
       overhead.pairedWith = ground;
       return;
     }
 
-    const kind = Phaser.Utils.Array.GetRandom(KINDS);
-    const variant: ObstacleVariant =
-      Math.random() < BLOCKER_PROBABILITY
-        ? { type: "blocker", material: Phaser.Utils.Array.GetRandom(MATERIALS) }
-        : { type: "plain" };
-    this.spawnObstacle(lane, kind, variant);
+    this.spawnObstacle(event.lane, event.kind, event.variant);
   }
 
   protected resolve(obstacle: SpawnedObstacle): boolean {
@@ -122,7 +61,7 @@ export class ObstacleField extends ScrollingField<SpawnedObstacle, ObstacleField
 
     if (obstacle.pairedWith) {
       // A forced pair is one decision point: being in this Lane at all
-      // is the miss, regardless of pose — see FORCED_PAIR_PROBABILITY.
+      // is the miss, regardless of pose.
       obstacle.pairedWith.resolved = true;
       if (sameLane) this.options.onMissed();
       return false;
@@ -161,7 +100,7 @@ export class ObstacleField extends ScrollingField<SpawnedObstacle, ObstacleField
     return false; // never removed early — scrolls off naturally like any obstacle
   }
 
-  private spawnObstacle(lane: Lane, kind: ObstacleKind, variant: ObstacleVariant = { type: "plain" }): SpawnedObstacle {
+  private spawnObstacle(lane: Lane, kind: ObstacleKind, variant: ObstacleVariant): SpawnedObstacle {
     const groundY = this.options.laneGroundY(lane);
     const x = this.spawnX();
     const gameObject = this.createGameObject(kind, x, groundY, variant);

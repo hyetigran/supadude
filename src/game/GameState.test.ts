@@ -22,13 +22,13 @@ describe("GameState", () => {
     expect(state.getLives()).toBe(0);
   });
 
-  it("isGameOver is true once Lives reaches 0", () => {
+  it("hasNoLivesLeft is true once Lives reaches 0", () => {
     const state = new GameState();
-    expect(state.isGameOver()).toBe(false);
+    expect(state.hasNoLivesLeft()).toBe(false);
     state.loseLife();
     state.loseLife();
     state.loseLife();
-    expect(state.isGameOver()).toBe(true);
+    expect(state.hasNoLivesLeft()).toBe(true);
   });
 
   it("gainLife increments Lives", () => {
@@ -89,5 +89,34 @@ describe("GameState", () => {
     state.collectCoin();
     state.resetForNewAttempt();
     expect(state.getCoinsCollected()).toBe(0);
+  });
+
+  it("respawnAtCheckpoint restores Lives to the cap", () => {
+    const state = new GameState();
+    state.loseLife();
+    state.loseLife();
+    state.loseLife();
+    state.respawnAtCheckpoint();
+    expect(state.getLives()).toBe(3);
+  });
+
+  it("respawnAtCheckpoint records a death (increments Score by 1)", () => {
+    const state = new GameState();
+    state.respawnAtCheckpoint();
+    expect(state.getScore()).toBe(1);
+  });
+
+  it("respawnAtCheckpoint accumulates Score across multiple respawns, unlike resetForNewAttempt", () => {
+    const state = new GameState();
+    state.respawnAtCheckpoint();
+    state.respawnAtCheckpoint();
+    expect(state.getScore()).toBe(2);
+  });
+
+  it("respawnAtCheckpoint does not touch Coins collected", () => {
+    const state = new GameState();
+    state.collectCoin();
+    state.respawnAtCheckpoint();
+    expect(state.getCoinsCollected()).toBe(1);
   });
 });

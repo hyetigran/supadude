@@ -16,38 +16,74 @@ export interface ScrollableItem {
   resolved: boolean;
 }
 
+export interface DistanceEvent {
+  distance: number;
+}
+
 /**
- * Shared spawn/scroll/resolve/cleanup lifecycle for lane-scrolling entities.
- * ObstacleField and CollectibleField both had this exact loop shape
- * independently; Power-up Cars (next ticket) need it a third time, which is
- * where duplicating it again stops being the cheaper option. Each subclass
- * owns its own spawn timing/geometry and what "resolving" an item means —
- * this only owns the part all three share: scroll left, resolve once when
- * in range, cull once off-screen.
+ * Shared spawn/scroll/resolve/cleanup lifecycle for lane-scrolling entities,
+ * driven by an authored, distance-indexed event queue (the Level — see
+ * Level.ts) rather than a random spawn timer. ADR-0003 committed the real
+ * Level to deliberate, hand-authored placement, replacing the random-timer
+ * placeholder test-track scaffolding this class previously drove (issue #6).
+ *
+ * An event is spawned once traveled distance comes within one screen-width
+ * of its authored distance — the same lead spawnX() always placed new items
+ * at — so it scrolls on from off-screen and reaches the player right as
+ * traveled distance reaches its authored distance.
  */
-export abstract class ScrollingField<TItem extends ScrollableItem, TOptions extends ScrollingFieldOptions> {
+export abstract class ScrollingField<
+  TEvent extends DistanceEvent,
+  TItem extends ScrollableItem,
+  TOptions extends ScrollingFieldOptions,
+> {
   protected items: TItem[] = [];
-  private stopped = false;
+  private pending: TEvent[];
+  private traveled = 0;
+  private stopped = true;
 
   constructor(
     protected readonly scene: Phaser.Scene,
     protected readonly options: TOptions,
-  ) {}
+    private readonly allEvents: TEvent[],
+  ) {
+    this.pending = [...allEvents];
+  }
 
   start(): void {
-    this.scheduleNext();
+    this.stopped = false;
   }
 
   stop(): void {
     this.stopped = true;
   }
 
+  /**
+   * Rewinds to a Checkpoint respawn: destroys everything currently on
+   * screen and rebuilds the pending queue from the authored events at or
+   * after that distance, so the stretch since the Checkpoint replays.
+   * Subclasses exclude already-resolved events with a persistent one-time
+   * effect (e.g. a Coin already collected) via shouldReplay.
+   */
+  seek(distance: number): void {
+    for (const item of this.items) item.gameObject.destroy();
+    this.items = [];
+    this.traveled = distance;
+    this.pending = this.allEvents.filter((event) => event.distance >= distance && this.shouldReplay(event));
+  }
+
   update(delta: number): void {
     if (this.stopped) return;
 
     const dx = (this.options.scrollSpeed * delta) / 1000;
-    const { characterX } = this.options;
+    this.traveled += dx;
 
+    const spawnLead = this.scene.scale.width + SPAWN_MARGIN;
+    while (this.pending.length > 0 && this.pending[0].distance <= this.traveled + spawnLead) {
+      this.spawnEvent(this.pending.shift()!);
+    }
+
+    const { characterX } = this.options;
     for (let i = this.items.length - 1; i >= 0; i--) {
       const item = this.items[i];
       item.gameObject.x -= dx;
@@ -72,17 +108,16 @@ export abstract class ScrollingField<TItem extends ScrollableItem, TOptions exte
     return this.scene.scale.width + SPAWN_MARGIN;
   }
 
-  private scheduleNext(): void {
-    if (this.stopped) return;
-    this.scene.time.delayedCall(this.nextSpawnDelayMs(), () => {
-      if (this.stopped) return;
-      this.spawn();
-      this.scheduleNext();
-    });
+  /**
+   * Whether an authored event should still fire when replayed after a
+   * seek(). Defaults to yes; override to dedupe an event with a persistent
+   * one-time effect (e.g. Coins — see CollectibleField).
+   */
+  protected shouldReplay(_event: TEvent): boolean {
+    return true;
   }
 
-  protected abstract nextSpawnDelayMs(): number;
-  protected abstract spawn(): void;
+  protected abstract spawnEvent(event: TEvent): void;
 
   /**
    * Called once when an item first reaches the player's x. Return true to

@@ -17,7 +17,12 @@ export class GameState {
     this.lives = Math.min(MAX_LIVES, this.lives + 1);
   }
 
-  isGameOver(): boolean {
+  /**
+   * True at 0 Lives. Despite the name's history, this is no longer terminal:
+   * mid-Level it triggers a Checkpoint respawn (see respawnAtCheckpoint),
+   * not a Game Over — see CONTEXT.md Attempt.
+   */
+  hasNoLivesLeft(): boolean {
     return this.lives <= 0;
   }
 
@@ -43,5 +48,17 @@ export class GameState {
     this.lives = MAX_LIVES;
     this.score = 0;
     this.coinsCollected = 0;
+  }
+
+  /**
+   * A Checkpoint respawn (0 Lives mid-Level): records the death and restores
+   * Lives to full, but — unlike resetForNewAttempt — leaves Score and Coins
+   * alone. Score is the death count for the whole Level (see CONTEXT.md
+   * Attempt/Score), so it must keep accumulating across every respawn within
+   * one completion, not reset per-Checkpoint.
+   */
+  respawnAtCheckpoint(): void {
+    this.recordDeath();
+    this.lives = MAX_LIVES;
   }
 }

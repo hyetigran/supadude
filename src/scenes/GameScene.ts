@@ -5,6 +5,10 @@ import { KeyboardAdapter } from "../game/KeyboardAdapter";
 import { PlayerState, type PowerColor } from "../game/PlayerState";
 import { ObstacleField } from "../game/ObstacleField";
 import { CollectibleField } from "../game/CollectibleField";
+import { MarkerField, type MarkerEvent } from "../game/MarkerField";
+import { LEVEL } from "../game/Level";
+import { LevelProgress } from "../game/LevelProgress";
+import { formatCompletionTime } from "../game/formatCompletionTime";
 import type { Lane } from "../game/Lane";
 
 const CHARACTER_X = 200;
@@ -22,14 +26,18 @@ const LANE_SWITCH_DURATION_MS = 150;
 const POWER_DURATION_MS = 5000;
 
 /**
- * Two-lane dodge core loop: Left/Right switches Road/Lawn Lane independently
- * of Jump/Duck, which still clear Ground/Overhead Obstacles (spawned by
- * ObstacleField) in whichever Lane the player currently occupies. A miss
- * costs a Life, and 0 Lives shows a Game Over screen with restart. Hearts
- * and Coins (spawned by CollectibleField) restore Lives and add to a
+ * Two-lane dodge core loop through the authored Level (see Level.ts,
+ * ADR-0003): Left/Right switches Road/Lawn Lane independently of Jump/Duck,
+ * which still clear Ground/Overhead Obstacles in whichever Lane the player
+ * currently occupies. A miss costs a Life; 0 Lives respawns at the most
+ * recent Checkpoint with Lives reset to 3 and the death recorded as Score
+ * (see CONTEXT.md Attempt/Score) — there is no terminal "Game Over" in this
+ * loop, only retries. Hearts and Coins restore Lives and add to a
  * completion count respectively. Clearing a Power-up Car grants a held
  * Power, which the activation input arms to destroy a matching Blocker
- * Obstacle on contact. Boss fights land in a later ticket.
+ * Obstacle on contact. Reaching the end of the Level shows a results screen
+ * with Score and the Coin completion stat. Boss fights land in a later
+ * ticket — the 3 Mini-Boss encounter points are placeholder markers here.
  */
 export class GameScene extends Phaser.Scene {
   readonly gameState = new GameState();
@@ -37,13 +45,18 @@ export class GameScene extends Phaser.Scene {
   private playerState!: PlayerState;
   private obstacleField!: ObstacleField;
   private collectibleField!: CollectibleField;
+  private markerField!: MarkerField;
+  private levelProgress!: LevelProgress;
   private keyboardAdapter?: KeyboardAdapter;
   private background?: Phaser.GameObjects.TileSprite;
   private character?: Phaser.GameObjects.Container;
   private powerIndicator?: Phaser.GameObjects.Arc;
+  private hudText?: Phaser.GameObjects.Text;
   private idleTween?: Phaser.Tweens.Tween;
   private powerExpiryTimer?: Phaser.Time.TimerEvent;
-  private isGameOver = false;
+  private traveledDistance = 0;
+  private attemptStartTimeMs = 0;
+  private isComplete = false;
 
   constructor() {
     super("GameScene");
@@ -53,8 +66,11 @@ export class GameScene extends Phaser.Scene {
     this.gameState.resetForNewAttempt();
     this.playerInput = new InputManager();
     this.playerState = new PlayerState();
+    this.levelProgress = new LevelProgress(LEVEL.checkpoints, LEVEL.length);
     this.powerExpiryTimer?.remove();
-    this.isGameOver = false;
+    this.traveledDistance = 0;
+    this.attemptStartTimeMs = this.time.now;
+    this.isComplete = false;
 
     this.createBackgroundTexture();
     this.background = this.add
@@ -62,28 +78,49 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.character = this.createCharacterPlaceholder();
+    this.hudText = this.add.text(12, 12, "", { fontSize: "14px", color: "#ffffff" }).setDepth(10);
+    this.updateHud();
 
-    this.obstacleField = new ObstacleField(this, {
-      laneGroundY: (lane) => this.getGroundYForLane(lane),
-      characterX: CHARACTER_X,
-      scrollSpeed: SCROLL_SPEED,
-      getPlayerPose: () => ({ lane: this.playerState.getLane(), verticalState: this.playerState.getState() }),
-      getActivePower: () => (this.playerState.isPowerActivated() ? this.playerState.getPower() : null),
-      onMissed: () => this.handleCollision(),
-      onPowerCollected: (color) => this.handlePowerCollected(color),
-      onBlockerDestroyed: () => this.playerState.clearPower(),
-    });
+    this.obstacleField = new ObstacleField(
+      this,
+      {
+        laneGroundY: (lane) => this.getGroundYForLane(lane),
+        characterX: CHARACTER_X,
+        scrollSpeed: SCROLL_SPEED,
+        getPlayerPose: () => ({ lane: this.playerState.getLane(), verticalState: this.playerState.getState() }),
+        getActivePower: () => (this.playerState.isPowerActivated() ? this.playerState.getPower() : null),
+        onMissed: () => this.handleCollision(),
+        onPowerCollected: (color) => this.handlePowerCollected(color),
+        onBlockerDestroyed: () => this.playerState.clearPower(),
+      },
+      LEVEL.obstacles,
+    );
     this.obstacleField.start();
 
-    this.collectibleField = new CollectibleField(this, {
-      laneGroundY: (lane) => this.getGroundYForLane(lane),
-      characterX: CHARACTER_X,
-      scrollSpeed: SCROLL_SPEED,
-      getLane: () => this.playerState.getLane(),
-      onHeartCollected: () => this.gameState.gainLife(),
-      onCoinCollected: () => this.gameState.collectCoin(),
-    });
+    this.collectibleField = new CollectibleField(
+      this,
+      {
+        laneGroundY: (lane) => this.getGroundYForLane(lane),
+        characterX: CHARACTER_X,
+        scrollSpeed: SCROLL_SPEED,
+        getLane: () => this.playerState.getLane(),
+        onHeartCollected: () => this.gameState.gainLife(),
+        onCoinCollected: () => this.gameState.collectCoin(),
+      },
+      LEVEL.collectibles,
+    );
     this.collectibleField.start();
+
+    this.markerField = new MarkerField(
+      this,
+      {
+        laneGroundY: (lane) => this.getGroundYForLane(lane),
+        characterX: CHARACTER_X,
+        scrollSpeed: SCROLL_SPEED,
+      },
+      buildMarkerEvents(),
+    );
+    this.markerField.start();
 
     this.playerInput.on("jump", () => this.handleJump());
     this.playerInput.on("duck", () => this.handleDuck());
@@ -99,13 +136,23 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    if (this.background) {
-      this.background.tilePositionX += (SCROLL_SPEED * delta) / 1000;
+    if (this.isComplete) return;
+
+    const dx = (SCROLL_SPEED * delta) / 1000;
+    this.traveledDistance += dx;
+    if (this.background) this.background.tilePositionX += dx;
+
+    this.levelProgress.update(this.traveledDistance);
+    if (this.levelProgress.isComplete(this.traveledDistance)) {
+      this.triggerLevelComplete();
+      return;
     }
-    if (this.isGameOver) return;
+
     this.updatePowerIndicator();
+    this.updateHud();
     this.obstacleField.update(delta);
     this.collectibleField.update(delta);
+    this.markerField.update(delta);
   }
 
   /** Road sits below Lawn on screen — the street is nearer the viewer than the sidewalk. */
@@ -172,6 +219,10 @@ export class GameScene extends Phaser.Scene {
     this.powerIndicator.setVisible(true).setFillStyle(color, alpha);
   }
 
+  private updateHud(): void {
+    this.hudText?.setText(`Lives ${this.gameState.getLives()}   Score ${this.gameState.getScore()}`);
+  }
+
   private handlePowerCollected(color: PowerColor): void {
     this.playerState.collectPower(color);
     this.powerExpiryTimer?.remove();
@@ -179,7 +230,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handlePowerActivate(): void {
-    if (this.isGameOver) return;
+    if (this.isComplete) return;
     this.playerState.activatePower();
   }
 
@@ -209,7 +260,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleJump(): void {
-    if (this.isGameOver || !this.character) return;
+    if (this.isComplete || !this.character) return;
     if (!this.playerState.jump()) return;
 
     const groundY = this.getGroundYForLane(this.playerState.getLane());
@@ -226,7 +277,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleDuck(): void {
-    if (this.isGameOver || !this.character) return;
+    if (this.isComplete || !this.character) return;
     if (!this.playerState.duck()) return;
 
     this.idleTween?.pause();
@@ -238,7 +289,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleLaneSwitch(): void {
-    if (this.isGameOver || !this.character) return;
+    if (this.isComplete || !this.character) return;
 
     this.playerState.switchLane();
     // Jump/duck already have their own y target baked into their in-flight
@@ -262,35 +313,90 @@ export class GameScene extends Phaser.Scene {
 
   private handleCollision(): void {
     this.gameState.loseLife();
-    if (this.gameState.isGameOver()) {
-      this.triggerGameOver();
+    if (this.gameState.hasNoLivesLeft()) {
+      this.respawnAtCheckpoint();
     }
   }
 
-  private triggerGameOver(): void {
-    this.isGameOver = true;
+  /**
+   * 0 Lives mid-Level: respawn at the most recent Checkpoint with Lives
+   * reset to 3 (see CONTEXT.md Checkpoint) rather than ending the Attempt —
+   * the death is recorded as Score and the Level keeps going.
+   */
+  private respawnAtCheckpoint(): void {
+    this.gameState.respawnAtCheckpoint();
+
+    const checkpointDistance = this.levelProgress.getCheckpointDistance();
+    this.traveledDistance = checkpointDistance;
+    this.obstacleField.seek(checkpointDistance);
+    this.collectibleField.seek(checkpointDistance);
+    this.markerField.seek(checkpointDistance);
+
+    this.playerState.clearPower();
+    this.powerExpiryTimer?.remove();
+    this.playerState.land();
+
+    if (this.character) {
+      this.tweens.killTweensOf(this.character);
+      this.character.setScale(1, 1);
+      const groundY = this.getGroundYForLane(this.playerState.getLane());
+      this.character.setPosition(CHARACTER_X, groundY);
+      this.startIdleTween(this.character, groundY);
+    }
+  }
+
+  private triggerLevelComplete(): void {
+    this.isComplete = true;
     this.idleTween?.pause();
     this.obstacleField.stop();
     this.collectibleField.stop();
-    this.showGameOverOverlay();
+    this.markerField.stop();
+    this.showResultsOverlay(this.time.now - this.attemptStartTimeMs);
   }
 
-  private showGameOverOverlay(): void {
+  private showResultsOverlay(completionTimeMs: number): void {
     const { width, height } = this.scale;
     const backdrop = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.6);
     const title = this.add
-      .text(width / 2, height / 2 - 20, "GAME OVER", { fontSize: "32px", color: "#ffffff" })
+      .text(width / 2, height / 2 - 70, "LEVEL COMPLETE", { fontSize: "32px", color: "#ffffff" })
       .setOrigin(0.5);
-    const prompt = this.add
-      .text(width / 2, height / 2 + 24, "Click or press any key to restart", {
-        fontSize: "16px",
+    const scoreLine = this.add
+      .text(width / 2, height / 2 - 20, `Score (deaths): ${this.gameState.getScore()}`, {
+        fontSize: "18px",
         color: "#ffffff",
       })
       .setOrigin(0.5);
-    this.add.container(0, 0, [backdrop, title, prompt]);
+    const timeLine = this.add
+      .text(width / 2, height / 2 + 8, `Time: ${formatCompletionTime(completionTimeMs)}`, {
+        fontSize: "18px",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5);
+    const coinLine = this.add
+      .text(width / 2, height / 2 + 36, `Coins: ${this.gameState.getCoinsCollected()}/${LEVEL.totalCoins}`, {
+        fontSize: "18px",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5);
+    const prompt = this.add
+      .text(width / 2, height / 2 + 78, "Click or press any key to play again", {
+        fontSize: "14px",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5);
+    this.add.container(0, 0, [backdrop, title, scoreLine, timeLine, coinLine, prompt]);
 
     const restart = () => this.scene.restart();
     this.input.once("pointerdown", restart);
     this.input.keyboard?.once("keydown", restart);
   }
+}
+
+/** Merges LEVEL's Checkpoint and Mini-Boss distances into one ascending queue for MarkerField. */
+function buildMarkerEvents(): MarkerEvent[] {
+  const events: MarkerEvent[] = [
+    ...LEVEL.checkpoints.map((distance): MarkerEvent => ({ distance, kind: "checkpoint" })),
+    ...LEVEL.bossMarkers.map((distance): MarkerEvent => ({ distance, kind: "boss" })),
+  ];
+  return events.sort((a, b) => a.distance - b.distance);
 }
