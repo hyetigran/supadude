@@ -2,7 +2,6 @@ export const MAX_LIVES = 3;
 
 export class GameState {
   private lives: number = MAX_LIVES;
-  private score: number = 0;
   private coinsCollected: number = 0;
 
   getLives(): number {
@@ -26,16 +25,11 @@ export class GameState {
     return this.lives <= 0;
   }
 
-  /** Score is the death count (see CONTEXT.md) — always +1, never an arbitrary amount. */
+  /** Score is the running Coins-collected count (see CONTEXT.md Score, ADR-0005) — dying never costs it. */
   getScore(): number {
-    return this.score;
+    return this.coinsCollected;
   }
 
-  recordDeath(): void {
-    this.score += 1;
-  }
-
-  /** Coins are a completion stat only (see CONTEXT.md) — never affect Score or Lives. */
   getCoinsCollected(): number {
     return this.coinsCollected;
   }
@@ -46,19 +40,11 @@ export class GameState {
 
   resetForNewAttempt(): void {
     this.lives = MAX_LIVES;
-    this.score = 0;
     this.coinsCollected = 0;
   }
 
-  /**
-   * A Checkpoint respawn (0 Lives mid-Level): records the death and restores
-   * Lives to full, but — unlike resetForNewAttempt — leaves Score and Coins
-   * alone. Score is the death count for the whole Level (see CONTEXT.md
-   * Attempt/Score), so it must keep accumulating across every respawn within
-   * one completion, not reset per-Checkpoint.
-   */
+  /** A Checkpoint respawn (0 Lives mid-Level): restores Lives to full. Score (Coins collected) is unaffected — only resetForNewAttempt (a brand new Attempt) resets it. */
   respawnAtCheckpoint(): void {
-    this.recordDeath();
     this.lives = MAX_LIVES;
   }
 }

@@ -78,4 +78,22 @@ describe("buildLevel", () => {
     const level = buildLevel();
     expect(level.collectibles.some((c) => c.kind === "heart")).toBe(true);
   });
+
+  it("restricts the Lawn Lane to plain Ground (trash can), plain Overhead (tree), and Light Pole — never a Blocker or Car", () => {
+    const level = buildLevel();
+    const lawnObstacles = level.obstacles.filter((o) => o.lane === "lawn");
+    expect(lawnObstacles.length).toBeGreaterThan(0);
+
+    for (const obstacle of lawnObstacles) {
+      if (obstacle.shape === "pole") continue; // Light Pole — allowed
+      expect(obstacle.variant.type).toBe("plain"); // no Blocker, no Car
+    }
+  });
+
+  it("includes at least one Light Pole in each Lane", () => {
+    const level = buildLevel();
+    const poles = level.obstacles.filter((o) => o.shape === "pole");
+    expect(poles.some((p) => p.lane === "road")).toBe(true);
+    expect(poles.some((p) => p.lane === "lawn")).toBe(true);
+  });
 });

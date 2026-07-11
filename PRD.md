@@ -15,20 +15,21 @@ Terminology in this document follows `CONTEXT.md`, which is the source of truth 
 - Supa Dude runs automatically at all times outside of Boss Fights — the player never controls forward movement.
 - Two parallel lanes: **Road Lane** and **Lawn Lane**. The player switches lanes with a dedicated input (Left/Right on desktop, swipe Left/Right on mobile).
 - Independently of lane choice, the player can **Jump** (Up/Space, swipe up) and **Duck** (Down, swipe down) to clear obstacles within the current lane.
-- Both lanes carry a comparable density of obstacles — switching lanes is a tactical choice about which hazard pattern to face, not a safe detour. Power-up Cars only appear in the Road Lane.
+- Both lanes carry a comparable density of obstacles — switching lanes is a tactical choice about which hazard pattern to face, not a safe detour. Power-up Cars only appear in the Road Lane. The Lawn Lane's obstacle vocabulary is narrower: only trash can (jump), tree (duck), and Light Pole (switch lanes, or Water Power) ever appear there — see §2.2.
 
 ### 2.2 Obstacles
 
-Two shapes, either of which can appear in either lane:
+Two shapes appear in either lane, plus one that spans both:
 
 - **Ground Obstacle** — jump over it.
 - **Overhead Obstacle** — duck under it.
+- **Light Pole** — spans both the Ground and Overhead clearance zones, so neither Jump nor Duck clears it; only switching lanes avoids it, unless destroyed with Water Power (always Electric material).
 
 MVP obstacle roster (8-9 total):
 - Ground: trash can, fire hydrant, mailbox, garden gnome, parked bike
 - Overhead: low tree branch, clothesline, sprinkler spray, awning
 
-A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric material (e.g. a light pole). These are dodgeable exactly like any other Ground/Overhead obstacle, but can alternatively be destroyed by the matching Power as a bonus/shortcut.
+A subset of Ground/Overhead Obstacles are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric material. These are dodgeable exactly like any other Ground/Overhead obstacle, but can alternatively be destroyed by the matching Power as a bonus/shortcut. The Lawn Lane only ever features plain (non-Blocker) trash can/tree content plus Light Poles — Blocker Obstacles are Road-Lane-only.
 
 ### 2.3 Lives & failure
 
@@ -41,15 +42,15 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 - Cars appear in the Road Lane in three colors. Jumping on top of one auto-collects its power:
   - **Red → Fire Power** — destroys Wood Blocker Obstacles.
-  - **Blue → Water Power** — destroys Electric Blocker Obstacles.
+  - **Blue → Water Power** — destroys Electric Blocker Obstacles and Light Poles.
   - **Grey → no power** — behaves as a plain Ground Obstacle.
 - A collected Power is held for a fixed duration (e.g. ~5s, to be tuned) and triggered with a dedicated activation input (F on desktop, an on-screen button on mobile).
 - Only one Power can be held at a time; collecting a new one replaces the old.
 
 ### 2.5 Coins
 
-- Optional collectibles scattered through the level. Tracked as a "collected / total" completion stat shown on the results screen.
-- Do **not** affect Score or Leaderboard ranking — collection-only, for completionists.
+- Collectibles scattered through the level. Tracked as a "collected / total" completion stat shown on the results screen. Not required to reach the end of the level.
+- Each Coin collected is the basis of **Score** — see §2.7. See ADR-0005 for why this changed from an earlier deaths-based Score.
 
 ### 2.6 Final Boss
 
@@ -60,7 +61,7 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 ### 2.7 Scoring & completion
 
-- **Score** = number of deaths (Checkpoint respawns) accumulated over the course of completing the level, tie-broken by total completion time. Lower is better.
+- **Score** = number of Coins collected over the course of completing the level, tie-broken by total completion time. Higher is better. Losing Lives/dying never costs Score.
 - Score is only recorded once the level is completed end-to-end — there's no partial-progress score.
 
 ## 3. Meta systems
@@ -74,7 +75,7 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 
 ### 3.2 Leaderboard
 
-- Global, cross-device ranking of completed attempts, sorted by fewest deaths, tie-broken by completion time.
+- Global, cross-device ranking of completed attempts, sorted by most Coins collected, tie-broken by completion time.
 - Backed by Supabase (Postgres + auto-generated API + row-level security for basic score validation). See ADR-0002.
 - Only Accounts (not Guests) can appear on it.
 
@@ -117,3 +118,4 @@ A subset are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric 
 - `docs/adr/0002-supabase-for-leaderboard-backend.md`
 - `docs/adr/0003-finite-authored-level-not-endless-runner.md`
 - `docs/adr/0004-single-final-boss-not-three-mini-bosses.md`
+- `docs/adr/0005-score-is-coins-not-deaths.md`
