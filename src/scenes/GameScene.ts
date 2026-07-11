@@ -27,6 +27,11 @@ const LANE_SWITCH_DURATION_MS = 150;
 const POWER_DURATION_MS = 5000;
 const BOSS_X_OFFSET = 220; // distance right of Supa Dude the boss placeholder sits at
 
+const PROGRESS_BAR_HEIGHT = 6;
+const PROGRESS_BAR_TRACK_COLOR = 0x000000;
+const PROGRESS_BAR_TRACK_ALPHA = 0.35;
+const PROGRESS_BAR_FILL_COLOR = 0x4ade80;
+
 /**
  * Two-lane dodge core loop through the authored Level (see Level.ts,
  * ADR-0003): Left/Right switches Road/Lawn Lane independently of Jump/Duck,
@@ -56,6 +61,7 @@ export class GameScene extends Phaser.Scene {
   private character?: Phaser.GameObjects.Container;
   private powerIndicator?: Phaser.GameObjects.Arc;
   private hudText?: Phaser.GameObjects.Text;
+  private progressBarFill?: Phaser.GameObjects.Rectangle;
   private idleTween?: Phaser.Tweens.Tween;
   private powerExpiryTimer?: Phaser.Time.TimerEvent;
   private bossFightController?: BossFightController;
@@ -91,6 +97,13 @@ export class GameScene extends Phaser.Scene {
     this.character = this.createCharacterPlaceholder();
     this.hudText = this.add.text(12, 12, "", { fontSize: "14px", color: "#ffffff" }).setDepth(10);
     this.updateHud();
+
+    this.add
+      .rectangle(0, 0, this.scale.width, PROGRESS_BAR_HEIGHT, PROGRESS_BAR_TRACK_COLOR, PROGRESS_BAR_TRACK_ALPHA)
+      .setOrigin(0, 0)
+      .setDepth(10);
+    this.progressBarFill = this.add.rectangle(0, 0, 0, PROGRESS_BAR_HEIGHT, PROGRESS_BAR_FILL_COLOR).setOrigin(0, 0).setDepth(11);
+    this.updateProgressBar();
 
     this.obstacleField = new ObstacleField(
       this,
@@ -162,6 +175,7 @@ export class GameScene extends Phaser.Scene {
     const dx = (SCROLL_SPEED * delta) / 1000;
     this.traveledDistance += dx;
     if (this.background) this.background.tilePositionX += dx;
+    this.updateProgressBar();
 
     this.levelProgress.update(this.traveledDistance);
     if (this.levelProgress.isComplete(this.traveledDistance)) {
@@ -245,6 +259,13 @@ export class GameScene extends Phaser.Scene {
 
   private updateHud(): void {
     this.hudText?.setText(`Lives ${this.gameState.getLives()}   Score ${this.gameState.getScore()}`);
+  }
+
+  /** A thin bar across the top of the screen showing how far through the Level the player has traveled. */
+  private updateProgressBar(): void {
+    if (!this.progressBarFill) return;
+    const progress = Phaser.Math.Clamp(this.traveledDistance / LEVEL.length, 0, 1);
+    this.progressBarFill.setSize(this.scale.width * progress, PROGRESS_BAR_HEIGHT);
   }
 
   private handlePowerCollected(color: PowerColor): void {
