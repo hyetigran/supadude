@@ -7,6 +7,7 @@ import { ObstacleField } from "../game/ObstacleField";
 import { CollectibleField } from "../game/CollectibleField";
 import { MarkerField, type MarkerEvent } from "../game/MarkerField";
 import { BossFightController } from "../game/BossFightController";
+import { BOSSES } from "../game/Bosses";
 import { LEVEL } from "../game/Level";
 import { LevelProgress } from "../game/LevelProgress";
 import { formatCompletionTime } from "../game/formatCompletionTime";
@@ -38,10 +39,10 @@ const BOSS_X_OFFSET = 220; // distance right of Supa Dude the boss placeholder s
  * completion count respectively. Clearing a Power-up Car grants a held
  * Power, which the activation input arms to destroy a matching Blocker
  * Obstacle on contact. Reaching the end of the Level shows a results screen
- * with Score and the Coin completion stat. Reaching the first Mini-Boss
- * marker stops auto-run and hands off to BossFightController for the
- * dodge-and-riposte Boss Fight (CONTEXT.md); the other 2 Mini-Boss markers
- * remain placeholder-only until issue #8 authors their attack patterns.
+ * with Score and the Coin completion stat. Reaching a Mini-Boss marker
+ * stops auto-run and hands off to BossFightController for the
+ * dodge-and-riposte Boss Fight (CONTEXT.md), using that Mini-Boss's
+ * authored attack pattern (see Bosses.ts).
  */
 export class GameScene extends Phaser.Scene {
   readonly gameState = new GameState();
@@ -63,7 +64,8 @@ export class GameScene extends Phaser.Scene {
   private attemptStartTimeMs = 0;
   private isComplete = false;
   private inBossFight = false;
-  private boss1Defeated = false;
+  /** Index into LEVEL.bossMarkers / Bosses.BOSSES of the next undefeated Mini-Boss. Only ever advances on a defeat — see startBossFight. */
+  private nextBossIndex = 0;
 
   constructor() {
     super("GameScene");
@@ -81,7 +83,7 @@ export class GameScene extends Phaser.Scene {
     this.attemptStartTimeMs = this.time.now;
     this.isComplete = false;
     this.inBossFight = false;
-    this.boss1Defeated = false;
+    this.nextBossIndex = 0;
 
     this.createBackgroundTexture();
     this.background = this.add
@@ -169,9 +171,9 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    const boss1Distance = LEVEL.bossMarkers[0];
-    if (!this.boss1Defeated && boss1Distance !== undefined && this.traveledDistance >= boss1Distance) {
-      this.startBoss1Fight();
+    const nextBossDistance = LEVEL.bossMarkers[this.nextBossIndex];
+    if (nextBossDistance !== undefined && this.traveledDistance >= nextBossDistance) {
+      this.startBossFight(this.nextBossIndex);
       return;
     }
 
@@ -352,31 +354,35 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Reaching the first Mini-Boss marker: stops auto-run and the
-   * Obstacle/Collectible/Marker fields, hands off to a BossFightController.
-   * Getting hit costs a Life via the same handleCollision as a normal
-   * Obstacle — 0 Lives mid-fight respawns at the Checkpoint before this
-   * boss exactly like any other death (see respawnAtCheckpoint).
+   * Reaching a Mini-Boss marker: stops auto-run and the
+   * Obstacle/Collectible/Marker fields, hands off to a BossFightController
+   * running that Mini-Boss's own attack pattern (see Bosses.ts). Getting
+   * hit costs a Life via the same handleCollision as a normal Obstacle —
+   * 0 Lives mid-fight respawns at the Checkpoint before this boss exactly
+   * like any other death (see respawnAtCheckpoint).
    */
-  private startBoss1Fight(): void {
+  private startBossFight(bossIndex: number): void {
     this.inBossFight = true;
     this.idleTween?.pause();
     this.obstacleField.stop();
     this.collectibleField.stop();
     this.markerField.stop();
 
+    const boss = BOSSES[bossIndex];
     const groundY = this.getGroundYForLane(this.playerState.getLane());
     this.bossFightController = new BossFightController(this, {
       x: CHARACTER_X + BOSS_X_OFFSET,
       groundY,
+      attackSequence: boss.attackSequence,
+      color: boss.color,
       getPlayerState: () => this.playerState.getState(),
       onHit: () => this.handleCollision(),
-      onDefeated: () => this.handleBoss1Defeated(),
+      onDefeated: () => this.handleBossDefeated(),
     });
   }
 
-  private handleBoss1Defeated(): void {
-    this.boss1Defeated = true;
+  private handleBossDefeated(): void {
+    this.nextBossIndex += 1;
     this.exitBossFight();
   }
 

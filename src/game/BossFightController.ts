@@ -10,17 +10,15 @@ const POST_RESOLVE_PAUSE_MS = 350;
 
 const BOSS_WIDTH = 40;
 const BOSS_HEIGHT = 70;
-
-/**
- * Fixed, authored attack pattern (cycled, not random) — same "no
- * procedural generation" spirit as the Level itself (ADR-0003). Boss #1's
- * distinct pattern; Boss #2/#3 (issue #8) will each get their own.
- */
-const ATTACK_SEQUENCE: readonly BossAttackKind[] = ["ground", "overhead", "overhead", "ground", "ground"];
+const VULNERABLE_COLOR = 0xffd400;
 
 export interface BossFightControllerOptions {
   x: number;
   groundY: number;
+  /** This boss's authored attack pattern (see Bosses.ts) — fixed, cycled, not random (ADR-0003's "no procedural generation" spirit). */
+  attackSequence: readonly BossAttackKind[];
+  /** This boss's placeholder body color (see Bosses.ts) — the only other per-boss cosmetic. */
+  color: number;
   getPlayerState: () => VerticalState;
   onHit: () => void;
   onDefeated: () => void;
@@ -33,10 +31,11 @@ export interface BossFightControllerOptions {
  * BossFight. Jump/Duck dodging reuses the existing PlayerState transitions
  * GameScene already drives for Obstacles (read via getPlayerState at
  * resolve time, same as ObstacleField.resolve reads player pose); only
- * Punch is new here, forwarded in via punch().
+ * Punch is new here, forwarded in via punch(). Shared across all 3
+ * Mini-Bosses (see Bosses.ts) — only the attack sequence and color vary.
  */
 export class BossFightController {
-  private readonly fight = new BossFight(DODGE_STREAK_REQUIRED, BOSS_HP, ATTACK_SEQUENCE);
+  private readonly fight: BossFight;
   private timer?: Phaser.Time.TimerEvent;
   private readonly sprite: Phaser.GameObjects.Rectangle;
   private readonly hpText: Phaser.GameObjects.Text;
@@ -47,7 +46,9 @@ export class BossFightController {
     private readonly scene: Phaser.Scene,
     private readonly options: BossFightControllerOptions,
   ) {
-    this.sprite = scene.add.rectangle(options.x, options.groundY, BOSS_WIDTH, BOSS_HEIGHT, 0x6b21a8).setOrigin(0.5, 1);
+    this.fight = new BossFight(DODGE_STREAK_REQUIRED, BOSS_HP, options.attackSequence);
+
+    this.sprite = scene.add.rectangle(options.x, options.groundY, BOSS_WIDTH, BOSS_HEIGHT, options.color).setOrigin(0.5, 1);
     this.hpText = scene.add
       .text(options.x, options.groundY - BOSS_HEIGHT - 34, "", { fontSize: "14px", color: "#ffffff" })
       .setOrigin(0.5);
@@ -121,10 +122,10 @@ export class BossFightController {
     this.hpText.setText(`Boss HP: ${Math.max(this.fight.getHp(), 0)}`);
 
     if (phase.type === "telegraph") {
-      this.sprite.setFillStyle(0x6b21a8);
+      this.sprite.setFillStyle(this.options.color);
       this.promptText.setText(phase.attack === "ground" ? "JUMP!" : "DUCK!");
     } else if (phase.type === "vulnerable") {
-      this.sprite.setFillStyle(0xffd400);
+      this.sprite.setFillStyle(VULNERABLE_COLOR);
       this.promptText.setText("PUNCH!");
     } else {
       this.promptText.setText("");
