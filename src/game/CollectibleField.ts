@@ -1,21 +1,17 @@
 import Phaser from "phaser";
 import type { Lane } from "./Lane";
+import type { CollectibleEvent, CollectibleKind } from "./Level";
 import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
 
-const COLLECTIBLE_MIN_INTERVAL_MS = 900;
-const COLLECTIBLE_MAX_INTERVAL_MS = 1600;
 const COLLECTIBLE_RADIUS = 9;
 const COLLECTIBLE_HEIGHT_ABOVE_LANE = 40;
-const HEART_PROBABILITY = 0.35;
-const LANES: Lane[] = ["road", "lawn"];
-
-type CollectibleKind = "heart" | "coin";
 
 interface SpawnedCollectible {
   gameObject: Phaser.GameObjects.Arc;
   lane: Lane;
   kind: CollectibleKind;
   resolved: boolean;
+  distance: number;
 }
 
 export interface CollectibleFieldOptions extends ScrollingFieldOptions {
@@ -25,38 +21,45 @@ export interface CollectibleFieldOptions extends ScrollingFieldOptions {
 }
 
 /**
- * Owns Heart/Coin spawning and pickup-resolution — the collectible sibling
- * to ObstacleField, sharing the scroll/cleanup lifecycle via ScrollingField.
- * Collection only depends on being in the matching Lane (unlike Obstacles,
- * pose is irrelevant here); missing a pickup by being in the other Lane has
- * no penalty, it just scrolls past.
+ * Owns Heart/Coin pickup-resolution for the authored Level's Collectible
+ * events (see Level.ts) — the collectible sibling to ObstacleField, sharing
+ * the spawn-timing/scroll/cleanup lifecycle via ScrollingField. Collection
+ * only depends on being in the matching Lane (unlike Obstacles, pose is
+ * irrelevant here); missing a pickup by being in the other Lane has no
+ * penalty, it just scrolls past.
  *
- * Spawns are randomly timed/kinded/laned, same placeholder test-track
- * scaffolding as ObstacleField — ticket #6 replaces this with the real
- * authored Level.
+ * A Coin already collected this Attempt is never re-awarded if a Checkpoint
+ * respawn replays the stretch it sits in (see shouldReplay) — Coins are a
+ * persistent "collected/total" completion stat (CONTEXT.md), so double-
+ * counting one across a respawn would overcount it. Hearts have no such
+ * stat and are harmless to re-collect, so they always replay.
  */
-export class CollectibleField extends ScrollingField<SpawnedCollectible, CollectibleFieldOptions> {
-  protected nextSpawnDelayMs(): number {
-    return Phaser.Math.Between(COLLECTIBLE_MIN_INTERVAL_MS, COLLECTIBLE_MAX_INTERVAL_MS);
+export class CollectibleField extends ScrollingField<CollectibleEvent, SpawnedCollectible, CollectibleFieldOptions> {
+  private readonly collectedCoinDistances = new Set<number>();
+
+  protected shouldReplay(event: CollectibleEvent): boolean {
+    return event.kind !== "coin" || !this.collectedCoinDistances.has(event.distance);
   }
 
-  protected spawn(): void {
-    const lane = Phaser.Utils.Array.GetRandom(LANES);
-    const kind: CollectibleKind = Math.random() < HEART_PROBABILITY ? "heart" : "coin";
-    const groundY = this.options.laneGroundY(lane);
+  protected spawnEvent(event: CollectibleEvent): void {
+    const groundY = this.options.laneGroundY(event.lane);
     const x = this.spawnX();
     const y = groundY - COLLECTIBLE_HEIGHT_ABOVE_LANE;
-    const color = kind === "heart" ? 0xff4d6d : 0xffd700;
+    const color = event.kind === "heart" ? 0xff4d6d : 0xffd700;
 
     const gameObject = this.scene.add.circle(x, y, COLLECTIBLE_RADIUS, color);
-    this.items.push({ gameObject, lane, kind, resolved: false });
+    this.items.push({ gameObject, lane: event.lane, kind: event.kind, resolved: false, distance: event.distance });
   }
 
   protected resolve(collectible: SpawnedCollectible): boolean {
     if (collectible.lane !== this.options.getLane()) return false;
 
-    if (collectible.kind === "heart") this.options.onHeartCollected();
-    else this.options.onCoinCollected();
+    if (collectible.kind === "heart") {
+      this.options.onHeartCollected();
+    } else {
+      this.collectedCoinDistances.add(collectible.distance);
+      this.options.onCoinCollected();
+    }
 
     return true; // vanish on contact, unlike an obstacle that scrolls off
   }
