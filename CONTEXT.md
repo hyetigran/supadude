@@ -18,34 +18,38 @@ A fixed save point in the Level (placed immediately before the Final Boss) that 
 One continuous playthrough of the Level from either the start or the most recent Checkpoint, ending in either reaching the end of the Level or losing all Lives (triggering a respawn at the last Checkpoint).
 
 **Road Lane** / **Lawn Lane**:
-The two parallel paths Supa Dude can switch between. Power-up Cars only appear in the Road Lane. The Lawn Lane's obstacle vocabulary is narrower than the Road Lane's — only plain Ground Obstacles, plain Overhead Obstacles, and Light Poles appear there, each mapping to exactly one dodge action (jump, duck, switch Lanes respectively); Wood/Electric Blocker Obstacles are Road-Lane-only.
+The two parallel paths Supa Dude can switch between. Each has a fixed suburban obstacle vocabulary: the Road Lane is vehicles only (Motorcycles and Power-up Cars — all cleared by jumping); the Lawn Lane is trash can (jump), tree / low branch (duck), and Light Pole (switch Lanes, or Water Power). Wood/Electric Blocker Obstacles live on the Lawn (tree and Light Pole), not the Road.
 
 **Ground Obstacle**:
-An obstacle positioned at ground level that Supa Dude must jump over to avoid. Appears in either Lane.
+An obstacle positioned at ground level that Supa Dude must jump over to avoid. On the Road Lane these are vehicles (Motorcycle, Power-up Car); on the Lawn Lane, the trash can.
 _Avoid_: Low obstacle, jump obstacle
 
 **Overhead Obstacle**:
-An obstacle positioned above ground level that Supa Dude must duck under to avoid. Appears in either Lane.
+An obstacle positioned above ground level that Supa Dude must duck under to avoid. Lawn Lane only (tree / low branch) — the Road Lane has no Overhead Obstacles.
 _Avoid_: High obstacle, duck obstacle
 
+**Motorcycle**:
+A plain Ground Obstacle in the Road Lane. Jump to clear; grants no Power. Visually distinct from Power-up Cars so the Road reads as mixed traffic, not only cars.
+_Avoid_: Bike, scooter
+
 **Blocker Obstacle**:
-A Ground or Overhead Obstacle made of Wood (e.g. a tree) that can still be dodged normally (jump/duck), but can alternatively be destroyed by the matching Power for a bonus/shortcut. Distinct from a Light Pole, which is never dodgeable by pose alone.
+A Lawn Obstacle made of Wood (the tree) or Electric material (the Light Pole) that can still be dodged normally (duck / switch Lanes), but can alternatively be destroyed by the matching Power as a bonus/shortcut. Distinct from a Light Pole's dodge rule: a Wood tree is still cleared by Duck when not destroyed.
 
 **Light Pole**:
-A single obstacle spanning the full Ground-to-Overhead height in one Lane — Jump and Duck don't clear it, so the only way past is switching Lanes, unless destroyed with Water Power (its material is always Electric) as a shortcut that lets Supa Dude stay in-Lane.
+A Lawn-Lane obstacle spanning the full Ground-to-Overhead height — Jump and Duck don't clear it, so the only way past is switching Lanes, unless destroyed with Water Power (its material is always Electric) as a shortcut that lets Supa Dude stay in-Lane. Never appears on the Road.
 _Avoid_: Forced pair, pole obstacle
 
 **Power-up Car**:
-A car in the Road Lane that Supa Dude can jump on top of to collect a Power. Comes in three colors: red (grants Fire Power), blue (grants Water Power), grey (no power — behaves as a plain Ground Obstacle).
+A car in the Road Lane that Supa Dude can jump on top of to collect a Power. Comes in three colors: red (grants Fire Power), blue (grants Water Power), grey (no power — behaves as a plain Ground Obstacle, same as a Motorcycle).
 
 **Power**:
-A temporary ability (Fire or Water) held after collecting a matching Power-up Car, active for a fixed duration and triggered with a dedicated activation input. Destroys matching Blocker Obstacles on contact while active. Only one Power can be held at a time — collecting a new one replaces the old.
+A temporary ability (Fire or Water) held after collecting a matching Power-up Car, active for a fixed duration and triggered with a dedicated activation input. Destroys matching Lawn Blocker Obstacles on contact while active. Only one Power can be held at a time — collecting a new one replaces the old.
 
 **Fire Power**:
-A Power (from a red Power-up Car) that destroys Wood Blocker Obstacles (e.g. trees).
+A Power (from a red Power-up Car) that destroys Wood Blocker Obstacles (trees on the Lawn).
 
 **Water Power**:
-A Power (from a blue Power-up Car) that destroys Electric Blocker Obstacles (e.g. light poles).
+A Power (from a blue Power-up Car) that destroys Light Poles (always Electric).
 
 **Final Boss**:
 The single fixed encounter in the Level, placed near the end. Reaching it stops auto-running and starts a Boss Fight; the Checkpoint sits immediately before it. Shares Supa Dude's normal 3 Lives — losing them all respawns at that Checkpoint. See ADR-0004 for why this is one encounter, not several.

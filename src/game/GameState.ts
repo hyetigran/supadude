@@ -17,9 +17,9 @@ export class GameState {
   }
 
   /**
-   * True at 0 Lives. Despite the name's history, this is no longer terminal:
-   * mid-Level it triggers a Checkpoint respawn (see respawnAtCheckpoint),
-   * not a Game Over — see CONTEXT.md Attempt.
+   * True at 0 Lives. Mid-Level this pauses for a continue prompt, then
+   * triggers a Checkpoint respawn (see GameScene.showOutOfLivesPause) —
+   * not a terminal Game Over (CONTEXT.md Attempt).
    */
   hasNoLivesLeft(): boolean {
     return this.lives <= 0;

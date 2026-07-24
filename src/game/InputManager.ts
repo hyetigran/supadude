@@ -4,7 +4,8 @@ export type Action =
   | "laneLeft"
   | "laneRight"
   | "powerActivate"
-  | "punch";
+  | "punch"
+  | "pause";
 
 type Listener = () => void;
 

@@ -10,6 +10,8 @@ describe("mapKeyToAction", () => {
     ["ArrowRight", "laneRight"],
     ["KeyF", "powerActivate"],
     ["KeyE", "punch"],
+    ["Escape", "pause"],
+    ["KeyP", "pause"],
   ] as const)("maps %s to %s", (key, action) => {
     expect(mapKeyToAction(key)).toBe(action);
   });

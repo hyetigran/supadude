@@ -9,6 +9,8 @@ const KEY_BINDINGS: Record<string, Action> = {
   ArrowRight: "laneRight",
   KeyF: "powerActivate",
   KeyE: "punch",
+  Escape: "pause",
+  KeyP: "pause",
 };
 
 export function mapKeyToAction(key: string): Action | undefined {

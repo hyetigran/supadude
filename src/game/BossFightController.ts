@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { BossFight, type BossAttackKind } from "./BossFight";
 import type { VerticalState } from "./PlayerState";
+import { BOSS_HEIGHT, BOSS_WIDTH, DEPTH_PLAYER } from "./VisualScale";
 
 const DODGE_STREAK_REQUIRED = 3;
 const BOSS_HP = 4;
@@ -8,8 +9,6 @@ const TELEGRAPH_DURATION_MS = 900;
 const VULNERABLE_WINDOW_MS = 1200;
 const POST_RESOLVE_PAUSE_MS = 350;
 
-const BOSS_WIDTH = 40;
-const BOSS_HEIGHT = 70;
 const BOSS_COLOR = 0x6b21a8;
 const VULNERABLE_COLOR = 0xffd400;
 
@@ -26,6 +25,7 @@ export interface BossFightControllerOptions {
   groundY: number;
   getPlayerState: () => VerticalState;
   onHit: () => void;
+  onPunchLanded: () => void;
   onDefeated: () => void;
 }
 
@@ -50,13 +50,18 @@ export class BossFightController {
     private readonly scene: Phaser.Scene,
     private readonly options: BossFightControllerOptions,
   ) {
-    this.sprite = scene.add.rectangle(options.x, options.groundY, BOSS_WIDTH, BOSS_HEIGHT, BOSS_COLOR).setOrigin(0.5, 1);
+    this.sprite = scene.add
+      .rectangle(options.x, options.groundY, BOSS_WIDTH, BOSS_HEIGHT, BOSS_COLOR)
+      .setOrigin(0.5, 1)
+      .setDepth(DEPTH_PLAYER);
     this.hpText = scene.add
       .text(options.x, options.groundY - BOSS_HEIGHT - 34, "", { fontSize: "14px", color: "#ffffff" })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setDepth(DEPTH_PLAYER);
     this.promptText = scene.add
       .text(options.x, options.groundY - BOSS_HEIGHT - 14, "", { fontSize: "16px", color: "#ffe066", fontStyle: "bold" })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setDepth(DEPTH_PLAYER);
 
     this.render();
     this.scheduleNext();
@@ -67,6 +72,7 @@ export class BossFightController {
     if (this.destroyed) return;
     if (!this.fight.punch()) return;
 
+    this.options.onPunchLanded();
     this.timer?.remove();
     this.render();
     if (this.fight.isDefeated()) {

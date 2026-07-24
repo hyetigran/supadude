@@ -2,9 +2,13 @@ import Phaser from "phaser";
 import type { Lane } from "./Lane";
 import type { CollectibleEvent, CollectibleKind } from "./Level";
 import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
-
-const COLLECTIBLE_RADIUS = 9;
-const COLLECTIBLE_HEIGHT_ABOVE_LANE = 40;
+import {
+  COLLECTIBLE_HEIGHT_ABOVE_LANE,
+  COLLECTIBLE_RADIUS,
+  DEPTH_LAWN,
+  DEPTH_ROAD,
+  LAWN_PERSPECTIVE_SCALE,
+} from "./VisualScale";
 
 interface SpawnedCollectible {
   gameObject: Phaser.GameObjects.Arc;
@@ -48,6 +52,10 @@ export class CollectibleField extends ScrollingField<CollectibleEvent, SpawnedCo
     const color = event.kind === "heart" ? 0xff4d6d : 0xffd700;
 
     const gameObject = this.scene.add.circle(x, y, COLLECTIBLE_RADIUS, color);
+    gameObject.setDepth(event.lane === "lawn" ? DEPTH_LAWN : DEPTH_ROAD);
+    if (event.lane === "lawn") {
+      gameObject.setScale(LAWN_PERSPECTIVE_SCALE);
+    }
     this.items.push({ gameObject, lane: event.lane, kind: event.kind, resolved: false, distance: event.distance });
   }
 

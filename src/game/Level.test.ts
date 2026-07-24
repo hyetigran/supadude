@@ -79,21 +79,54 @@ describe("buildLevel", () => {
     expect(level.collectibles.some((c) => c.kind === "heart")).toBe(true);
   });
 
-  it("restricts the Lawn Lane to plain Ground (trash can), plain Overhead (tree), and Light Pole — never a Blocker or Car", () => {
+  it("restricts the Road Lane to Motorcycles and Power-up Cars — jump vehicles only", () => {
+    const level = buildLevel();
+    const roadObstacles = level.obstacles.filter((o) => o.lane === "road");
+    expect(roadObstacles.length).toBeGreaterThan(0);
+
+    for (const obstacle of roadObstacles) {
+      expect(obstacle.shape).toBe("single");
+      if (obstacle.shape !== "single") continue;
+      expect(obstacle.kind).toBe("ground");
+      expect(["motorcycle", "car"]).toContain(obstacle.variant.type);
+    }
+  });
+
+  it("restricts the Lawn Lane to trash can, tree (plain or Wood Blocker), and Light Pole", () => {
     const level = buildLevel();
     const lawnObstacles = level.obstacles.filter((o) => o.lane === "lawn");
     expect(lawnObstacles.length).toBeGreaterThan(0);
 
     for (const obstacle of lawnObstacles) {
-      if (obstacle.shape === "pole") continue; // Light Pole — allowed
-      expect(obstacle.variant.type).toBe("plain"); // no Blocker, no Car
+      if (obstacle.shape === "pole") continue; // Light Pole — allowed, Lawn-only
+      expect(obstacle.shape).toBe("single");
+      if (obstacle.shape !== "single") continue;
+      expect(obstacle.variant.type).not.toBe("car");
+      expect(obstacle.variant.type).not.toBe("motorcycle");
+      if (obstacle.variant.type === "blocker") {
+        expect(obstacle.variant.material).toBe("wood");
+        expect(obstacle.kind).toBe("overhead");
+      } else {
+        expect(obstacle.variant.type).toBe("plain");
+        expect(["ground", "overhead"]).toContain(obstacle.kind);
+      }
     }
   });
 
-  it("includes at least one Light Pole in each Lane", () => {
+  it("places Light Poles only on the Lawn Lane", () => {
     const level = buildLevel();
     const poles = level.obstacles.filter((o) => o.shape === "pole");
-    expect(poles.some((p) => p.lane === "road")).toBe(true);
-    expect(poles.some((p) => p.lane === "lawn")).toBe(true);
+    expect(poles.length).toBeGreaterThan(0);
+    expect(poles.every((p) => p.lane === "lawn")).toBe(true);
+  });
+
+  it("includes Motorcycles and at least one Wood tree Blocker on the Lawn", () => {
+    const level = buildLevel();
+    expect(level.obstacles.some((o) => o.shape === "single" && o.variant.type === "motorcycle")).toBe(true);
+    expect(
+      level.obstacles.some(
+        (o) => o.shape === "single" && o.lane === "lawn" && o.variant.type === "blocker" && o.variant.material === "wood",
+      ),
+    ).toBe(true);
   });
 });

@@ -1,16 +1,17 @@
-import type { CarColor, Material, ObstacleKind } from "./ObstacleRules";
+import type { CarColor, ObstacleKind } from "./ObstacleRules";
 import type { Lane } from "./Lane";
 
 export type CollectibleKind = "heart" | "coin";
 
 export type ObstacleVariant =
   | { type: "plain" }
+  | { type: "motorcycle" }
   | { type: "car"; carColor: CarColor }
-  | { type: "blocker"; material: Material };
+  | { type: "blocker"; material: "wood" };
 
 /**
- * "pole" is the Light Pole (see CONTEXT.md): a single obstacle spanning the
- * full Ground-to-Overhead height, so neither Jump nor Duck clears it —
+ * "pole" is the Light Pole (see CONTEXT.md): a Lawn-Lane obstacle spanning
+ * the full Ground-to-Overhead height, so neither Jump nor Duck clears it —
  * survivable only by being in the other Lane, or by destroying it with
  * Water Power (its material is always Electric).
  */
@@ -39,21 +40,29 @@ export interface Level {
   totalCoins: number;
 }
 
+/**
+ * Authored chunk vocabulary mirrors CONTEXT.md lane rules:
+ * - Road: motorcycle | car (jump only)
+ * - Lawn: single ground (trash can) | single overhead (tree) | pole |
+ *   blocker overhead wood (Fire-destroyable tree)
+ */
 type ChunkToken =
-  | { chunk: "single"; lane: Lane; kind: ObstacleKind }
-  | { chunk: "pole"; lane: Lane }
-  | { chunk: "blocker"; lane: Lane; kind: ObstacleKind; material: Material }
+  | { chunk: "motorcycle" }
   | { chunk: "car"; carColor: CarColor }
+  | { chunk: "single"; lane: "lawn"; kind: ObstacleKind }
+  | { chunk: "pole" }
+  | { chunk: "blocker"; kind: "overhead"; material: "wood" }
   | { chunk: "breather"; gap: number }
   | { chunk: "checkpoint" }
   | { chunk: "boss" };
 
 /** Distance (world px) the cursor advances after placing each chunk kind — the pacing knob for that shape. */
 const SPACING = {
-  single: 420,
+  motorcycle: 420,
   pole: 520,
   blocker: 470,
   car: 540,
+  single: 420,
 } as const;
 
 const CHECKPOINT_TO_BOSS_GAP = 170; // "immediately before" per issue #6
@@ -63,79 +72,73 @@ const POST_BOSS_GAP = 700; // breathing room after the Final Boss before the clo
  * The authored Level, hand-written as an explicit, fixed token sequence — no
  * Math.random or other runtime source of variation (ADR-0003). 3 Acts of
  * continuous Obstacle/Collectible content run back-to-back, ending in a
- * single Checkpoint immediately followed by the Final Boss (ADR-0004 — a
- * Boss Fight pauses auto-run, so it happens once, near the climax, not
- * repeatedly through the middle of the Level), then a closing stretch to
- * the finish line.
+ * single Checkpoint immediately followed by the Final Boss (ADR-0004), then
+ * a closing stretch to the finish line.
  *
- * The Lawn Lane's obstacle vocabulary is deliberately narrow — only plain
- * Ground (trash can, jump), plain Overhead (tree, duck), and Light Pole
- * (switch Lanes or Water Power) ever appear there, each mapping to exactly
- * one dodge action. Wood/Electric Blocker variants (Fire/Water-destroyable
- * but still Jump/Duck-dodgeable) are Road-Lane-only.
+ * Lane vocabularies (see CONTEXT.md): Road is vehicles only (Motorcycle +
+ * Power-up Cars, all jump); Lawn is trash can (jump), tree (duck), Light
+ * Pole (switch / Water), and Wood tree Blockers (Fire).
  */
 const ACT_1: ChunkToken[] = [
-  { chunk: "single", lane: "road", kind: "ground" },
+  { chunk: "motorcycle" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "breather", gap: 400 },
-  { chunk: "pole", lane: "road" },
   { chunk: "single", lane: "lawn", kind: "ground" },
   { chunk: "car", carColor: "grey" },
   { chunk: "single", lane: "lawn", kind: "ground" },
-  { chunk: "single", lane: "road", kind: "overhead" },
+  { chunk: "motorcycle" },
   { chunk: "breather", gap: 350 },
   { chunk: "car", carColor: "red" },
-  { chunk: "pole", lane: "lawn" },
-  { chunk: "single", lane: "road", kind: "ground" },
-  { chunk: "blocker", lane: "road", kind: "overhead", material: "electric" },
+  { chunk: "pole" },
+  { chunk: "motorcycle" },
+  { chunk: "blocker", kind: "overhead", material: "wood" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "single", lane: "road", kind: "ground" },
+  { chunk: "car", carColor: "grey" },
 ];
 
 const ACT_2: ChunkToken[] = [
-  { chunk: "single", lane: "road", kind: "ground" },
+  { chunk: "motorcycle" },
   { chunk: "car", carColor: "blue" },
-  { chunk: "blocker", lane: "road", kind: "ground", material: "electric" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "breather", gap: 400 },
-  { chunk: "pole", lane: "road" },
+  { chunk: "pole" },
   { chunk: "single", lane: "lawn", kind: "ground" },
-  { chunk: "single", lane: "road", kind: "overhead" },
+  { chunk: "motorcycle" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "car", carColor: "grey" },
   { chunk: "breather", gap: 350 },
-  { chunk: "pole", lane: "lawn" },
-  { chunk: "single", lane: "road", kind: "ground" },
+  { chunk: "blocker", kind: "overhead", material: "wood" },
+  { chunk: "motorcycle" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
   { chunk: "car", carColor: "red" },
 ];
 
 const ACT_3: ChunkToken[] = [
   { chunk: "car", carColor: "red" },
-  { chunk: "blocker", lane: "road", kind: "ground", material: "wood" },
+  { chunk: "blocker", kind: "overhead", material: "wood" },
   { chunk: "single", lane: "lawn", kind: "ground" },
   { chunk: "breather", gap: 400 },
-  { chunk: "pole", lane: "road" },
   { chunk: "car", carColor: "blue" },
+  { chunk: "pole" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "single", lane: "road", kind: "overhead" },
+  { chunk: "motorcycle" },
   { chunk: "breather", gap: 350 },
-  { chunk: "pole", lane: "lawn" },
-  { chunk: "single", lane: "road", kind: "ground" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
+  { chunk: "pole" },
   { chunk: "car", carColor: "grey" },
-  { chunk: "blocker", lane: "road", kind: "ground", material: "wood" },
+  { chunk: "single", lane: "lawn", kind: "overhead" },
+  { chunk: "motorcycle" },
+  { chunk: "blocker", kind: "overhead", material: "wood" },
 ];
 
 const FINAL_STRETCH: ChunkToken[] = [
-  { chunk: "single", lane: "road", kind: "ground" },
+  { chunk: "motorcycle" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "pole", lane: "road" },
   { chunk: "breather", gap: 400 },
   { chunk: "car", carColor: "grey" },
   { chunk: "single", lane: "lawn", kind: "ground" },
+  { chunk: "pole" },
   { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "single", lane: "road", kind: "ground" },
+  { chunk: "motorcycle" },
 ];
 
 const SCRIPT: ChunkToken[] = [
@@ -164,21 +167,39 @@ function buildObstacleTrack(script: ChunkToken[]): ObstacleTrack {
 
   for (const token of script) {
     switch (token.chunk) {
-      case "single":
-        obstacles.push({ distance: cursor, shape: "single", lane: token.lane, kind: token.kind, variant: { type: "plain" } });
-        cursor += SPACING.single;
-        break;
-      case "pole":
-        obstacles.push({ distance: cursor, shape: "pole", lane: token.lane });
-        cursor += SPACING.pole;
-        break;
-      case "blocker":
+      case "motorcycle":
         obstacles.push({
           distance: cursor,
           shape: "single",
-          lane: token.lane,
+          lane: "road",
+          kind: "ground",
+          variant: { type: "motorcycle" },
+        });
+        cursor += SPACING.motorcycle;
+        break;
+      case "single":
+        // Lawn-only in the chunk type — trash can (ground) or plain tree (overhead).
+        obstacles.push({
+          distance: cursor,
+          shape: "single",
+          lane: "lawn",
           kind: token.kind,
-          variant: { type: "blocker", material: token.material },
+          variant: { type: "plain" },
+        });
+        cursor += SPACING.single;
+        break;
+      case "pole":
+        obstacles.push({ distance: cursor, shape: "pole", lane: "lawn" });
+        cursor += SPACING.pole;
+        break;
+      case "blocker":
+        // Wood tree on the Lawn — Fire-destroyable Overhead Blocker (see CONTEXT.md).
+        obstacles.push({
+          distance: cursor,
+          shape: "single",
+          lane: "lawn",
+          kind: "overhead",
+          variant: { type: "blocker", material: "wood" },
         });
         cursor += SPACING.blocker;
         break;

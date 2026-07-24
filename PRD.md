@@ -14,22 +14,23 @@ Terminology in this document follows `CONTEXT.md`, which is the source of truth 
 
 - Supa Dude runs automatically at all times outside of Boss Fights — the player never controls forward movement.
 - Two parallel lanes: **Road Lane** and **Lawn Lane**. The player switches lanes with a dedicated input (Left/Right on desktop, swipe Left/Right on mobile).
-- Independently of lane choice, the player can **Jump** (Up/Space, swipe up) and **Duck** (Down, swipe down) to clear obstacles within the current lane.
-- Both lanes carry a comparable density of obstacles — switching lanes is a tactical choice about which hazard pattern to face, not a safe detour. Power-up Cars only appear in the Road Lane. The Lawn Lane's obstacle vocabulary is narrower: only trash can (jump), tree (duck), and Light Pole (switch lanes, or Water Power) ever appear there — see §2.2.
+- Independently of lane choice, the player can **Jump** (Up/Space, swipe up) and **Duck** (Down, swipe down) to clear obstacles within the current lane — but each Lane's obstacle vocabulary differs, so not every action is useful in both Lanes (see §2.2).
+- Both lanes carry a comparable density of obstacles — switching lanes is a tactical choice about which hazard pattern to face, not a safe detour.
 
 ### 2.2 Obstacles
 
-Two shapes appear in either lane, plus one that spans both:
+Three clearance shapes:
 
 - **Ground Obstacle** — jump over it.
-- **Overhead Obstacle** — duck under it.
-- **Light Pole** — spans both the Ground and Overhead clearance zones, so neither Jump nor Duck clears it; only switching lanes avoids it, unless destroyed with Water Power (always Electric material).
+- **Overhead Obstacle** — duck under it (Lawn Lane only).
+- **Light Pole** — spans both the Ground and Overhead clearance zones, so neither Jump nor Duck clears it; only switching lanes avoids it, unless destroyed with Water Power (always Electric material). Lawn Lane only.
 
-MVP obstacle roster (8-9 total):
-- Ground: trash can, fire hydrant, mailbox, garden gnome, parked bike
-- Overhead: low tree branch, clothesline, sprinkler spray, awning
+Lane vocabularies (suburban neighborhood — props stay where they belong):
 
-A subset of Ground/Overhead Obstacles are **Blocker Obstacles** — made of Wood (e.g. the tree) or Electric material. These are dodgeable exactly like any other Ground/Overhead obstacle, but can alternatively be destroyed by the matching Power as a bonus/shortcut. The Lawn Lane only ever features plain (non-Blocker) trash can/tree content plus Light Poles — Blocker Obstacles are Road-Lane-only.
+- **Road Lane** — vehicles only, all Ground Obstacles (jump): **Motorcycle** (plain) and **Power-up Cars** (red / blue / grey). No Overhead Obstacles, Light Poles, trash cans, or trees on the Road.
+- **Lawn Lane** — **trash can** (jump), **tree / low branch** (duck), and **Light Pole** (switch lanes, or Water Power).
+
+A subset of Lawn Obstacles are **Blocker Obstacles** — the tree is Wood, and the Light Pole is always Electric. These are still dodgeable normally (duck / switch), but can alternatively be destroyed by the matching Power as a bonus/shortcut.
 
 ### 2.3 Lives & failure
 
@@ -40,10 +41,10 @@ A subset of Ground/Overhead Obstacles are **Blocker Obstacles** — made of Wood
 
 ### 2.4 Power-up Cars
 
-- Cars appear in the Road Lane in three colors. Jumping on top of one auto-collects its power:
-  - **Red → Fire Power** — destroys Wood Blocker Obstacles.
-  - **Blue → Water Power** — destroys Electric Blocker Obstacles and Light Poles.
-  - **Grey → no power** — behaves as a plain Ground Obstacle.
+- Cars appear in the Road Lane in three colors. Jumping on top of one auto-collects its power (same jump clear as a Motorcycle):
+  - **Red → Fire Power** — destroys Wood Blocker Obstacles (trees on the Lawn).
+  - **Blue → Water Power** — destroys Light Poles (Electric).
+  - **Grey → no power** — behaves as a plain Ground Obstacle, same as a Motorcycle.
 - A collected Power is held for a fixed duration (e.g. ~5s, to be tuned) and triggered with a dedicated activation input (F on desktop, an on-screen button on mobile).
 - Only one Power can be held at a time; collecting a new one replaces the old.
 

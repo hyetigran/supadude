@@ -4,21 +4,37 @@ import type { PowerColor, VerticalState } from "./PlayerState";
 import type { Lane } from "./Lane";
 import type { ObstacleEvent, ObstacleVariant } from "./Level";
 import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
+import {
+  CANOPY_RADIUS,
+  CAR_HEIGHT,
+  CAR_WIDTH,
+  DEPTH_LAWN,
+  DEPTH_ROAD,
+  LAWN_PERSPECTIVE_SCALE,
+  MOTORCYCLE_HEIGHT,
+  MOTORCYCLE_WIDTH,
+  OVERHEAD_GAP,
+  POLE_HEIGHT,
+  POLE_LAMP_RADIUS,
+  POLE_WIDTH,
+  TRASH_CAN_HEIGHT,
+  TRASH_CAN_WIDTH,
+  TRUNK_COLOR,
+  TRUNK_WIDTH,
+} from "./VisualScale";
 
-const GROUND_OBSTACLE_WIDTH = 22;
-const GROUND_OBSTACLE_HEIGHT = 36;
-const OVERHEAD_GAP = 50; // must satisfy duckHeight < OVERHEAD_GAP < standHeight
-const CAR_WIDTH = 34;
-const CAR_HEIGHT = 24;
-const TRUNK_WIDTH = 8;
-const TRUNK_COLOR = 0x6b4226;
-const CANOPY_RADIUS = 20;
-const POLE_WIDTH = 8;
-const POLE_HEIGHT = 150; // well past both the Jump and Duck clearance zones — ungapped by pose alone
-const POLE_LAMP_RADIUS = 9;
 const POLE_LAMP_COLOR = 0xfff2a8;
 const WOOD_COLOR = 0xa97449;
 const ELECTRIC_COLOR = 0x00c2d1; // shared by Electric Blocker Obstacles and the Light Pole (always Electric — see CONTEXT.md)
+
+/**
+ * Road vehicles approach faster than the neighborhood scroll so they read as
+ * oncoming traffic instead of props glued to the asphalt. Spawn lead is
+ * shortened by the same factor so contact still lands on the authored distance.
+ */
+const VEHICLE_SCROLL_MULTIPLIER = 1.55;
+const WHEEL_RADIUS = 5;
+const WHEEL_COLOR = 0x111827;
 
 type SpawnedObstacle =
   | {
@@ -28,8 +44,16 @@ type SpawnedObstacle =
       shape: "single";
       kind: ObstacleKind;
       variant: ObstacleVariant;
+      scrollMultiplier: number;
+      wheelHubs?: Phaser.GameObjects.Rectangle[];
     }
-  | { gameObject: Phaser.GameObjects.Container; lane: Lane; resolved: boolean; shape: "pole" };
+  | {
+      gameObject: Phaser.GameObjects.Container;
+      lane: Lane;
+      resolved: boolean;
+      shape: "pole";
+      scrollMultiplier: number;
+    };
 
 export interface PlayerPose {
   lane: Lane;
@@ -50,6 +74,19 @@ export interface ObstacleFieldOptions extends ScrollingFieldOptions {
  * The spawn-timing/scroll/cleanup lifecycle lives in ScrollingField.
  */
 export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle, ObstacleFieldOptions> {
+  protected scrollMultiplierForEvent(event: ObstacleEvent): number {
+    return isRoadVehicle(event) ? VEHICLE_SCROLL_MULTIPLIER : 1;
+  }
+
+  protected scrollMultiplierForItem(item: SpawnedObstacle): number {
+    return item.scrollMultiplier;
+  }
+
+  update(delta: number): void {
+    super.update(delta);
+    this.spinVehicleWheels(delta);
+  }
+
   protected spawnEvent(event: ObstacleEvent): void {
     if (event.shape === "pole") {
       this.spawnPole(event.lane);
@@ -113,15 +150,37 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
   private spawnObstacle(lane: Lane, kind: ObstacleKind, variant: ObstacleVariant): void {
     const groundY = this.options.laneGroundY(lane);
     const x = this.spawnX();
-    const gameObject = this.createGameObject(kind, x, groundY, variant);
-    this.items.push({ gameObject, lane, resolved: false, shape: "single", kind, variant });
+    const { gameObject, wheelHubs } = this.createGameObject(kind, x, groundY, variant);
+    this.applyLanePresentation(gameObject, lane);
+    const scrollMultiplier = variant.type === "car" || variant.type === "motorcycle" ? VEHICLE_SCROLL_MULTIPLIER : 1;
+    this.items.push({
+      gameObject,
+      lane,
+      resolved: false,
+      shape: "single",
+      kind,
+      variant,
+      scrollMultiplier,
+      wheelHubs,
+    });
   }
 
   private spawnPole(lane: Lane): void {
     const groundY = this.options.laneGroundY(lane);
     const x = this.spawnX();
     const gameObject = this.createPoleGameObject(x, groundY);
-    this.items.push({ gameObject, lane, resolved: false, shape: "pole" });
+    this.applyLanePresentation(gameObject, lane);
+    this.items.push({ gameObject, lane, resolved: false, shape: "pole", scrollMultiplier: 1 });
+  }
+
+  private applyLanePresentation(
+    gameObject: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container,
+    lane: Lane,
+  ): void {
+    gameObject.setDepth(lane === "lawn" ? DEPTH_LAWN : DEPTH_ROAD);
+    if (lane === "lawn") {
+      gameObject.setScale(LAWN_PERSPECTIVE_SCALE);
+    }
   }
 
   private createGameObject(
@@ -129,18 +188,60 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
     x: number,
     groundY: number,
     variant: ObstacleVariant,
-  ): Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container {
+  ): {
+    gameObject: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container;
+    wheelHubs?: Phaser.GameObjects.Rectangle[];
+  } {
     const color = this.colorFor(kind, variant);
 
     if (variant.type === "car") {
-      return this.scene.add.rectangle(x, groundY, CAR_WIDTH, CAR_HEIGHT, color).setOrigin(0.5, 1);
+      return this.createVehicleGameObject(x, groundY, CAR_WIDTH, CAR_HEIGHT, color);
+    }
+
+    if (variant.type === "motorcycle") {
+      return this.createVehicleGameObject(x, groundY, MOTORCYCLE_WIDTH, MOTORCYCLE_HEIGHT, color);
     }
 
     if (kind === "ground") {
-      return this.scene.add.rectangle(x, groundY, GROUND_OBSTACLE_WIDTH, GROUND_OBSTACLE_HEIGHT, color).setOrigin(0.5, 1);
+      // Lawn trash can (see CONTEXT.md) — Road never uses plain ground.
+      return {
+        gameObject: this.scene.add.rectangle(x, groundY, TRASH_CAN_WIDTH, TRASH_CAN_HEIGHT, color).setOrigin(0.5, 1),
+      };
     }
 
-    return this.createTreeGameObject(x, groundY, color);
+    return { gameObject: this.createTreeGameObject(x, groundY, color) };
+  }
+
+  /** Body + spinning wheel hubs so Road traffic reads as driving, not a static block. */
+  private createVehicleGameObject(
+    x: number,
+    groundY: number,
+    width: number,
+    height: number,
+    color: number,
+  ): { gameObject: Phaser.GameObjects.Container; wheelHubs: Phaser.GameObjects.Rectangle[] } {
+    const body = this.scene.add.rectangle(0, 0, width, height, color).setOrigin(0.5, 1);
+    const wheelY = -WHEEL_RADIUS;
+    const wheelInset = width * 0.28;
+    const frontWheel = this.scene.add.circle(-wheelInset, wheelY, WHEEL_RADIUS, WHEEL_COLOR);
+    const rearWheel = this.scene.add.circle(wheelInset, wheelY, WHEEL_RADIUS, WHEEL_COLOR);
+    const frontHub = this.scene.add.rectangle(-wheelInset, wheelY, 2, WHEEL_RADIUS * 1.6, 0x9ca3af);
+    const rearHub = this.scene.add.rectangle(wheelInset, wheelY, 2, WHEEL_RADIUS * 1.6, 0x9ca3af);
+    const gameObject = this.scene.add.container(x, groundY, [body, frontWheel, rearWheel, frontHub, rearHub]);
+    return { gameObject, wheelHubs: [frontHub, rearHub] };
+  }
+
+  /** Rotate wheel hubs with approach speed so vehicles look like they're rolling. */
+  private spinVehicleWheels(delta: number): void {
+    const baseDx = (this.options.scrollSpeed * delta) / 1000;
+    for (const item of this.items) {
+      if (item.shape !== "single" || !item.wheelHubs) continue;
+      const roll = baseDx * item.scrollMultiplier;
+      const degrees = (roll / WHEEL_RADIUS) * Phaser.Math.RAD_TO_DEG;
+      for (const hub of item.wheelHubs) {
+        hub.angle += degrees;
+      }
+    }
   }
 
   /**
@@ -171,10 +272,16 @@ export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle
         if (variant.carColor === "red") return 0xd62828;
         if (variant.carColor === "blue") return 0x1d4ed8;
         return 0x9ca3af; // grey
+      case "motorcycle":
+        return 0x1f2937;
       case "blocker":
         return variant.material === "wood" ? WOOD_COLOR : ELECTRIC_COLOR;
       case "plain":
-        return kind === "ground" ? 0x4a4a4a : 0x3f7d3f; // leafy green canopy for a plain tree
+        return kind === "ground" ? 0x4a4a4a : 0x3f7d3f; // trash can vs leafy green canopy
     }
   }
+}
+
+function isRoadVehicle(event: ObstacleEvent): boolean {
+  return event.shape === "single" && (event.variant.type === "car" || event.variant.type === "motorcycle");
 }

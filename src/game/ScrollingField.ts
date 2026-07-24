@@ -27,10 +27,9 @@ export interface DistanceEvent {
  * Level to deliberate, hand-authored placement, replacing the random-timer
  * placeholder test-track scaffolding this class previously drove (issue #6).
  *
- * An event is spawned once traveled distance comes within one screen-width
- * of its authored distance — the same lead spawnX() always placed new items
- * at — so it scrolls on from off-screen and reaches the player right as
- * traveled distance reaches its authored distance.
+ * An event is spawned so that, given its scroll multiplier, it reaches
+ * characterX right as traveled distance reaches its authored distance
+ * (faster movers spawn later / closer; see spawnLeadFor).
  */
 export abstract class ScrollingField<
   TEvent extends DistanceEvent,
@@ -75,18 +74,17 @@ export abstract class ScrollingField<
   update(delta: number): void {
     if (this.stopped) return;
 
-    const dx = (this.options.scrollSpeed * delta) / 1000;
-    this.traveled += dx;
+    const baseDx = (this.options.scrollSpeed * delta) / 1000;
+    this.traveled += baseDx;
 
-    const spawnLead = this.scene.scale.width + SPAWN_MARGIN;
-    while (this.pending.length > 0 && this.pending[0].distance <= this.traveled + spawnLead) {
+    while (this.pending.length > 0 && this.pending[0].distance <= this.traveled + this.spawnLeadFor(this.pending[0])) {
       this.spawnEvent(this.pending.shift()!);
     }
 
     const { characterX } = this.options;
     for (let i = this.items.length - 1; i >= 0; i--) {
       const item = this.items[i];
-      item.gameObject.x -= dx;
+      item.gameObject.x -= baseDx * this.scrollMultiplierForItem(item);
 
       if (!item.resolved && item.gameObject.x <= characterX + RESOLVE_TOLERANCE) {
         item.resolved = true;
@@ -106,6 +104,28 @@ export abstract class ScrollingField<
 
   protected spawnX(): number {
     return this.scene.scale.width + SPAWN_MARGIN;
+  }
+
+  /** Screen distance from spawnX to characterX — the path an item scrolls across. */
+  protected screenTravelDistance(): number {
+    return this.scene.scale.width + SPAWN_MARGIN - this.options.characterX;
+  }
+
+  /**
+   * How early (in traveled world px) to spawn so contact still lands on
+   * event.distance when the item moves at scrollSpeed * multiplier.
+   */
+  protected spawnLeadFor(event: TEvent): number {
+    return this.screenTravelDistance() / this.scrollMultiplierForEvent(event);
+  }
+
+  /** 1 = locked to the background; >1 approaches faster (oncoming). */
+  protected scrollMultiplierForEvent(_event: TEvent): number {
+    return 1;
+  }
+
+  protected scrollMultiplierForItem(_item: TItem): number {
+    return 1;
   }
 
   /**
