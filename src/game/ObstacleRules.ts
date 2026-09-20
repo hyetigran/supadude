@@ -2,7 +2,6 @@ import type { PowerColor, VerticalState } from "./PlayerState";
 import type { Lane } from "./Lane";
 
 export type ObstacleKind = "ground" | "overhead";
-export type CarColor = "red" | "blue" | "grey";
 export type Material = "wood" | "electric";
 
 /** Contact with an obstacle requires standing in its Lane — shared precondition for every rule below. */
@@ -30,24 +29,12 @@ export interface DamageCheck {
 }
 
 /**
- * Lane is a precondition for the dodge rule: an obstacle in the other Lane
+ * Lane is a precondition for the dodge rule: an obstacle in a different Lane
  * never causes damage, regardless of pose — the player simply isn't there.
  */
 export function shouldTakeDamage(check: DamageCheck): boolean {
   if (!sameLane(check.obstacleLane, check.playerLane)) return false;
   return !isCleared(check.obstacleKind, check.playerState);
-}
-
-/**
- * Which Power a Power-up Car grants once cleared (see CONTEXT.md: red →
- * Fire, blue → Water, grey → none). Only meaningful for a cleared car — a
- * missed car never grants anything, matching CONTEXT.md's "grey behaves as
- * a plain Ground Obstacle" and, implicitly, a missed red/blue car too.
- */
-export function carPowerGranted(carColor: CarColor | undefined): PowerColor | null {
-  if (carColor === "red") return "fire";
-  if (carColor === "blue") return "water";
-  return null;
 }
 
 /** Fire destroys Wood, Water destroys Electric — see CONTEXT.md Fire/Water Power. */

@@ -1,4 +1,9 @@
-import { toggleLane, type Lane } from "./Lane";
+import {
+  adjacentLane,
+  STARTING_LANE,
+  type Lane,
+  type LaneMove,
+} from "./Lane";
 
 export type VerticalState = "grounded" | "jumping" | "ducking";
 export type PowerColor = "fire" | "water";
@@ -19,7 +24,7 @@ export type PowerColor = "fire" | "water";
  */
 export class PlayerState {
   private state: VerticalState = "grounded";
-  private lane: Lane = "road";
+  private lane: Lane = STARTING_LANE;
   private power: PowerColor | null = null;
   private powerActivated = false;
 
@@ -31,8 +36,19 @@ export class PlayerState {
     return this.lane;
   }
 
-  switchLane(): void {
-    this.lane = toggleLane(this.lane);
+  moveLane(move: LaneMove): boolean {
+    const nextLane = adjacentLane(this.lane, move);
+    if (nextLane === this.lane) return false;
+
+    this.lane = nextLane;
+    return true;
+  }
+
+  /** Restores the player-owned state that starts each checkpoint Attempt. */
+  resetForAttempt(): void {
+    this.state = "grounded";
+    this.lane = STARTING_LANE;
+    this.clearPower();
   }
 
   jump(): boolean {

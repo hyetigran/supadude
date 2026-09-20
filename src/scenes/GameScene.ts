@@ -10,7 +10,8 @@ import { BossFightController } from "../game/BossFightController";
 import { LEVEL } from "../game/Level";
 import { LevelProgress } from "../game/LevelProgress";
 import { formatCompletionTime } from "../game/formatCompletionTime";
-import type { Lane } from "../game/Lane";
+import type { Lane, LaneMove } from "../game/Lane";
+import { createNeighborhoodLayout, type NeighborhoodLayout } from "../game/LaneLayout";
 import {
   BOSS_HEIGHT,
   DEPTH_BACKGROUND,
@@ -20,20 +21,23 @@ import {
   DUCK_SCALE_Y,
   IDLE_BOB_PX,
   JUMP_HEIGHT,
-  LAWN_GRASS_HEIGHT,
-  LAWN_GROUND_INSET_FROM_SIDEWALK_BOTTOM,
-  LAWN_TOP_RATIO,
   PLAYER_BODY_HEIGHT,
   PLAYER_BODY_WIDTH,
   PLAYER_CAPE_COLOR,
   PLAYER_HEAD_RADIUS,
   PLAYER_STAND_HEIGHT,
-  ROAD_GROUND_INSET,
-  SIDEWALK_HEIGHT,
 } from "../game/VisualScale";
 import { PauseOverlay } from "./PauseOverlay";
 import { Fx } from "./Fx";
 import { Sfx } from "../game/Sfx";
+import {
+  ANIM_SPECS,
+  SPRITE_DISPLAY_SCALE,
+  SPRITE_SHEET_KEY,
+  animKeyForVerticalState,
+  type AnimSpec,
+  type SpriteAnimKey,
+} from "../game/PlayerSpriteAnim";
 
 const CHARACTER_X = 200;
 const SCROLL_SPEED = 220; // px/sec
@@ -43,6 +47,8 @@ const BACKGROUND_TILE_WIDTH = 160;
 const JUMP_DURATION_MS = 420;
 const DUCK_DURATION_MS = 500;
 const LANE_SWITCH_DURATION_MS = 150;
+const HIT_ANIM_DURATION_MS = 130; // matches the existing HIT_FLASH_COLOR flash duration below
+const PUNCH_ANIM_DURATION_MS = 260; // ~3 frames at the punch anim's 12fps (see PlayerSpriteAnim.ts ANIM_SPECS)
 const POWER_DURATION_MS = 5000;
 const BOSS_X_OFFSET = 220; // distance right of Supa Dude the boss placeholder sits at
 
@@ -55,16 +61,16 @@ const PAUSE_BUTTON_SIZE = 36;
 const PAUSE_BUTTON_PAD = 12;
 
 const SKY_COLOR = 0x87ceeb;
-const LAWN_COLOR = 0x6b8e4e;
+const TREE_LAWN_COLOR = 0x6b8e4e;
 const SIDEWALK_COLOR = 0xc4c4c0;
 const CURB_COLOR = 0x9a9a96;
-const ROAD_COLOR = 0x3f3f46;
-const ROAD_DASH_COLOR = 0xfbbf24;
+const STREET_COLOR = 0x3f3f46;
+const STREET_DASH_COLOR = 0xfbbf24;
 const FENCE_COLOR = 0x8b5a2b;
-const ROAD_DASH_WIDTH = 28;
-const ROAD_DASH_GAP = 22;
-const ROAD_DASH_HEIGHT = 4;
-const ROAD_DASH_BOTTOM_PAD = 14;
+const STREET_DASH_WIDTH = 28;
+const STREET_DASH_GAP = 22;
+const STREET_DASH_HEIGHT = 4;
+const STREET_DASH_BOTTOM_PAD = 14;
 
 // Parallax sky decor: clouds drift slower than the neighborhood scroll,
 // distant rooftops slower still than the foreground but faster than clouds
@@ -90,10 +96,9 @@ const BOSS_HIT_BURST_COLOR = 0xffd400;
 const BOSS_DEFEAT_BURST_COLOR = 0x6b21a8;
 
 /**
- * Two-lane dodge core loop through the authored Level (see Level.ts,
- * ADR-0003): Left/Right switches Road/Lawn Lane independently of Jump/Duck,
- * which still clear Ground/Overhead Obstacles in whichever Lane the player
- * currently occupies. A miss costs a Life; 0 Lives pauses for a continue
+ * Three-Lane dodge core loop through the authored Level (see Level.ts,
+ * ADR-0003): Left/Right shifts one step across Sidewalk/Tree Lawn/Street,
+ * independently of Jump/Duck. A miss costs a Life; 0 Lives pauses for a continue
  * prompt, then respawns at the most recent Checkpoint with Lives reset to 3
  * — there is no terminal "Game Over" in this loop, only retries (see
  * CONTEXT.md Attempt). Score is the running Coins-collected count (ADR-0005)
@@ -110,6 +115,7 @@ export class GameScene extends Phaser.Scene {
   readonly gameState = new GameState();
   private playerInput!: InputManager;
   private playerState!: PlayerState;
+  private neighborhoodLayout!: NeighborhoodLayout;
   private obstacleField!: ObstacleField;
   private collectibleField!: CollectibleField;
   private markerField!: MarkerField;
@@ -121,6 +127,8 @@ export class GameScene extends Phaser.Scene {
   private cloudsLayer?: Phaser.GameObjects.TileSprite;
   private skylineLayer?: Phaser.GameObjects.TileSprite;
   private character?: Phaser.GameObjects.Container;
+  /** Set only when public/sprites/supa-dude.png has loaded; undefined means the primitive-drawn fallback is in play. */
+  private characterSprite?: Phaser.GameObjects.Sprite;
   private fx!: Fx;
   private readonly sfx = new Sfx();
   private powerIndicator?: Phaser.GameObjects.Arc;
@@ -144,6 +152,7 @@ export class GameScene extends Phaser.Scene {
     this.gameState.resetForNewAttempt();
     this.playerInput = new InputManager();
     this.playerState = new PlayerState();
+    this.neighborhoodLayout = createNeighborhoodLayout(this.scale.height);
     this.levelProgress = new LevelProgress(LEVEL.checkpoint, LEVEL.length);
     this.pauseOverlay = new PauseOverlay(this);
     this.powerExpiryTimer?.remove();
@@ -164,15 +173,15 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setDepth(DEPTH_BACKGROUND);
 
-    const lawnTop = this.scale.height * LAWN_TOP_RATIO;
-    this.createCloudsTexture(lawnTop);
+    const neighborhoodTop = this.neighborhoodLayout.neighborhoodTop;
+    this.createCloudsTexture(neighborhoodTop);
     this.cloudsLayer = this.add
-      .tileSprite(0, 0, this.scale.width, lawnTop, CLOUDS_TEXTURE)
+      .tileSprite(0, 0, this.scale.width, neighborhoodTop, CLOUDS_TEXTURE)
       .setOrigin(0, 0)
       .setDepth(DEPTH_SKY_DECOR);
-    this.createSkylineTexture(lawnTop);
+    this.createSkylineTexture(neighborhoodTop);
     this.skylineLayer = this.add
-      .tileSprite(0, 0, this.scale.width, lawnTop, SKYLINE_TEXTURE)
+      .tileSprite(0, 0, this.scale.width, neighborhoodTop, SKYLINE_TEXTURE)
       .setOrigin(0, 0)
       .setDepth(DEPTH_SKY_DECOR + 0.1);
 
@@ -196,7 +205,7 @@ export class GameScene extends Phaser.Scene {
     this.obstacleField = new ObstacleField(
       this,
       {
-        laneGroundY: (lane) => this.getGroundYForLane(lane),
+        lanePresentation: (lane) => this.neighborhoodLayout.lanes[lane],
         characterX: CHARACTER_X,
         scrollSpeed: SCROLL_SPEED,
         getPlayerPose: () => ({ lane: this.playerState.getLane(), verticalState: this.playerState.getState() }),
@@ -211,7 +220,7 @@ export class GameScene extends Phaser.Scene {
     this.collectibleField = new CollectibleField(
       this,
       {
-        laneGroundY: (lane) => this.getGroundYForLane(lane),
+        lanePresentation: (lane) => this.neighborhoodLayout.lanes[lane],
         characterX: CHARACTER_X,
         scrollSpeed: SCROLL_SPEED,
         getLane: () => this.playerState.getLane(),
@@ -224,7 +233,7 @@ export class GameScene extends Phaser.Scene {
     this.markerField = new MarkerField(
       this,
       {
-        laneGroundY: (lane) => this.getGroundYForLane(lane),
+        lanePresentation: (lane) => this.neighborhoodLayout.lanes[lane],
         characterX: CHARACTER_X,
         scrollSpeed: SCROLL_SPEED,
       },
@@ -233,8 +242,8 @@ export class GameScene extends Phaser.Scene {
 
     this.playerInput.on("jump", () => this.handleJump());
     this.playerInput.on("duck", () => this.handleDuck());
-    this.playerInput.on("laneLeft", () => this.handleLaneSwitch());
-    this.playerInput.on("laneRight", () => this.handleLaneSwitch());
+    this.playerInput.on("laneLeft", () => this.handleLaneShift("towardSidewalk"));
+    this.playerInput.on("laneRight", () => this.handleLaneShift("towardStreet"));
     this.playerInput.on("powerActivate", () => this.handlePowerActivate());
     this.playerInput.on("punch", () => this.handlePunch());
     this.playerInput.on("pause", () => this.handlePause());
@@ -286,61 +295,68 @@ export class GameScene extends Phaser.Scene {
     this.markerField.update(delta);
   }
 
-  /**
-   * Feet sit inside each lane surface — Lawn on the sidewalk, Road inset into
-   * the asphalt — not balanced on the top edge of the colored band.
-   */
   private getGroundYForLane(lane: Lane): number {
-    const lawnTop = this.scale.height * LAWN_TOP_RATIO;
-    const sidewalkBottom = lawnTop + LAWN_GRASS_HEIGHT + SIDEWALK_HEIGHT;
-    if (lane === "lawn") {
-      return sidewalkBottom - LAWN_GROUND_INSET_FROM_SIDEWALK_BOTTOM;
-    }
-    return sidewalkBottom + ROAD_GROUND_INSET;
+    return this.neighborhoodLayout.lanes[lane].groundY;
+  }
+
+  /** Boss combat is a fixed Street-based arena, outside normal Lane movement. */
+  private getActivePresentationLane(): Lane {
+    return this.inBossFight ? "street" : this.playerState.getLane();
+  }
+
+  private getActiveGroundY(): number {
+    return this.getGroundYForLane(this.getActivePresentationLane());
+  }
+
+  /** Keep Supa Dude in the same depth/perspective contract as Lane content. */
+  private applyCharacterLanePresentation(lane: Lane): void {
+    if (!this.character) return;
+    const presentation = this.neighborhoodLayout.lanes[lane];
+    const depth = this.inBossFight ? DEPTH_PLAYER : presentation.depth + 0.5;
+    this.character.setDepth(depth).setScale(presentation.scale);
   }
 
   /**
-   * Repeating neighborhood tile: sky, lawn grass, sidewalk, curb, road with
-   * yellow dashes near the bottom, plus a fence-post landmark.
+   * Repeating neighborhood tile: sky, Sidewalk, Tree Lawn, and Street.
    */
   private createBackgroundTexture(): void {
     const width = BACKGROUND_TILE_WIDTH;
     const height = this.scale.height;
-    const lawnTop = height * LAWN_TOP_RATIO;
-    const sidewalkTop = lawnTop + LAWN_GRASS_HEIGHT;
-    const roadTop = sidewalkTop + SIDEWALK_HEIGHT;
+    const { neighborhoodTop: sidewalkTop, treeLawnTop, streetTop } = this.neighborhoodLayout;
 
     const graphics = this.add.graphics();
 
     // Sky
     graphics.fillStyle(SKY_COLOR, 1);
-    graphics.fillRect(0, 0, width, lawnTop);
+    graphics.fillRect(0, 0, width, sidewalkTop);
 
-    // Lawn grass
-    graphics.fillStyle(LAWN_COLOR, 1);
-    graphics.fillRect(0, lawnTop, width, LAWN_GRASS_HEIGHT);
-
-    // Sidewalk
+    // Sidewalk Lane
     graphics.fillStyle(SIDEWALK_COLOR, 1);
-    graphics.fillRect(0, sidewalkTop, width, SIDEWALK_HEIGHT);
+    graphics.fillRect(0, sidewalkTop, width, treeLawnTop - sidewalkTop);
     graphics.lineStyle(1, CURB_COLOR, 1);
     graphics.lineBetween(0, sidewalkTop, width, sidewalkTop);
-    graphics.lineBetween(0, roadTop, width, roadTop);
+    graphics.lineBetween(0, treeLawnTop, width, treeLawnTop);
 
-    // Road
-    graphics.fillStyle(ROAD_COLOR, 1);
-    graphics.fillRect(0, roadTop, width, height - roadTop);
+    // Tree Lawn Lane
+    graphics.fillStyle(TREE_LAWN_COLOR, 1);
+    graphics.fillRect(0, treeLawnTop, width, streetTop - treeLawnTop);
+    graphics.lineStyle(1, CURB_COLOR, 1);
+    graphics.lineBetween(0, streetTop, width, streetTop);
 
-    // Yellow dashes along the bottom of the road
-    const dashY = height - ROAD_DASH_BOTTOM_PAD - ROAD_DASH_HEIGHT;
-    graphics.fillStyle(ROAD_DASH_COLOR, 1);
-    for (let x = 8; x < width; x += ROAD_DASH_WIDTH + ROAD_DASH_GAP) {
-      graphics.fillRect(x, dashY, ROAD_DASH_WIDTH, ROAD_DASH_HEIGHT);
+    // Street Lane
+    graphics.fillStyle(STREET_COLOR, 1);
+    graphics.fillRect(0, streetTop, width, height - streetTop);
+
+    // Yellow dashes along the bottom of the Street
+    const dashY = height - STREET_DASH_BOTTOM_PAD - STREET_DASH_HEIGHT;
+    graphics.fillStyle(STREET_DASH_COLOR, 1);
+    for (let x = 8; x < width; x += STREET_DASH_WIDTH + STREET_DASH_GAP) {
+      graphics.fillRect(x, dashY, STREET_DASH_WIDTH, STREET_DASH_HEIGHT);
     }
 
-    // Fence post landmark on the lawn
+    // Fence post landmark on the Tree Lawn
     graphics.fillStyle(FENCE_COLOR, 1);
-    graphics.fillRect(width - 6, sidewalkTop - 34, 6, 34);
+    graphics.fillRect(width - 6, streetTop - 34, 6, 34);
 
     graphics.generateTexture(BACKGROUND_TEXTURE, width, height);
     graphics.destroy();
@@ -358,7 +374,7 @@ export class GameScene extends Phaser.Scene {
     graphics.destroy();
   }
 
-  /** Distant rooftop silhouette sitting just above the lawn line, faster than clouds but still slower than the foreground (see SKYLINE_PARALLAX_FACTOR). */
+  /** Distant rooftop silhouette above the Sidewalk, faster than clouds but slower than the foreground. */
   private createSkylineTexture(bandHeight: number): void {
     const width = SKYLINE_LAYER_TILE_WIDTH;
     const graphics = this.add.graphics();
@@ -386,21 +402,59 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createCharacterPlaceholder(): Phaser.GameObjects.Container {
-    const groundY = this.getGroundYForLane(this.playerState.getLane());
+    const presentation = this.neighborhoodLayout.lanes[this.playerState.getLane()];
+    const groundY = presentation.groundY;
 
     // Feet at local y=0 so the container sits on the lane baseline and duck
     // squash (scaleY) contracts toward the ground rather than through it.
-    const body = this.add.rectangle(0, 0, PLAYER_BODY_WIDTH, PLAYER_BODY_HEIGHT, 0x000000).setOrigin(0.5, 1);
-    const headY = -(PLAYER_BODY_HEIGHT + PLAYER_HEAD_RADIUS);
-    const head = this.add.circle(0, headY, PLAYER_HEAD_RADIUS, 0x000000);
-    const cape = this.add.triangle(-4, -PLAYER_BODY_HEIGHT * 0.5, 0, -PLAYER_BODY_HEIGHT * 0.55, -10, 0, 4, 0, PLAYER_CAPE_COLOR);
+    const children: Phaser.GameObjects.GameObject[] = [];
+    if (this.textures.exists(SPRITE_SHEET_KEY)) {
+      this.registerCharacterAnims();
+      this.characterSprite = this.add
+        .sprite(0, 0, SPRITE_SHEET_KEY, ANIM_SPECS.idle.start)
+        .setOrigin(0.5, 1)
+        .setScale(SPRITE_DISPLAY_SCALE);
+      children.push(this.characterSprite);
+    } else {
+      const body = this.add.rectangle(0, 0, PLAYER_BODY_WIDTH, PLAYER_BODY_HEIGHT, 0x000000).setOrigin(0.5, 1);
+      const headY = -(PLAYER_BODY_HEIGHT + PLAYER_HEAD_RADIUS);
+      const head = this.add.circle(0, headY, PLAYER_HEAD_RADIUS, 0x000000);
+      const cape = this.add.triangle(-4, -PLAYER_BODY_HEIGHT * 0.5, 0, -PLAYER_BODY_HEIGHT * 0.55, -10, 0, 4, 0, PLAYER_CAPE_COLOR);
+      children.push(cape, body, head);
+    }
     this.powerIndicator = this.add.circle(0, -(PLAYER_STAND_HEIGHT + 8), 8, 0xffffff, 0).setVisible(false);
+    children.push(this.powerIndicator);
 
-    const character = this.add.container(CHARACTER_X, groundY, [cape, body, head, this.powerIndicator]);
-    character.setDepth(DEPTH_PLAYER);
+    const character = this.add.container(CHARACTER_X, groundY, children);
+    character.setDepth(presentation.depth + 0.5).setScale(presentation.scale);
     this.startIdleTween(character, groundY);
 
     return character;
+  }
+
+  /** Registered once per Scene lifetime — anims persist in Phaser's global AnimationManager across scene restarts. */
+  private registerCharacterAnims(): void {
+    if (this.anims.exists("idle")) return;
+    for (const [key, spec] of Object.entries(ANIM_SPECS) as [SpriteAnimKey, AnimSpec][]) {
+      this.anims.create({
+        key,
+        frames: this.anims.generateFrameNumbers(SPRITE_SHEET_KEY, { start: spec.start, end: spec.end }),
+        frameRate: spec.frameRate,
+        repeat: spec.repeat,
+      });
+    }
+  }
+
+  /** No-op under the primitive fallback (this.characterSprite is only set once real art has loaded). */
+  private playCharacterAnim(key: SpriteAnimKey): void {
+    if (!this.characterSprite) return;
+    if (this.characterSprite.anims.currentAnim?.key === key) return;
+    this.characterSprite.play(key);
+  }
+
+  private steadyCharacterAnimKey(): SpriteAnimKey {
+    const state = this.playerState.getState();
+    return this.inBossFight && state === "grounded" ? "idle" : animKeyForVerticalState(state);
   }
 
   /** Shows a small dot above Supa Dude's head while a Power is held (dim) or activated (bright) — no Power, no dot. */
@@ -484,7 +538,7 @@ export class GameScene extends Phaser.Scene {
   private handleBossPunchLanded(): void {
     this.sfx.play("bossHit");
     this.fx.shake(90, 0.006);
-    this.fx.burst(CHARACTER_X + BOSS_X_OFFSET, this.getGroundYForLane("road") - BOSS_HEIGHT * 0.5, BOSS_HIT_BURST_COLOR, {
+    this.fx.burst(CHARACTER_X + BOSS_X_OFFSET, this.getGroundYForLane("street") - BOSS_HEIGHT * 0.5, BOSS_HIT_BURST_COLOR, {
       count: 12,
       speedMax: 180,
     });
@@ -499,6 +553,8 @@ export class GameScene extends Phaser.Scene {
   private handlePunch(): void {
     if (this.isComplete || this.isPaused) return;
     this.sfx.play("punch");
+    this.playCharacterAnim("punch");
+    this.time.delayedCall(PUNCH_ANIM_DURATION_MS, () => this.playCharacterAnim(this.steadyCharacterAnimKey()));
     this.bossFightController?.punch();
   }
 
@@ -507,16 +563,27 @@ export class GameScene extends Phaser.Scene {
   }
 
   private charY(): number {
-    return this.character?.y ?? this.getGroundYForLane(this.playerState.getLane());
+    return this.character?.y ?? this.getActiveGroundY();
   }
 
   // A quick, slightly-tilting bounce reads as a running stride; final
   // sprite-sheet animation replaces this in the art-integration ticket.
-  // Re-anchored on each Lane switch since the bounce's rest position is
+  // Re-anchored on each Lane Shift since the bounce's rest position is
   // baked in relative to whichever baseline was current when it started.
   // Paused during Jump/Duck so idle bob never fights overhead clearance.
   private startIdleTween(character: Phaser.GameObjects.Container, baselineY: number): void {
     this.idleTween?.stop();
+
+    // With real art, the run-cycle animation itself carries the motion — stacking
+    // the fake bounce/tilt on top would double up. Just pin to baseline and
+    // resume whichever steady-state pose matches the current vertical state.
+    if (this.characterSprite) {
+      character.y = baselineY;
+      character.angle = 0;
+      this.playCharacterAnim(this.steadyCharacterAnimKey());
+      return;
+    }
+
     this.idleTween = this.tweens.add({
       targets: character,
       y: baselineY - IDLE_BOB_PX,
@@ -532,7 +599,9 @@ export class GameScene extends Phaser.Scene {
   private finishPose(revertState: () => void): void {
     revertState();
     if (this.character) {
-      this.startIdleTween(this.character, this.getGroundYForLane(this.playerState.getLane()));
+      const presentationLane = this.getActivePresentationLane();
+      this.applyCharacterLanePresentation(presentationLane);
+      this.startIdleTween(this.character, this.getGroundYForLane(presentationLane));
     }
   }
 
@@ -541,7 +610,8 @@ export class GameScene extends Phaser.Scene {
     if (!this.playerState.jump()) return;
 
     this.sfx.play("jump");
-    const groundY = this.getGroundYForLane(this.playerState.getLane());
+    this.playCharacterAnim("jump");
+    const groundY = this.getActiveGroundY();
     this.idleTween?.pause();
     this.tweens.add({
       targets: this.character,
@@ -563,34 +633,45 @@ export class GameScene extends Phaser.Scene {
     if (!this.playerState.duck()) return;
 
     this.sfx.play("duck");
-    // Squash toward feet (local y=0) — reads as a crouch under Overhead Obstacles.
     this.idleTween?.pause();
-    this.character.setScale(1, DUCK_SCALE_Y);
-    this.character.y = this.getGroundYForLane(this.playerState.getLane());
+    this.character.y = this.getActiveGroundY();
+    if (this.characterSprite) {
+      // Real art draws the crouch as its own frame — no geometric squash needed.
+      this.playCharacterAnim("duck");
+    } else {
+      // Squash toward feet (local y=0) — reads as a crouch under Overhead Obstacles.
+      const laneScale = this.neighborhoodLayout.lanes[this.getActivePresentationLane()].scale;
+      this.character.setScale(laneScale, laneScale * DUCK_SCALE_Y);
+    }
     this.time.delayedCall(DUCK_DURATION_MS, () => {
-      this.character?.setScale(1, 1);
       this.finishPose(() => this.playerState.standUp());
     });
   }
 
-  private handleLaneSwitch(): void {
+  private handleLaneShift(move: LaneMove): void {
     // Boss Fights aren't Lane-based (CONTEXT.md Boss Fight) — disabled so the
     // boss's fixed-position placeholder UI never desyncs from Supa Dude's row.
     if (this.isComplete || this.isPaused || this.inBossFight || !this.character) return;
 
+    if (!this.playerState.moveLane(move)) return;
     this.sfx.play("laneSwitch");
-    this.playerState.switchLane();
     // Jump/duck already have their own y target baked into their in-flight
     // tween/timer; switching mid-pose updates the Lane immediately (so
     // collision resolution is always correct) but the visual re-anchor
     // happens on the next finishPose, not mid-animation.
     if (this.playerState.getState() !== "grounded") return;
 
-    const newGroundY = this.getGroundYForLane(this.playerState.getLane());
+    const presentation = this.neighborhoodLayout.lanes[this.playerState.getLane()];
+    const newGroundY = presentation.groundY;
     this.idleTween?.pause();
+    this.tweens.killTweensOf(this.character);
+    this.playCharacterAnim("laneSwitch");
+    this.character.setDepth(presentation.depth + 0.5);
     this.tweens.add({
       targets: this.character,
       y: newGroundY,
+      scaleX: presentation.scale,
+      scaleY: presentation.scale,
       duration: LANE_SWITCH_DURATION_MS,
       ease: "Sine.easeInOut",
       onComplete: () => {
@@ -608,6 +689,8 @@ export class GameScene extends Phaser.Scene {
     this.fx.shake(160, 0.01);
     this.fx.flash(HIT_FLASH_COLOR, 130);
     this.fx.burst(this.charX(), this.charY(), HIT_FLASH_COLOR, { count: 10, speedMax: 150 });
+    this.playCharacterAnim("hit");
+    this.time.delayedCall(HIT_ANIM_DURATION_MS, () => this.playCharacterAnim(this.steadyCharacterAnimKey()));
     if (this.gameState.hasNoLivesLeft()) {
       this.showOutOfLivesPause();
     }
@@ -689,11 +772,11 @@ export class GameScene extends Phaser.Scene {
 
     if (this.character) {
       this.tweens.killTweensOf(this.character);
-      this.character.setScale(1, 1);
       this.character.setAngle(0);
       this.character.y = this.getGroundYForLane(this.playerState.getLane());
     }
     this.playerState.land();
+    this.applyCharacterLanePresentation(this.playerState.getLane());
   }
 
   private resumeWorld(): void {
@@ -712,7 +795,7 @@ export class GameScene extends Phaser.Scene {
    * Obstacle — 0 Lives mid-fight pauses for continue, then respawns at the
    * Checkpoint before the boss exactly like any other death
    * (see showOutOfLivesPause / respawnAtCheckpoint).
-   * Boss is pinned to the Road baseline so the fight reads as a fixed arena
+   * Boss is pinned to the Street baseline so the fight reads as a fixed arena
    * regardless of which Lane the player arrived on.
    */
   private startBossFight(): void {
@@ -722,17 +805,17 @@ export class GameScene extends Phaser.Scene {
     this.collectibleField.stop();
     this.markerField.stop();
 
-    // Snap Supa Dude onto the Road arena row for the fight.
-    const arenaY = this.getGroundYForLane("road");
+    // The Boss arena is outside the Lane model; Street supplies its visual baseline.
+    const arenaY = this.getGroundYForLane("street");
     if (this.character) {
       this.tweens.killTweensOf(this.character);
       this.character.setScale(1, 1);
+      this.character.setDepth(DEPTH_PLAYER);
       this.character.setPosition(CHARACTER_X, arenaY);
     }
-    if (this.playerState.getLane() !== "road") {
-      this.playerState.switchLane();
-    }
-
+    // Auto-run stops for the fight, so the run-cycle animation would read as
+    // running-in-place; hold on idle until dodges/punches/hits play their own pose.
+    this.playCharacterAnim("idle");
     this.bossFightController = new BossFightController(this, {
       x: CHARACTER_X + BOSS_X_OFFSET,
       groundY: arenaY,
@@ -747,7 +830,7 @@ export class GameScene extends Phaser.Scene {
     this.bossDefeated = true;
     this.sfx.play("bossDefeated");
     this.fx.shake(320, 0.014);
-    this.fx.burst(CHARACTER_X + BOSS_X_OFFSET, this.getGroundYForLane("road") - BOSS_HEIGHT * 0.5, BOSS_DEFEAT_BURST_COLOR, {
+    this.fx.burst(CHARACTER_X + BOSS_X_OFFSET, this.getGroundYForLane("street") - BOSS_HEIGHT * 0.5, BOSS_DEFEAT_BURST_COLOR, {
       count: 26,
       speedMax: 240,
       lifespanMs: 520,
@@ -773,15 +856,14 @@ export class GameScene extends Phaser.Scene {
     this.collectibleField.seek(checkpointDistance);
     this.markerField.seek(checkpointDistance);
 
-    this.playerState.clearPower();
+    this.playerState.resetForAttempt();
     this.powerExpiryTimer?.remove();
-    this.playerState.land();
 
     if (this.character) {
       this.tweens.killTweensOf(this.character);
-      this.character.setScale(1, 1);
       const groundY = this.getGroundYForLane(this.playerState.getLane());
       this.character.setPosition(CHARACTER_X, groundY);
+      this.applyCharacterLanePresentation(this.playerState.getLane());
     }
 
     this.updateHud();
@@ -793,6 +875,11 @@ export class GameScene extends Phaser.Scene {
     this.inBossFight = false;
     this.bossFightController?.destroy();
     this.bossFightController = undefined;
+
+    if (this.character) {
+      this.character.y = this.getGroundYForLane(this.playerState.getLane());
+      this.applyCharacterLanePresentation(this.playerState.getLane());
+    }
 
     this.resumeWorld();
   }

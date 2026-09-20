@@ -68,31 +68,69 @@ describe("PlayerState", () => {
     expect(player.jump()).toBe(true);
   });
 
-  it("starts in the road Lane", () => {
+  it("starts in the tree lawn Lane", () => {
     const player = new PlayerState();
-    expect(player.getLane()).toBe("road");
+    expect(player.getLane()).toBe("treeLawn");
   });
 
-  it("switchLane toggles between road and lawn", () => {
+  it("moveLane moves one Lane toward the sidewalk and reports the change", () => {
     const player = new PlayerState();
-    player.switchLane();
-    expect(player.getLane()).toBe("lawn");
-    player.switchLane();
-    expect(player.getLane()).toBe("road");
+    expect(player.moveLane("towardSidewalk")).toBe(true);
+    expect(player.getLane()).toBe("sidewalk");
   });
 
-  it("switchLane does not affect the vertical state", () => {
+  it("moveLane moves one Lane toward the street and reports the change", () => {
+    const player = new PlayerState();
+    expect(player.moveLane("towardStreet")).toBe(true);
+    expect(player.getLane()).toBe("street");
+  });
+
+  it("moveLane stops at the sidewalk edge and reports no change", () => {
+    const player = new PlayerState();
+    player.moveLane("towardSidewalk");
+    expect(player.moveLane("towardSidewalk")).toBe(false);
+    expect(player.getLane()).toBe("sidewalk");
+  });
+
+  it("moveLane stops at the street edge and reports no change", () => {
+    const player = new PlayerState();
+    player.moveLane("towardStreet");
+    expect(player.moveLane("towardStreet")).toBe(false);
+    expect(player.getLane()).toBe("street");
+  });
+
+  it("moveLane never wraps directly between the outer Lanes", () => {
+    const player = new PlayerState();
+    player.moveLane("towardSidewalk");
+    player.moveLane("towardStreet");
+    expect(player.getLane()).toBe("treeLawn");
+    player.moveLane("towardStreet");
+    expect(player.getLane()).toBe("street");
+  });
+
+  it("moveLane is allowed while jumping without affecting the vertical state", () => {
     const player = new PlayerState();
     player.jump();
-    player.switchLane();
+    expect(player.moveLane("towardSidewalk")).toBe(true);
+    expect(player.getLane()).toBe("sidewalk");
     expect(player.getState()).toBe("jumping");
+  });
+
+  it("moveLane is allowed while ducking without affecting the vertical state", () => {
+    const player = new PlayerState();
+    player.duck();
+    expect(player.moveLane("towardStreet")).toBe(true);
+    expect(player.getLane()).toBe("street");
+    expect(player.getState()).toBe("ducking");
   });
 
   it("jump and duck are unaffected by which Lane the player is in", () => {
     const player = new PlayerState();
-    player.switchLane();
+    player.moveLane("towardSidewalk");
     expect(player.jump()).toBe(true);
     player.land();
+    player.moveLane("towardStreet");
+    player.moveLane("towardStreet");
     expect(player.duck()).toBe(true);
   });
 
@@ -154,11 +192,37 @@ describe("PlayerState", () => {
     expect(player.isPowerActivated()).toBe(false);
   });
 
-  it("Power is independent of vertical state and Lane", () => {
+  it("Lane movement is independent of held Power", () => {
     const player = new PlayerState();
     player.collectPower("water");
-    player.jump();
-    player.switchLane();
+    expect(player.moveLane("towardStreet")).toBe(true);
+    expect(player.getLane()).toBe("street");
     expect(player.getPower()).toBe("water");
+    expect(player.isPowerActivated()).toBe(false);
+  });
+
+  it("Lane movement is independent of activated Power", () => {
+    const player = new PlayerState();
+    player.collectPower("fire");
+    player.activatePower();
+    expect(player.moveLane("towardSidewalk")).toBe(true);
+    expect(player.getLane()).toBe("sidewalk");
+    expect(player.getPower()).toBe("fire");
+    expect(player.isPowerActivated()).toBe(true);
+  });
+
+  it("resetForAttempt restores the middle Lane, grounded pose, and no Power", () => {
+    const player = new PlayerState();
+    player.moveLane("towardStreet");
+    player.jump();
+    player.collectPower("fire");
+    player.activatePower();
+
+    player.resetForAttempt();
+
+    expect(player.getLane()).toBe("treeLawn");
+    expect(player.getState()).toBe("grounded");
+    expect(player.getPower()).toBeNull();
+    expect(player.isPowerActivated()).toBe(false);
   });
 });

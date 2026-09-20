@@ -1,23 +1,12 @@
-import type { CarColor, ObstacleKind } from "./ObstacleRules";
-import type { Lane } from "./Lane";
+import { LANES, type Lane } from "./Lane";
+import { OBSTACLE_CATALOG, type ObstacleId } from "./ObstacleCatalog";
 
 export type CollectibleKind = "heart" | "coin";
 
-export type ObstacleVariant =
-  | { type: "plain" }
-  | { type: "motorcycle" }
-  | { type: "car"; carColor: CarColor }
-  | { type: "blocker"; material: "wood" };
-
-/**
- * "pole" is the Light Pole (see CONTEXT.md): a Lawn-Lane obstacle spanning
- * the full Ground-to-Overhead height, so neither Jump nor Duck clears it —
- * survivable only by being in the other Lane, or by destroying it with
- * Water Power (its material is always Electric).
- */
-export type ObstacleEvent =
-  | { distance: number; shape: "single"; lane: Lane; kind: ObstacleKind; variant: ObstacleVariant }
-  | { distance: number; shape: "pole"; lane: Lane };
+export interface ObstacleEvent {
+  distance: number;
+  obstacle: ObstacleId;
+}
 
 export interface CollectibleEvent {
   distance: number;
@@ -26,129 +15,113 @@ export interface CollectibleEvent {
 }
 
 export interface Level {
-  /** Ascending by distance. */
+  /** Nondecreasing by distance; a shared distance represents one authored beat. */
   obstacles: ObstacleEvent[];
   /** Ascending by distance. */
   collectibles: CollectibleEvent[];
-  /** The Checkpoint immediately before the Final Boss (see CONTEXT.md, ADR-0004 — one Boss, not several, so one Checkpoint). */
+  /** The one Checkpoint immediately before the Final Boss. */
   checkpoint: number;
-  /** The Final Boss's encounter distance (see ADR-0004). */
+  /** The Final Boss encounter distance. */
   bossMarker: number;
   /** Total Level distance in world px (finish line). */
   length: number;
-  /** Count of Coin (not Heart) collectibles — the results screen's "collected/total" denominator. */
+  /** Coin count used by the results screen's collected/total display. */
   totalCoins: number;
 }
 
-/**
- * Authored chunk vocabulary mirrors CONTEXT.md lane rules:
- * - Road: motorcycle | car (jump only)
- * - Lawn: single ground (trash can) | single overhead (tree) | pole |
- *   blocker overhead wood (Fire-destroyable tree)
- */
-type ChunkToken =
-  | { chunk: "motorcycle" }
-  | { chunk: "car"; carColor: CarColor }
-  | { chunk: "single"; lane: "lawn"; kind: ObstacleKind }
-  | { chunk: "pole" }
-  | { chunk: "blocker"; kind: "overhead"; material: "wood" }
-  | { chunk: "breather"; gap: number }
-  | { chunk: "checkpoint" }
-  | { chunk: "boss" };
+type ObstacleBeat = readonly [ObstacleId] | readonly [ObstacleId, ObstacleId];
 
-/** Distance (world px) the cursor advances after placing each chunk kind — the pacing knob for that shape. */
-const SPACING = {
-  motorcycle: 420,
-  pole: 520,
-  blocker: 470,
-  car: 540,
-  single: 420,
-} as const;
+type ScriptToken =
+  | { type: "beat"; obstacles: ObstacleBeat }
+  | { type: "breather"; gap: number }
+  | { type: "checkpoint" }
+  | { type: "boss" };
 
-const CHECKPOINT_TO_BOSS_GAP = 170; // "immediately before" per issue #6
-const POST_BOSS_GAP = 700; // breathing room after the Final Boss before the closing stretch to the finish line
+function beat(...obstacles: ObstacleBeat): ScriptToken {
+  return { type: "beat", obstacles };
+}
+
+const BEAT_SPACING = 460;
+const CHECKPOINT_TO_BOSS_GAP = 170;
+const POST_BOSS_GAP = 700;
 
 /**
- * The authored Level, hand-written as an explicit, fixed token sequence — no
- * Math.random or other runtime source of variation (ADR-0003). 3 Acts of
- * continuous Obstacle/Collectible content run back-to-back, ending in a
- * single Checkpoint immediately followed by the Final Boss (ADR-0004), then
- * a closing stretch to the finish line.
- *
- * Lane vocabularies (see CONTEXT.md): Road is vehicles only (Motorcycle +
- * Power-up Cars, all jump); Lawn is trash can (jump), tree (duck), Light
- * Pole (switch / Water), and Wood tree Blockers (Fire).
+ * Three continuous acts teach the Sidewalk, Tree Lawn, and Street obstacle
+ * vocabularies, then combine two different Lanes on the same beat. The
+ * sequence is fixed and hand-authored: no runtime randomness is involved.
  */
-const ACT_1: ChunkToken[] = [
-  { chunk: "motorcycle" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "breather", gap: 400 },
-  { chunk: "single", lane: "lawn", kind: "ground" },
-  { chunk: "car", carColor: "grey" },
-  { chunk: "single", lane: "lawn", kind: "ground" },
-  { chunk: "motorcycle" },
-  { chunk: "breather", gap: 350 },
-  { chunk: "car", carColor: "red" },
-  { chunk: "pole" },
-  { chunk: "motorcycle" },
-  { chunk: "blocker", kind: "overhead", material: "wood" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "car", carColor: "grey" },
+const ACT_1: ScriptToken[] = [
+  beat("trashCan"),
+  beat("awning", "motorcycle"),
+  { type: "breather", gap: 400 },
+  beat("fireHydrant"),
+  beat("greyCar", "lowBranch"),
+  beat("utilityBox", "trashCan"),
+  beat("motorcycle"),
+  { type: "breather", gap: 350 },
+  beat("redCar", "awning"),
+  beat("streetBanner", "fireHydrant"),
+  beat("lowBranch", "trashCan"),
+  beat("blueCar"),
+  beat("utilityBox", "awning"),
+  beat("motorcycle", "lowBranch"),
+  beat("greyCar", "fireHydrant"),
 ];
 
-const ACT_2: ChunkToken[] = [
-  { chunk: "motorcycle" },
-  { chunk: "car", carColor: "blue" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "breather", gap: 400 },
-  { chunk: "pole" },
-  { chunk: "single", lane: "lawn", kind: "ground" },
-  { chunk: "motorcycle" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "car", carColor: "grey" },
-  { chunk: "breather", gap: 350 },
-  { chunk: "blocker", kind: "overhead", material: "wood" },
-  { chunk: "motorcycle" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "car", carColor: "red" },
+const ACT_2: ScriptToken[] = [
+  beat("fireHydrant", "awning"),
+  beat("blueCar", "trashCan"),
+  beat("lowBranch"),
+  { type: "breather", gap: 400 },
+  beat("streetBanner", "utilityBox"),
+  beat("trashCan", "motorcycle"),
+  beat("awning", "fireHydrant"),
+  beat("greyCar"),
+  beat("lowBranch", "redCar"),
+  { type: "breather", gap: 350 },
+  beat("utilityBox", "trashCan"),
+  beat("motorcycle", "awning"),
+  beat("fireHydrant", "streetBanner"),
+  beat("blueCar", "lowBranch"),
 ];
 
-const ACT_3: ChunkToken[] = [
-  { chunk: "car", carColor: "red" },
-  { chunk: "blocker", kind: "overhead", material: "wood" },
-  { chunk: "single", lane: "lawn", kind: "ground" },
-  { chunk: "breather", gap: 400 },
-  { chunk: "car", carColor: "blue" },
-  { chunk: "pole" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "motorcycle" },
-  { chunk: "breather", gap: 350 },
-  { chunk: "pole" },
-  { chunk: "car", carColor: "grey" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "motorcycle" },
-  { chunk: "blocker", kind: "overhead", material: "wood" },
+const ACT_3: ScriptToken[] = [
+  beat("redCar", "awning"),
+  beat("lowBranch", "trashCan"),
+  beat("utilityBox"),
+  { type: "breather", gap: 400 },
+  beat("blueCar", "fireHydrant"),
+  beat("streetBanner", "awning"),
+  beat("trashCan", "greyCar"),
+  beat("motorcycle", "lowBranch"),
+  { type: "breather", gap: 350 },
+  beat("utilityBox", "redCar"),
+  beat("awning", "fireHydrant"),
+  beat("streetBanner", "trashCan"),
+  beat("blueCar", "lowBranch"),
+  beat("motorcycle", "utilityBox"),
 ];
 
-const FINAL_STRETCH: ChunkToken[] = [
-  { chunk: "motorcycle" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "breather", gap: 400 },
-  { chunk: "car", carColor: "grey" },
-  { chunk: "single", lane: "lawn", kind: "ground" },
-  { chunk: "pole" },
-  { chunk: "single", lane: "lawn", kind: "overhead" },
-  { chunk: "motorcycle" },
+/** Closing content after the Boss preserves the existing finish-line structure. */
+const FINAL_STRETCH: ScriptToken[] = [
+  beat("motorcycle", "awning"),
+  beat("lowBranch", "redCar"),
+  { type: "breather", gap: 400 },
+  beat("greyCar", "fireHydrant"),
+  beat("trashCan", "streetBanner"),
+  beat("utilityBox", "awning"),
+  beat("blueCar", "lowBranch"),
+  beat("motorcycle", "trashCan"),
 ];
 
-const SCRIPT: ChunkToken[] = [
-  { chunk: "breather", gap: 600 }, // intro buffer before the first Obstacle
+const SCRIPT: ScriptToken[] = [
+  { type: "breather", gap: 600 },
   ...ACT_1,
   ...ACT_2,
   ...ACT_3,
-  { chunk: "breather", gap: 1500 }, // tension-building lull before the Checkpoint/Final Boss
-  { chunk: "checkpoint" },
-  { chunk: "boss" },
+  { type: "breather", gap: 1500 },
+  { type: "checkpoint" },
+  { type: "boss" },
   ...FINAL_STRETCH,
 ];
 
@@ -159,69 +132,37 @@ interface ObstacleTrack {
   length: number;
 }
 
-function buildObstacleTrack(script: ChunkToken[]): ObstacleTrack {
+function buildObstacleTrack(script: readonly ScriptToken[]): ObstacleTrack {
   let cursor = 0;
   const obstacles: ObstacleEvent[] = [];
   let checkpoint: number | undefined;
   let bossMarker: number | undefined;
 
   for (const token of script) {
-    switch (token.chunk) {
-      case "motorcycle":
-        obstacles.push({
-          distance: cursor,
-          shape: "single",
-          lane: "road",
-          kind: "ground",
-          variant: { type: "motorcycle" },
-        });
-        cursor += SPACING.motorcycle;
+    switch (token.type) {
+      case "beat": {
+        const lanes = token.obstacles.map((id) => OBSTACLE_CATALOG[id].lane);
+        if (new Set(lanes).size !== lanes.length) {
+          throw new Error(`Obstacle beat at ${cursor} repeats a Lane`);
+        }
+
+        for (const obstacle of token.obstacles) {
+          obstacles.push({ distance: cursor, obstacle });
+        }
+        cursor += BEAT_SPACING;
         break;
-      case "single":
-        // Lawn-only in the chunk type — trash can (ground) or plain tree (overhead).
-        obstacles.push({
-          distance: cursor,
-          shape: "single",
-          lane: "lawn",
-          kind: token.kind,
-          variant: { type: "plain" },
-        });
-        cursor += SPACING.single;
-        break;
-      case "pole":
-        obstacles.push({ distance: cursor, shape: "pole", lane: "lawn" });
-        cursor += SPACING.pole;
-        break;
-      case "blocker":
-        // Wood tree on the Lawn — Fire-destroyable Overhead Blocker (see CONTEXT.md).
-        obstacles.push({
-          distance: cursor,
-          shape: "single",
-          lane: "lawn",
-          kind: "overhead",
-          variant: { type: "blocker", material: "wood" },
-        });
-        cursor += SPACING.blocker;
-        break;
-      case "car":
-        // Power-up Cars only ever spawn in the Road Lane (see CONTEXT.md Power-up Car).
-        obstacles.push({
-          distance: cursor,
-          shape: "single",
-          lane: "road",
-          kind: "ground",
-          variant: { type: "car", carColor: token.carColor },
-        });
-        cursor += SPACING.car;
-        break;
+      }
       case "breather":
         cursor += token.gap;
         break;
       case "checkpoint":
+        if (checkpoint !== undefined) throw new Error("Level SCRIPT must include exactly one Checkpoint");
         checkpoint = cursor;
         cursor += CHECKPOINT_TO_BOSS_GAP;
         break;
       case "boss":
+        if (checkpoint === undefined) throw new Error("The Checkpoint must appear before the Final Boss");
+        if (bossMarker !== undefined) throw new Error("Level SCRIPT must include exactly one Final Boss");
         bossMarker = cursor;
         cursor += POST_BOSS_GAP;
         break;
@@ -229,39 +170,38 @@ function buildObstacleTrack(script: ChunkToken[]): ObstacleTrack {
   }
 
   if (checkpoint === undefined || bossMarker === undefined) {
-    // Authored-content invariant, not user input — SCRIPT always has exactly
-    // one checkpoint/boss token (ADR-0004), so this can only mean SCRIPT itself was edited wrong.
-    throw new Error("Level SCRIPT must include exactly one checkpoint and one boss token");
+    throw new Error("Level SCRIPT must include exactly one Checkpoint and one Final Boss");
   }
 
   return { obstacles, checkpoint, bossMarker, length: cursor };
 }
 
-const COIN_STEP = 260;
+const COLLECTIBLE_STEP = 260;
 const COLLECTIBLE_START_BUFFER = 700;
 const HEART_EVERY_NTH = 5;
 
-/**
- * A fixed formula over the Level's length, not runtime randomness — same
- * output every call for the same length, which is what ADR-0003's "no
- * procedural generation" is actually ruling out. Every 5th slot is a Heart;
- * the rest are Coins, alternating Lanes.
- */
+/** Fixed placement formula; each slot advances to the next of all three Lanes. */
 function buildCollectibleTrack(length: number): CollectibleEvent[] {
   const collectibles: CollectibleEvent[] = [];
-  let i = 0;
-  for (let distance = COLLECTIBLE_START_BUFFER; distance < length; distance += COIN_STEP, i++) {
-    const lane: Lane = i % 2 === 0 ? "road" : "lawn";
-    const kind: CollectibleKind = (i + 1) % HEART_EVERY_NTH === 0 ? "heart" : "coin";
+  let index = 0;
+
+  for (
+    let distance = COLLECTIBLE_START_BUFFER;
+    distance < length;
+    distance += COLLECTIBLE_STEP, index++
+  ) {
+    const lane = LANES[index % LANES.length];
+    const kind: CollectibleKind = (index + 1) % HEART_EVERY_NTH === 0 ? "heart" : "coin";
     collectibles.push({ distance, lane, kind });
   }
+
   return collectibles;
 }
 
 export function buildLevel(): Level {
   const { obstacles, checkpoint, bossMarker, length } = buildObstacleTrack(SCRIPT);
   const collectibles = buildCollectibleTrack(length);
-  const totalCoins = collectibles.filter((c) => c.kind === "coin").length;
+  const totalCoins = collectibles.filter(({ kind }) => kind === "coin").length;
 
   return { obstacles, collectibles, checkpoint, bossMarker, length, totalCoins };
 }

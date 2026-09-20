@@ -1,6 +1,18 @@
-export type Lane = "road" | "lawn";
+export const LANES = ["sidewalk", "treeLawn", "street"] as const;
 
-/** The only two Lanes toggle each other — see CONTEXT.md Road Lane / Lawn Lane. */
-export function toggleLane(lane: Lane): Lane {
-  return lane === "road" ? "lawn" : "road";
+export type Lane = (typeof LANES)[number];
+export type LaneMove = "towardSidewalk" | "towardStreet";
+
+export const STARTING_LANE: Lane = "treeLawn";
+
+/** Moves one Lane in the requested direction, stopping at the outer Lanes. */
+export function adjacentLane(current: Lane, move: LaneMove): Lane {
+  const currentIndex = LANES.indexOf(current);
+  const offset = move === "towardSidewalk" ? -1 : 1;
+  const nextIndex = Math.max(
+    0,
+    Math.min(LANES.length - 1, currentIndex + offset),
+  );
+
+  return LANES[nextIndex] ?? current;
 }

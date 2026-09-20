@@ -2,13 +2,7 @@ import Phaser from "phaser";
 import type { Lane } from "./Lane";
 import type { CollectibleEvent, CollectibleKind } from "./Level";
 import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
-import {
-  COLLECTIBLE_HEIGHT_ABOVE_LANE,
-  COLLECTIBLE_RADIUS,
-  DEPTH_LAWN,
-  DEPTH_ROAD,
-  LAWN_PERSPECTIVE_SCALE,
-} from "./VisualScale";
+import { COLLECTIBLE_HEIGHT_ABOVE_LANE, COLLECTIBLE_RADIUS } from "./VisualScale";
 
 interface SpawnedCollectible {
   gameObject: Phaser.GameObjects.Arc;
@@ -29,7 +23,7 @@ export interface CollectibleFieldOptions extends ScrollingFieldOptions {
  * events (see Level.ts) — the collectible sibling to ObstacleField, sharing
  * the spawn-timing/scroll/cleanup lifecycle via ScrollingField. Collection
  * only depends on being in the matching Lane (unlike Obstacles, pose is
- * irrelevant here); missing a pickup by being in the other Lane has no
+ * irrelevant here); missing a pickup by being in a different Lane has no
  * penalty, it just scrolls past.
  *
  * A Coin already collected this Attempt is never re-awarded if a Checkpoint
@@ -46,16 +40,14 @@ export class CollectibleField extends ScrollingField<CollectibleEvent, SpawnedCo
   }
 
   protected spawnEvent(event: CollectibleEvent): void {
-    const groundY = this.options.laneGroundY(event.lane);
+    const presentation = this.options.lanePresentation(event.lane);
+    const groundY = presentation.groundY;
     const x = this.spawnX();
     const y = groundY - COLLECTIBLE_HEIGHT_ABOVE_LANE;
     const color = event.kind === "heart" ? 0xff4d6d : 0xffd700;
 
     const gameObject = this.scene.add.circle(x, y, COLLECTIBLE_RADIUS, color);
-    gameObject.setDepth(event.lane === "lawn" ? DEPTH_LAWN : DEPTH_ROAD);
-    if (event.lane === "lawn") {
-      gameObject.setScale(LAWN_PERSPECTIVE_SCALE);
-    }
+    gameObject.setDepth(presentation.depth).setScale(presentation.scale);
     this.items.push({ gameObject, lane: event.lane, kind: event.kind, resolved: false, distance: event.distance });
   }
 

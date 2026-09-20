@@ -1,12 +1,13 @@
 import Phaser from "phaser";
 import type { Lane } from "./Lane";
+import type { LanePresentation } from "./LaneLayout";
 
 const SPAWN_MARGIN = 40;
 const DESPAWN_MARGIN = 60;
 const RESOLVE_TOLERANCE = 14;
 
 export interface ScrollingFieldOptions {
-  laneGroundY: (lane: Lane) => number;
+  lanePresentation: (lane: Lane) => LanePresentation;
   characterX: number;
   scrollSpeed: number;
 }
@@ -22,7 +23,7 @@ export interface DistanceEvent {
 
 /**
  * Shared spawn/scroll/resolve/cleanup lifecycle for lane-scrolling entities,
- * driven by an authored, distance-indexed event queue (the Level — see
+ * driven by authored, distance-indexed events (the Level — see
  * Level.ts) rather than a random spawn timer. ADR-0003 committed the real
  * Level to deliberate, hand-authored placement, replacing the random-timer
  * placeholder test-track scaffolding this class previously drove (issue #6).
@@ -59,7 +60,7 @@ export abstract class ScrollingField<
 
   /**
    * Rewinds to a Checkpoint respawn: destroys everything currently on
-   * screen and rebuilds the pending queue from the authored events at or
+   * screen and rebuilds the pending events from the authored events at or
    * after that distance, so the stretch since the Checkpoint replays.
    * Subclasses exclude already-resolved events with a persistent one-time
    * effect (e.g. a Coin already collected) via shouldReplay.
@@ -77,9 +78,20 @@ export abstract class ScrollingField<
     const baseDx = (this.options.scrollSpeed * delta) / 1000;
     this.traveled += baseDx;
 
-    while (this.pending.length > 0 && this.pending[0].distance <= this.traveled + this.spawnLeadFor(this.pending[0])) {
-      this.spawnEvent(this.pending.shift()!);
+    // Evaluate every pending event independently. Events on the same authored
+    // beat can have different approach speeds (for example, a stationary
+    // Awning beside an oncoming Motorcycle), so distance order is not always
+    // spawn order. Letting the first event gate the rest would desynchronize
+    // those simultaneous obstacles at the player.
+    const waiting: TEvent[] = [];
+    for (const event of this.pending) {
+      if (event.distance <= this.traveled + this.spawnLeadFor(event)) {
+        this.spawnEvent(event);
+      } else {
+        waiting.push(event);
+      }
     }
+    this.pending = waiting;
 
     const { characterX } = this.options;
     for (let i = this.items.length - 1; i >= 0; i--) {

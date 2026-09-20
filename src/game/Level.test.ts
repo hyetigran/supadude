@@ -1,132 +1,105 @@
 import { describe, expect, it } from "vitest";
+import { LANES } from "./Lane";
 import { buildLevel } from "./Level";
+import { OBSTACLE_CATALOG, OBSTACLE_IDS } from "./ObstacleCatalog";
 
 describe("buildLevel", () => {
   it("is deterministic — no procedural/random generation (ADR-0003)", () => {
     expect(buildLevel()).toEqual(buildLevel());
   });
 
-  it("has a defined start and a finite end", () => {
+  it("has a finite 100–260 second authored length at the game scroll speed", () => {
     const level = buildLevel();
-    expect(level.length).toBeGreaterThan(0);
-    expect(Number.isFinite(level.length)).toBe(true);
-  });
+    const seconds = level.length / 220;
 
-  it("is roughly a long Geometry Dash level in length (~2-4 minutes at 220px/s)", () => {
-    const level = buildLevel();
-    const SCROLL_SPEED = 220;
-    const seconds = level.length / SCROLL_SPEED;
+    expect(Number.isFinite(level.length)).toBe(true);
     expect(seconds).toBeGreaterThanOrEqual(100);
     expect(seconds).toBeLessThanOrEqual(260);
   });
 
-  it("places the Checkpoint immediately before the Final Boss marker (ADR-0004)", () => {
+  it("places one Checkpoint immediately before the Final Boss and keeps both within bounds", () => {
     const level = buildLevel();
+
+    expect(level.checkpoint).toBeGreaterThan(0);
     expect(level.bossMarker).toBeGreaterThan(level.checkpoint);
     expect(level.bossMarker - level.checkpoint).toBeLessThan(300);
+    expect(level.bossMarker).toBeLessThan(level.length);
   });
 
-  it("keeps the Checkpoint and Final Boss marker within the Level bounds", () => {
+  it("keeps a closing obstacle stretch after the Final Boss", () => {
     const level = buildLevel();
-    for (const d of [level.checkpoint, level.bossMarker]) {
-      expect(d).toBeGreaterThan(0);
-      expect(d).toBeLessThan(level.length);
-    }
+
+    expect(level.obstacles.some((obstacle) => obstacle.distance < level.checkpoint)).toBe(true);
+    expect(level.obstacles.some((obstacle) => obstacle.distance > level.bossMarker)).toBe(true);
   });
 
-  it("sorts Obstacle events ascending by distance, within bounds", () => {
+  it("sorts Obstacle events nondecreasing by distance and keeps them within bounds", () => {
     const level = buildLevel();
+
     expect(level.obstacles.length).toBeGreaterThan(0);
     for (let i = 1; i < level.obstacles.length; i++) {
-      expect(level.obstacles[i].distance).toBeGreaterThan(level.obstacles[i - 1].distance);
+      expect(level.obstacles[i].distance).toBeGreaterThanOrEqual(level.obstacles[i - 1].distance);
     }
-    for (const o of level.obstacles) {
-      expect(o.distance).toBeGreaterThanOrEqual(0);
-      expect(o.distance).toBeLessThan(level.length);
-    }
-  });
-
-  it("only ever spawns Power-up Cars in the Road Lane", () => {
-    const level = buildLevel();
-    const cars = level.obstacles.filter((o) => o.shape === "single" && o.variant.type === "car");
-    expect(cars.length).toBeGreaterThan(0);
-    for (const car of cars) {
-      expect(car.shape === "single" && car.lane).toBe("road");
+    for (const obstacle of level.obstacles) {
+      expect(obstacle.distance).toBeGreaterThanOrEqual(0);
+      expect(obstacle.distance).toBeLessThan(level.length);
     }
   });
 
-  it("sorts Collectible events ascending by distance, within bounds", () => {
+  it("authors one or two Obstacles per beat without repeating a Lane", () => {
     const level = buildLevel();
+    const beats = new Map<number, typeof level.obstacles>();
+
+    for (const obstacle of level.obstacles) {
+      const beat = beats.get(obstacle.distance) ?? [];
+      beat.push(obstacle);
+      beats.set(obstacle.distance, beat);
+    }
+
+    for (const beat of beats.values()) {
+      expect(beat.length).toBeGreaterThanOrEqual(1);
+      expect(beat.length).toBeLessThanOrEqual(2);
+
+      const lanes = beat.map(({ obstacle }) => OBSTACLE_CATALOG[obstacle].lane);
+      expect(new Set(lanes).size).toBe(lanes.length);
+    }
+  });
+
+  it("represents all three Lanes and every catalogued Obstacle", () => {
+    const level = buildLevel();
+    const obstacleIds = new Set(level.obstacles.map(({ obstacle }) => obstacle));
+    const lanes = new Set(level.obstacles.map(({ obstacle }) => OBSTACLE_CATALOG[obstacle].lane));
+
+    expect([...obstacleIds].sort()).toEqual([...OBSTACLE_IDS].sort());
+    expect(lanes).toEqual(new Set(LANES));
+  });
+
+  it("sorts Collectible events ascending by distance and keeps them within bounds", () => {
+    const level = buildLevel();
+
     expect(level.collectibles.length).toBeGreaterThan(0);
     for (let i = 1; i < level.collectibles.length; i++) {
       expect(level.collectibles[i].distance).toBeGreaterThan(level.collectibles[i - 1].distance);
     }
-    for (const c of level.collectibles) {
-      expect(c.distance).toBeGreaterThanOrEqual(0);
-      expect(c.distance).toBeLessThan(level.length);
+    for (const collectible of level.collectibles) {
+      expect(collectible.distance).toBeGreaterThanOrEqual(0);
+      expect(collectible.distance).toBeLessThan(level.length);
     }
   });
 
-  it("totalCoins matches the count of Coin (not Heart) collectibles", () => {
+  it("cycles Collectibles through Sidewalk, Tree Lawn, and Street", () => {
     const level = buildLevel();
-    const coinCount = level.collectibles.filter((c) => c.kind === "coin").length;
+    const firstTwoCycles = level.collectibles.slice(0, LANES.length * 2).map(({ lane }) => lane);
+
+    expect(firstTwoCycles).toEqual([...LANES, ...LANES]);
+  });
+
+  it("counts Coins separately from Hearts", () => {
+    const level = buildLevel();
+    const coinCount = level.collectibles.filter(({ kind }) => kind === "coin").length;
+
     expect(level.totalCoins).toBe(coinCount);
     expect(level.totalCoins).toBeGreaterThan(0);
-  });
-
-  it("includes at least one Heart collectible", () => {
-    const level = buildLevel();
-    expect(level.collectibles.some((c) => c.kind === "heart")).toBe(true);
-  });
-
-  it("restricts the Road Lane to Motorcycles and Power-up Cars — jump vehicles only", () => {
-    const level = buildLevel();
-    const roadObstacles = level.obstacles.filter((o) => o.lane === "road");
-    expect(roadObstacles.length).toBeGreaterThan(0);
-
-    for (const obstacle of roadObstacles) {
-      expect(obstacle.shape).toBe("single");
-      if (obstacle.shape !== "single") continue;
-      expect(obstacle.kind).toBe("ground");
-      expect(["motorcycle", "car"]).toContain(obstacle.variant.type);
-    }
-  });
-
-  it("restricts the Lawn Lane to trash can, tree (plain or Wood Blocker), and Light Pole", () => {
-    const level = buildLevel();
-    const lawnObstacles = level.obstacles.filter((o) => o.lane === "lawn");
-    expect(lawnObstacles.length).toBeGreaterThan(0);
-
-    for (const obstacle of lawnObstacles) {
-      if (obstacle.shape === "pole") continue; // Light Pole — allowed, Lawn-only
-      expect(obstacle.shape).toBe("single");
-      if (obstacle.shape !== "single") continue;
-      expect(obstacle.variant.type).not.toBe("car");
-      expect(obstacle.variant.type).not.toBe("motorcycle");
-      if (obstacle.variant.type === "blocker") {
-        expect(obstacle.variant.material).toBe("wood");
-        expect(obstacle.kind).toBe("overhead");
-      } else {
-        expect(obstacle.variant.type).toBe("plain");
-        expect(["ground", "overhead"]).toContain(obstacle.kind);
-      }
-    }
-  });
-
-  it("places Light Poles only on the Lawn Lane", () => {
-    const level = buildLevel();
-    const poles = level.obstacles.filter((o) => o.shape === "pole");
-    expect(poles.length).toBeGreaterThan(0);
-    expect(poles.every((p) => p.lane === "lawn")).toBe(true);
-  });
-
-  it("includes Motorcycles and at least one Wood tree Blocker on the Lawn", () => {
-    const level = buildLevel();
-    expect(level.obstacles.some((o) => o.shape === "single" && o.variant.type === "motorcycle")).toBe(true);
-    expect(
-      level.obstacles.some(
-        (o) => o.shape === "single" && o.lane === "lawn" && o.variant.type === "blocker" && o.variant.material === "wood",
-      ),
-    ).toBe(true);
+    expect(level.collectibles.some(({ kind }) => kind === "heart")).toBe(true);
   });
 });

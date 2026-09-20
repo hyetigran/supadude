@@ -13,24 +13,25 @@ Terminology in this document follows `CONTEXT.md`, which is the source of truth 
 ### 2.1 Auto-run & lanes
 
 - Supa Dude runs automatically at all times outside of Boss Fights — the player never controls forward movement.
-- Two parallel lanes: **Road Lane** and **Lawn Lane**. The player switches lanes with a dedicated input (Left/Right on desktop, swipe Left/Right on mobile).
-- Independently of lane choice, the player can **Jump** (Up/Space, swipe up) and **Duck** (Down, swipe down) to clear obstacles within the current lane — but each Lane's obstacle vocabulary differs, so not every action is useful in both Lanes (see §2.2).
-- Both lanes carry a comparable density of obstacles — switching lanes is a tactical choice about which hazard pattern to face, not a safe detour.
+- Three parallel lanes, ordered **Sidewalk Lane ↔ Tree Lawn Lane ↔ Street Lane**. Each Attempt starts in the Tree Lawn Lane.
+- A **Lane Shift** moves Supa Dude one adjacent Lane toward the Sidewalk (Left / swipe left) or Street (Right / swipe right). A shift stops at the outer Lanes; it never skips the Tree Lawn Lane or wraps between the Sidewalk and Street.
+- Independently of Lane choice, the player can **Jump** (Up/Space, swipe up) and **Duck** (Down, swipe down) to clear Obstacles within the current Lane — but each Lane has its own obstacle vocabulary (see §2.2).
+- All three Lanes carry a comparable density of Obstacles — a Lane Shift is a tactical choice about which hazard pattern to face, not a safe detour.
 
 ### 2.2 Obstacles
 
-Three clearance shapes:
+Every normal Obstacle has one of two clearance shapes:
 
 - **Ground Obstacle** — jump over it.
-- **Overhead Obstacle** — duck under it (Lawn Lane only).
-- **Light Pole** — spans both the Ground and Overhead clearance zones, so neither Jump nor Duck clears it; only switching lanes avoids it, unless destroyed with Water Power (always Electric material). Lawn Lane only.
+- **Overhead Obstacle** — duck under it.
 
-Lane vocabularies (suburban neighborhood — props stay where they belong):
+Each Obstacle type belongs to exactly one Lane:
 
-- **Road Lane** — vehicles only, all Ground Obstacles (jump): **Motorcycle** (plain) and **Power-up Cars** (red / blue / grey). No Overhead Obstacles, Light Poles, trash cans, or trees on the Road.
-- **Lawn Lane** — **trash can** (jump), **tree / low branch** (duck), and **Light Pole** (switch lanes, or Water Power).
+- **Sidewalk Lane** — **Trash Can** (Ground) and **Awning** (Overhead).
+- **Tree Lawn Lane** — **Fire Hydrant** (Ground), **Low Branch** (Overhead / Wood Blocker), and **Utility Box** (Ground / Electric Blocker).
+- **Street Lane** — **Motorcycle** and **Power-up Cars** (Ground), and **Street Banner** (Overhead).
 
-A subset of Lawn Obstacles are **Blocker Obstacles** — the tree is Wood, and the Light Pole is always Electric. These are still dodgeable normally (duck / switch), but can alternatively be destroyed by the matching Power as a bonus/shortcut.
+The Tree Lawn Lane's two **Blocker Obstacles** are still cleared normally: Duck under a Low Branch and Jump over a Utility Box. As an optional alternate clear, Fire Power destroys the Wood Low Branch and Water Power destroys the Electric Utility Box.
 
 ### 2.3 Lives & failure
 
@@ -41,9 +42,9 @@ A subset of Lawn Obstacles are **Blocker Obstacles** — the tree is Wood, and t
 
 ### 2.4 Power-up Cars
 
-- Cars appear in the Road Lane in three colors. Jumping on top of one auto-collects its power (same jump clear as a Motorcycle):
-  - **Red → Fire Power** — destroys Wood Blocker Obstacles (trees on the Lawn).
-  - **Blue → Water Power** — destroys Light Poles (Electric).
+- Cars appear in the Street Lane in three colors. Jumping on top of one auto-collects its Power (the same Jump clear as a Motorcycle):
+  - **Red → Fire Power** — destroys Wood Low Branches.
+  - **Blue → Water Power** — destroys Electric Utility Boxes.
   - **Grey → no power** — behaves as a plain Ground Obstacle, same as a Motorcycle.
 - A collected Power is held for a fixed duration (e.g. ~5s, to be tuned) and triggered with a dedicated activation input (F on desktop, an on-screen button on mobile).
 - Only one Power can be held at a time; collecting a new one replaces the old.
@@ -86,7 +87,7 @@ A subset of Lawn Obstacles are **Blocker Obstacles** — the tree is Wood, and t
 |---|---|---|
 | Jump | Up / Space | Swipe up |
 | Duck | Down | Swipe down |
-| Switch lane | Left / Right | Swipe left / right |
+| Lane Shift | Left toward Sidewalk / Right toward Street | Swipe left / right |
 | Activate Power | F | On-screen button |
 | Punch (Boss Fight only) | E | On-screen button |
 
@@ -94,7 +95,7 @@ A subset of Lawn Obstacles are **Blocker Obstacles** — the tree is Wood, and t
 
 - **Character:** Supa Dude is a classic stick figure (circle head, line limbs) with a small cape and chest emblem/mask, nodding at the "Supa" name.
 - **Environment:** single seamless looping neighborhood background (houses, sidewalk, trees) — no zone transitions.
-- **Asset pipeline:** hand-drawn/vector sprite sheets (Aseprite, Figma, or Illustrator), exported as PNG sprite sheets + JSON atlas. Needed poses: run, jump, duck, lane-switch, hit, punch, idle/game-over, plus the Final Boss (poses TBD once designed).
+- **Asset pipeline:** hand-drawn/vector sprite sheets (Aseprite, Figma, or Illustrator), exported as PNG sprite sheets + JSON atlas. Needed poses: run, jump, duck, Lane Shift, hit, punch, idle/game-over, plus the Final Boss (poses TBD once designed).
 - **Audio:** basic SFX (jump, duck, coin pickup, heart pickup, hit, punch, boss defeat, game over) plus one looping background music track. Royalty-free/CC or custom.
 
 ## 6. Technical

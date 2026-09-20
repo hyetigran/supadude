@@ -1,6 +1,6 @@
 /**
- * Shared placeholder proportions so Jump/Duck/lanes and Ground/Overhead/
- * Light Pole clearance read against one height contract (see CONTEXT.md).
+ * Shared placeholder proportions so Jump/Duck and Ground/Overhead clearance
+ * read against one height contract (see CONTEXT.md).
  * Art integration should replace these with atlas metrics, not re-tune
  * each field independently.
  */
@@ -28,6 +28,10 @@ export const MOTORCYCLE_WIDTH = 30;
 export const MOTORCYCLE_HEIGHT = 24;
 export const CAR_WIDTH = 36;
 export const CAR_HEIGHT = 26;
+export const FIRE_HYDRANT_WIDTH = 20;
+export const FIRE_HYDRANT_HEIGHT = 30;
+export const UTILITY_BOX_WIDTH = 26;
+export const UTILITY_BOX_HEIGHT = 32;
 
 /**
  * Trunk/canopy clearance line. Must satisfy duckHeight < OVERHEAD_GAP < standHeight
@@ -37,11 +41,8 @@ export const OVERHEAD_GAP = 48;
 export const TRUNK_WIDTH = 8;
 export const TRUNK_COLOR = 0x6b4226;
 export const CANOPY_RADIUS = 18;
-
-/** Light Pole spans Ground-to-Overhead with modest overshoot past the canopy. */
-export const POLE_WIDTH = 8;
-export const POLE_HEIGHT = OVERHEAD_GAP + CANOPY_RADIUS * 2 + 16;
-export const POLE_LAMP_RADIUS = 9;
+export const OVERHEAD_BAR_WIDTH = 54;
+export const OVERHEAD_BAR_HEIGHT = 12;
 
 /** Jump apex ≈ tallest ground obstacle + small clearance (not a floaty leap). */
 export const JUMP_CLEARANCE = 16;
@@ -49,22 +50,20 @@ export const JUMP_HEIGHT = GROUND_OBSTACLE_HEIGHT + JUMP_CLEARANCE;
 
 /**
  * Vertical neighborhood composition (top → bottom):
- * sky → lawn grass → sidewalk → road (with yellow dashes near the bottom).
+ * sky → Sidewalk Lane → Tree Lawn Lane → Street Lane.
  * Ground baselines sit *inside* each lane band so Supa Dude stands in the
  * surface, not balanced on its top edge.
  */
-/** Y where lawn grass begins, as a fraction of canvas height. */
-export const LAWN_TOP_RATIO = 0.4;
-/** Grass strip above the sidewalk. */
-export const LAWN_GRASS_HEIGHT = 72;
-/** Concrete sidewalk between lawn and road. */
-export const SIDEWALK_HEIGHT = 22;
-/** How far below the curb the Road baseline sits (feet in the asphalt). */
-export const ROAD_GROUND_INSET = 95;
-/** How far above the sidewalk bottom the Lawn baseline sits (feet on the walk). */
-export const LAWN_GROUND_INSET_FROM_SIDEWALK_BOTTOM = 4;
+/** Y where the playable neighborhood begins, as a fraction of canvas height. */
+export const NEIGHBORHOOD_TOP_RATIO = 0.38;
+export const SIDEWALK_LANE_HEIGHT = 70;
+export const TREE_LAWN_LANE_HEIGHT = 70;
+export const SIDEWALK_GROUND_INSET = 6;
+export const TREE_LAWN_GROUND_INSET = 6;
+/** How far below the curb the Street baseline sits (feet in the asphalt). */
+export const STREET_GROUND_INSET = 92;
 
-/** Final Boss placeholder ≈ 1.6× player; pinned to the Road baseline in GameScene. */
+/** Final Boss placeholder ≈ 1.6× player; pinned to the Street baseline in GameScene. */
 export const BOSS_WIDTH = 50;
 export const BOSS_HEIGHT = Math.round(PLAYER_STAND_HEIGHT * 1.6);
 
@@ -74,14 +73,17 @@ export const MARKER_HEIGHT = 100;
 export const COLLECTIBLE_RADIUS = 9;
 export const COLLECTIBLE_HEIGHT_ABOVE_LANE = 36;
 
-/** Draw order: farther Lawn under nearer Road under player under HUD. */
+/** Draw order: farther Sidewalk under Tree Lawn under nearer Street. */
 export const DEPTH_BACKGROUND = 0;
-/** Parallax sky decor (clouds, distant skyline) — above the base sky rect, below Lawn props. */
+/** Parallax sky decor — above the base sky rect, below Lane props. */
 export const DEPTH_SKY_DECOR = 0.5;
-export const DEPTH_LAWN = 1;
-export const DEPTH_ROAD = 2;
-export const DEPTH_PLAYER = 3;
+export const DEPTH_SIDEWALK = 1;
+export const DEPTH_TREE_LAWN = 2;
+export const DEPTH_STREET = 3;
+export const DEPTH_PLAYER = 4;
 export const DEPTH_HUD = 10;
 
-/** Slight scale-down on Lawn props so Road reads nearer. */
-export const LAWN_PERSPECTIVE_SCALE = 0.92;
+/** Perspective scales for the three Lane bands, farthest to nearest. */
+export const SIDEWALK_PERSPECTIVE_SCALE = 0.84;
+export const TREE_LAWN_PERSPECTIVE_SCALE = 0.92;
+export const STREET_PERSPECTIVE_SCALE = 1;
