@@ -1,14 +1,11 @@
 import type { Action } from "./InputManager";
 
-/** Desktop key-to-Action bindings, per PRD.md §4 (Controls). */
+/** Jump, optional powered shooting, and pause controls. */
 const KEY_BINDINGS: Record<string, Action> = {
   Space: "jump",
   ArrowUp: "jump",
-  ArrowDown: "duck",
-  ArrowLeft: "laneLeft",
-  ArrowRight: "laneRight",
-  KeyF: "powerActivate",
-  KeyE: "punch",
+  KeyF: "shoot",
+  KeyX: "shoot",
   Escape: "pause",
   KeyP: "pause",
 };

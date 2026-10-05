@@ -5,18 +5,15 @@ describe("mapKeyToAction", () => {
   it.each([
     ["Space", "jump"],
     ["ArrowUp", "jump"],
-    ["ArrowDown", "duck"],
-    ["ArrowLeft", "laneLeft"],
-    ["ArrowRight", "laneRight"],
-    ["KeyF", "powerActivate"],
-    ["KeyE", "punch"],
+    ["KeyF", "shoot"],
+    ["KeyX", "shoot"],
     ["Escape", "pause"],
     ["KeyP", "pause"],
   ] as const)("maps %s to %s", (key, action) => {
     expect(mapKeyToAction(key)).toBe(action);
   });
 
-  it("returns undefined for an unbound key", () => {
-    expect(mapKeyToAction("KeyZ")).toBeUndefined();
+  it.each(["ArrowDown", "ArrowLeft", "ArrowRight", "KeyE"])("leaves removed control %s unbound", (key) => {
+    expect(mapKeyToAction(key)).toBeUndefined();
   });
 });

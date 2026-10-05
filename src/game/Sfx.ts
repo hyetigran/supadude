@@ -1,19 +1,12 @@
 const MASTER_GAIN = 0.16;
 
 export type SfxName =
+  | "flight"
+  | "orb"
   | "jump"
-  | "duck"
   | "land"
-  | "laneSwitch"
   | "coin"
-  | "heart"
-  | "powerCollect"
-  | "powerActivate"
-  | "blockerDestroyed"
   | "hit"
-  | "punch"
-  | "bossHit"
-  | "bossDefeated"
   | "levelComplete"
   | "pause";
 
@@ -29,33 +22,15 @@ interface Tone {
 }
 
 const SEQUENCES: Record<SfxName, Tone[]> = {
+  flight: [{ freq: 240, slideTo: 1100, duration: 360, type: "sine" }],
+  orb: [{ freq: 600, slideTo: 1400, duration: 160, type: "triangle" }],
   jump: [{ freq: 320, slideTo: 640, duration: 90, type: "square" }],
-  duck: [{ freq: 340, slideTo: 170, duration: 90, type: "square" }],
   land: [{ freq: 110, duration: 55, type: "triangle", gain: 0.7 }],
-  laneSwitch: [{ freq: 500, duration: 45, type: "square", gain: 0.5 }],
   coin: [
     { freq: 880, duration: 60, type: "square" },
     { freq: 1320, delay: 55, duration: 90, type: "square" },
   ],
-  heart: [{ freq: 523, slideTo: 784, duration: 160, type: "sine" }],
-  powerCollect: [{ freq: 400, slideTo: 900, duration: 180, type: "sawtooth", gain: 0.5 }],
-  powerActivate: [
-    { freq: 660, duration: 70, type: "square" },
-    { freq: 660, delay: 90, duration: 70, type: "square" },
-  ],
-  blockerDestroyed: [
-    { freq: 200, duration: 70, type: "sawtooth" },
-    { freq: 700, delay: 30, duration: 120, type: "square", gain: 0.5 },
-  ],
   hit: [{ freq: 220, slideTo: 60, duration: 160, type: "sawtooth", gain: 0.8 }],
-  punch: [{ freq: 180, duration: 70, type: "square", gain: 0.7 }],
-  bossHit: [{ freq: 300, slideTo: 90, duration: 130, type: "sawtooth", gain: 0.8 }],
-  bossDefeated: [
-    { freq: 523, duration: 100, type: "square" },
-    { freq: 659, delay: 100, duration: 100, type: "square" },
-    { freq: 784, delay: 200, duration: 100, type: "square" },
-    { freq: 1046, delay: 300, duration: 260, type: "square" },
-  ],
   levelComplete: [
     { freq: 523, duration: 90, type: "square" },
     { freq: 659, delay: 90, duration: 90, type: "square" },

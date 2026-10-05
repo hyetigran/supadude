@@ -1,309 +1,150 @@
 import Phaser from "phaser";
-import type { Lane } from "./Lane";
-import { OBSTACLE_CATALOG, type ObstacleDefinition } from "./ObstacleCatalog";
-import { shouldDestroyBlocker, shouldTakeDamage, type Material } from "./ObstacleRules";
-import type { ObstacleEvent } from "./Level";
-import type { PowerColor, VerticalState } from "./PlayerState";
-import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
-import {
-  CANOPY_RADIUS,
-  CAR_HEIGHT,
-  CAR_WIDTH,
-  FIRE_HYDRANT_HEIGHT,
-  FIRE_HYDRANT_WIDTH,
-  MOTORCYCLE_HEIGHT,
-  MOTORCYCLE_WIDTH,
-  OVERHEAD_BAR_HEIGHT,
-  OVERHEAD_BAR_WIDTH,
-  OVERHEAD_GAP,
-  TRASH_CAN_HEIGHT,
-  TRASH_CAN_WIDTH,
-  TRUNK_COLOR,
-  UTILITY_BOX_HEIGHT,
-  UTILITY_BOX_WIDTH,
-} from "./VisualScale";
+import { solidWorldX, solidBottom, type HazardEvent, type Level, type SolidEvent } from "./Level";
+import type { RunnerFrame } from "./Runner";
+import { DEPTH_TRACK } from "./VisualScale";
 
-const TRASH_CAN_COLOR = 0x4a4a4a;
-const AWNING_COLOR = 0xf59e0b;
-const AWNING_STRIPE_COLOR = 0xfff7ed;
-const FIRE_HYDRANT_COLOR = 0xdc2626;
-const LEAF_COLOR = 0x3f7d3f;
-const ELECTRIC_COLOR = 0x00c2d1;
-const MOTORCYCLE_COLOR = 0x1f2937;
-const GREY_CAR_COLOR = 0x9ca3af;
-const FIRE_CAR_COLOR = 0xd62828;
-const WATER_CAR_COLOR = 0x1d4ed8;
-const STREET_BANNER_COLOR = 0x7c3aed;
-
-/** Oncoming Street traffic approaches faster than stationary neighborhood fixtures. */
-const VEHICLE_SCROLL_MULTIPLIER = 1.55;
-const WHEEL_RADIUS = 5;
-const WHEEL_COLOR = 0x111827;
-
-interface SpawnedObstacle {
-  gameObject: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container;
-  lane: Lane;
-  resolved: boolean;
-  definition: ObstacleDefinition;
-  scrollMultiplier: number;
-  wheelHubs?: Phaser.GameObjects.Rectangle[];
+interface TrackObject {
+  x: number;
+  object: Phaser.GameObjects.Container;
+  solid?: SolidEvent;
+  powerId?: string;
+  hazardId?: string;
+  powerLabel?: Phaser.GameObjects.Text;
+  wheels?: Phaser.GameObjects.Graphics[];
 }
 
-interface RenderedObstacle {
-  gameObject: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Container;
-  wheelHubs?: Phaser.GameObjects.Rectangle[];
-}
+/** The same world positions drive traffic collision and its approaching artwork. */
+export class ObstacleField {
+  private readonly objects: TrackObject[] = [];
 
-export interface PlayerPose {
-  lane: Lane;
-  verticalState: VerticalState;
-}
-
-export interface ObstacleFieldOptions extends ScrollingFieldOptions {
-  getPlayerPose: () => PlayerPose;
-  getActivePower: () => PowerColor | null;
-  onMissed: () => void;
-  onPowerCollected: (color: PowerColor) => void;
-  onBlockerDestroyed: () => void;
-}
-
-/**
- * Owns obstacle geometry and collision resolution for the authored Level.
- * Lane, dodge kind, appearance, motion, material, and Power are all read from
- * ObstacleCatalog so Level events cannot assemble invalid combinations.
- */
-export class ObstacleField extends ScrollingField<ObstacleEvent, SpawnedObstacle, ObstacleFieldOptions> {
-  protected scrollMultiplierForEvent(event: ObstacleEvent): number {
-    return this.scrollMultiplierForDefinition(OBSTACLE_CATALOG[event.obstacle]);
-  }
-
-  protected scrollMultiplierForItem(item: SpawnedObstacle): number {
-    return item.scrollMultiplier;
-  }
-
-  update(delta: number): void {
-    super.update(delta);
-    this.spinVehicleWheels(delta);
-  }
-
-  protected spawnEvent(event: ObstacleEvent): void {
-    this.spawnObstacle(OBSTACLE_CATALOG[event.obstacle]);
-  }
-
-  protected resolve(obstacle: SpawnedObstacle): boolean {
-    const pose = this.options.getPlayerPose();
-    const { lane, kind, material, power } = obstacle.definition;
-    const sameLane = lane === pose.lane;
-
-    if (material && this.tryDestroyBlocker(lane, pose.lane, material)) {
-      return true;
+  constructor(
+    private readonly scene: Phaser.Scene,
+    private readonly groundY: number,
+    private readonly characterX: number,
+    level: Level,
+  ) {
+    for (const solid of level.solids) this.createCar(solid);
+    for (const hazard of level.hazards) this.createHazard(hazard);
+    for (const power of level.powers ?? []) {
+      const g = scene.add.graphics();
+      const isPad = power.kind === "flightPad";
+      if (isPad) {
+        g.lineStyle(4, 0x64748b);
+        g.lineBetween(-23, -8, -23, 0);
+        g.lineBetween(23, -8, 23, 0);
+        g.fillStyle(0x1e293b);
+        g.fillRoundedRect(-30, -17, 60, 9, 4);
+        g.lineStyle(3, 0x22d3ee);
+        g.strokeEllipse(0, -12, 58, 8);
+        g.fillStyle(0xa5f3fc);
+        g.fillTriangle(-7, -27, 0, -36, 7, -27);
+      } else {
+        g.fillStyle(0xfbbf24, 0.16);
+        g.fillCircle(0, 0, 23);
+        g.lineStyle(2, 0xfffbeb);
+        g.strokeCircle(0, 0, 15);
+        g.fillStyle(0xf59e0b);
+        g.fillCircle(0, 0, 11);
+        g.fillStyle(0xfffbeb);
+        g.fillTriangle(-6, 2, 0, -6, 6, 2);
+      }
+      const label = scene.add.text(0, isPad ? -54 : -40, isPad ? "FLY · 4s" : "DOUBLE JUMP", {
+        fontFamily: "Arial, sans-serif", fontSize: "10px", fontStyle: "bold", color: isPad ? "#075985" : "#92400e",
+        backgroundColor: "#fffbeb", padding: { x: 5, y: 3 },
+      }).setOrigin(0.5);
+      this.objects.push({ x: power.x, powerId: power.id, object: scene.add.container(0, isPad ? groundY : groundY - power.altitude, [g, label]).setDepth(DEPTH_TRACK + 1) });
     }
+    const finish = scene.add.graphics();
+    finish.fillStyle(0x334155);
+    finish.fillRect(-3, -140, 6, 140);
+    finish.fillStyle(0xfef3c7);
+    finish.fillRect(3, -140, 74, 34);
+    for (let x = 0; x < 8; x++) for (let y = 0; y < 3; y++) {
+      if ((x + y) % 2 === 0) { finish.fillStyle(0x334155); finish.fillRect(3 + x * 9, -140 + y * 11, 9, 11); }
+    }
+    this.objects.push({ x: level.length, object: scene.add.container(0, groundY, [finish]).setDepth(DEPTH_TRACK) });
+  }
 
-    const hit = shouldTakeDamage({
-      obstacleLane: lane,
-      obstacleKind: kind,
-      playerLane: pose.lane,
-      playerState: pose.verticalState,
+  render(frame: RunnerFrame): void {
+    for (const item of this.objects) {
+      const worldX = item.solid ? solidWorldX(item.solid, frame.distance) : item.x;
+      const screenX = this.characterX + worldX - frame.distance;
+      item.object.setPosition(screenX, item.object.y).setVisible(screenX > -180 && screenX < this.scene.scale.width + 180 && !frame.clearedHazardIds.includes(item.hazardId ?? ""));
+      item.object.setAlpha(item.powerId && frame.usedPowerIds.includes(item.powerId) ? 0.3 : 1);
+      item.powerLabel?.setAlpha(frame.usedCarIds.includes(item.solid?.id ?? "") ? 0.3 : 1);
+      for (const wheel of item.wheels ?? []) wheel.rotation = -frame.distance / 12;
+    }
+  }
+
+  private createCar(solid: SolidEvent): void {
+    const { width: w, height: h } = solid;
+    const g = this.scene.add.graphics();
+    const colors = [0xe9b44c, 0x8b6bb1];
+    const color = solid.power === "fire" ? 0xef4444 : solid.power === "water" ? 0x2563eb : colors[Number(solid.id.split("-").pop()) % colors.length] ?? colors[0];
+    g.fillStyle(0x172033, 0.18);
+    g.fillEllipse(0, 1, w + 12, 10);
+    g.fillStyle(color);
+    g.fillRoundedRect(-w / 2, -h, w, h - 6, 6);
+    g.lineStyle(2, 0x243c4b);
+    g.strokeRoundedRect(-w / 2, -h, w, h - 6, 6);
+    g.fillStyle(0xd7eff5);
+    g.fillRoundedRect(-w / 2 + 7, -h + 6, w * 0.35, h * 0.4, 3);
+    g.fillStyle(0x8fc2d4);
+    g.fillRoundedRect(-w / 2 + w * 0.44, -h + 6, w * 0.42, h * 0.4, 3);
+    g.lineStyle(2, 0xffffff, 0.6);
+    g.lineBetween(-w / 2 + 8, -h + 8, -w / 2 + 18, -h + 8);
+    g.fillStyle(0xfff3b0);
+    g.fillRect(-w / 2, -19, 6, 8);
+    g.fillStyle(0x991b1b);
+    g.fillRect(w / 2 - 5, -19, 5, 8);
+    g.fillStyle(0x243c4b);
+    g.fillRect(-5, -h * 0.45, 9, 3);
+    const wheels = [-w * 0.3, w * 0.3].map((x) => {
+      const wheel = this.scene.add.graphics({ x, y: -8 });
+      wheel.fillStyle(0x202b38); wheel.fillCircle(0, 0, 10);
+      wheel.fillStyle(0xcbd5e1); wheel.fillCircle(0, 0, 5);
+      wheel.lineStyle(2, 0x64748b); wheel.lineBetween(-4, 0, 4, 0);
+      return wheel;
     });
+    const object = this.scene.add.container(0, this.groundY - solidBottom(solid), [g, ...wheels]).setDepth(DEPTH_TRACK);
+    const powerLabel = solid.power ? this.scene.add.text(0, -h - 16,
+      solid.power === "fire" ? "FIRE ↓" : "WATER ↓", {
+        fontFamily: "Arial, sans-serif", fontSize: "10px", fontStyle: "bold",
+        color: solid.power === "fire" ? "#991b1b" : "#1e40af", backgroundColor: "#fffbeb",
+        padding: { x: 5, y: 3 },
+      }).setOrigin(0.5) : undefined;
+    if (powerLabel) object.add(powerLabel);
+    this.objects.push({ x: solid.x, solid, object, wheels, powerLabel });
+  }
 
-    if (hit) {
-      this.options.onMissed();
-    } else if (sameLane && power) {
-      // A Power-up Car only grants its Power after a successful same-Lane jump.
-      this.options.onPowerCollected(power);
+  private createHazard(hazard: HazardEvent): void {
+    const { width: w, height: h } = hazard;
+    const g = this.scene.add.graphics();
+    if (hazard.kind === "tree") {
+      // The trunk stands behind the curb; the outlined low branch is in the player's path.
+      g.fillStyle(0x9b7653, 0.65); g.fillRect(w / 2 - 8, -h + 12, 12, h + 24);
+      g.fillStyle(0x467c44); g.fillRoundedRect(-w / 2, -h, w, h, 18);
+      g.fillStyle(0x669c50); g.fillCircle(-20, -h + 12, 31); g.fillCircle(22, -h + 8, 34);
+      g.lineStyle(4, 0x5b442e); g.lineBetween(-w / 2 + 5, -3, w / 2 - 6, -3);
+    } else if (hazard.kind === "basketballHoop") {
+      g.fillStyle(0x718096, 0.65); g.fillRect(w / 2 - 8, -h + 8, 7, h + hazard.bottom - 15);
+      g.fillStyle(0xf8fafc); g.fillRoundedRect(-w / 2, -h, w, h, 3);
+      g.lineStyle(3, 0x345565); g.strokeRect(-w / 2, -h, w, h);
+      g.lineStyle(2, 0xe76f51); g.strokeRect(-18, -h + 15, 36, h - 24);
+      g.lineStyle(4, 0xef6c35); g.lineBetween(-23, -3, 23, -3);
+      g.lineStyle(1, 0xffffff); for (let x = -18; x < 20; x += 9) g.lineBetween(x, 0, x * 0.65, 15);
+    } else if (hazard.kind === "trashCan") {
+      g.fillStyle(0x557780); g.fillRoundedRect(-w / 2, -h, w, h, 3);
+      g.fillStyle(0x304d59); g.fillRoundedRect(-w / 2 - 2, -h, w + 4, 5, 2);
+      g.lineStyle(2, 0xa2bfc4); for (let x = -w / 2 + 6; x < w / 2; x += 8) g.lineBetween(x, -h + 8, x, -5);
+    } else {
+      g.fillStyle(0x427747); g.fillRoundedRect(-w / 2, -h * 0.7, w, h * 0.7, 6);
+      g.fillStyle(0x62994b);
+      for (let x = -w / 2 + 10; x < w / 2; x += 14) g.fillCircle(x, -h * 0.6, Math.min(17, h * 0.55));
+      g.fillStyle(0xf4cf6c); g.fillCircle(-w / 4, -h * 0.65, 2); g.fillCircle(w / 4, -h * 0.5, 2);
     }
-
-    return false;
+    const object = this.scene.add.container(0, this.groundY - hazard.bottom, [g]).setDepth(DEPTH_TRACK);
+    if (hazard.bottom > 0) object.add(this.scene.add.text(0, -h - 17, "STAY LOW", { fontSize: "10px", fontFamily: "Arial", color: "#334155", backgroundColor: "#fffbeb", padding: { x: 4, y: 2 } }).setOrigin(0.5));
+    this.objects.push({ x: hazard.x, hazardId: hazard.id, object });
   }
-
-  private tryDestroyBlocker(obstacleLane: Lane, playerLane: Lane, material: Material): boolean {
-    const destroyed = shouldDestroyBlocker({
-      obstacleLane,
-      playerLane,
-      material,
-      activePower: this.options.getActivePower(),
-    });
-    if (destroyed) this.options.onBlockerDestroyed();
-    return destroyed;
-  }
-
-  private spawnObstacle(definition: ObstacleDefinition): void {
-    const presentation = this.options.lanePresentation(definition.lane);
-    const x = this.spawnX();
-    const { gameObject, wheelHubs } = this.createGameObject(definition, x, presentation.groundY);
-    gameObject.setDepth(presentation.depth).setScale(presentation.scale);
-
-    this.items.push({
-      gameObject,
-      lane: definition.lane,
-      resolved: false,
-      definition,
-      scrollMultiplier: this.scrollMultiplierForDefinition(definition),
-      wheelHubs,
-    });
-  }
-
-  private scrollMultiplierForDefinition(definition: ObstacleDefinition): number {
-    return definition.motion === "oncoming" ? VEHICLE_SCROLL_MULTIPLIER : 1;
-  }
-
-  private createGameObject(definition: ObstacleDefinition, x: number, groundY: number): RenderedObstacle {
-    switch (definition.appearance) {
-      case "trashCan":
-        return {
-          gameObject: this.scene.add
-            .rectangle(x, groundY, TRASH_CAN_WIDTH, TRASH_CAN_HEIGHT, TRASH_CAN_COLOR)
-            .setOrigin(0.5, 1),
-        };
-      case "awning":
-        return { gameObject: this.createAwningGameObject(x, groundY) };
-      case "fireHydrant":
-        return { gameObject: this.createFireHydrantGameObject(x, groundY) };
-      case "lowBranch":
-        return { gameObject: this.createLowBranchGameObject(x, groundY) };
-      case "utilityBox":
-        return {
-          gameObject: this.scene.add
-            .rectangle(x, groundY, UTILITY_BOX_WIDTH, UTILITY_BOX_HEIGHT, ELECTRIC_COLOR)
-            .setOrigin(0.5, 1),
-        };
-      case "motorcycle":
-        return this.createVehicleGameObject(
-          x,
-          groundY,
-          MOTORCYCLE_WIDTH,
-          MOTORCYCLE_HEIGHT,
-          MOTORCYCLE_COLOR,
-        );
-      case "car":
-        return this.createVehicleGameObject(x, groundY, CAR_WIDTH, CAR_HEIGHT, this.carColor(definition.power));
-      case "streetBanner":
-        return { gameObject: this.createStreetBannerGameObject(x, groundY) };
-      default:
-        return assertNeverAppearance(definition.appearance);
-    }
-  }
-
-  /** Body + spinning wheel hubs so Street traffic reads as driving, not a static block. */
-  private createVehicleGameObject(
-    x: number,
-    groundY: number,
-    width: number,
-    height: number,
-    color: number,
-  ): { gameObject: Phaser.GameObjects.Container; wheelHubs: Phaser.GameObjects.Rectangle[] } {
-    const body = this.scene.add.rectangle(0, 0, width, height, color).setOrigin(0.5, 1);
-    const wheelY = -WHEEL_RADIUS;
-    const wheelInset = width * 0.28;
-    const frontWheel = this.scene.add.circle(-wheelInset, wheelY, WHEEL_RADIUS, WHEEL_COLOR);
-    const rearWheel = this.scene.add.circle(wheelInset, wheelY, WHEEL_RADIUS, WHEEL_COLOR);
-    const frontHub = this.scene.add.rectangle(-wheelInset, wheelY, 2, WHEEL_RADIUS * 1.6, 0x9ca3af);
-    const rearHub = this.scene.add.rectangle(wheelInset, wheelY, 2, WHEEL_RADIUS * 1.6, 0x9ca3af);
-    const gameObject = this.scene.add.container(x, groundY, [body, frontWheel, rearWheel, frontHub, rearHub]);
-    return { gameObject, wheelHubs: [frontHub, rearHub] };
-  }
-
-  private createFireHydrantGameObject(x: number, groundY: number): Phaser.GameObjects.Container {
-    const body = this.scene.add
-      .rectangle(0, 0, FIRE_HYDRANT_WIDTH * 0.62, FIRE_HYDRANT_HEIGHT, FIRE_HYDRANT_COLOR)
-      .setOrigin(0.5, 1);
-    const cap = this.scene.add.rectangle(
-      0,
-      -FIRE_HYDRANT_HEIGHT,
-      FIRE_HYDRANT_WIDTH,
-      5,
-      FIRE_HYDRANT_COLOR,
-    );
-    const nozzle = this.scene.add.circle(
-      FIRE_HYDRANT_WIDTH * 0.42,
-      -FIRE_HYDRANT_HEIGHT * 0.58,
-      4,
-      FIRE_HYDRANT_COLOR,
-    );
-    return this.scene.add.container(x, groundY, [body, cap, nozzle]);
-  }
-
-  /** A branch hangs across the clearance line without a trunk blocking the duck path. */
-  private createLowBranchGameObject(x: number, groundY: number): Phaser.GameObjects.Container {
-    const branchY = -OVERHEAD_GAP - OVERHEAD_BAR_HEIGHT * 0.5;
-    const branch = this.scene.add.rectangle(0, branchY, OVERHEAD_BAR_WIDTH, 7, TRUNK_COLOR);
-    const leaves = [
-      this.scene.add.circle(-OVERHEAD_BAR_WIDTH * 0.28, branchY - 6, CANOPY_RADIUS * 0.55, LEAF_COLOR),
-      this.scene.add.circle(0, branchY - 8, CANOPY_RADIUS * 0.65, LEAF_COLOR),
-      this.scene.add.circle(OVERHEAD_BAR_WIDTH * 0.28, branchY - 5, CANOPY_RADIUS * 0.55, LEAF_COLOR),
-    ];
-    return this.scene.add.container(x, groundY, [branch, ...leaves]);
-  }
-
-  private createAwningGameObject(x: number, groundY: number): Phaser.GameObjects.Container {
-    const awningY = -OVERHEAD_GAP - OVERHEAD_BAR_HEIGHT * 0.5;
-    const shade = this.scene.add.rectangle(0, awningY, OVERHEAD_BAR_WIDTH, OVERHEAD_BAR_HEIGHT, AWNING_COLOR);
-    const stripeWidth = OVERHEAD_BAR_WIDTH / 5;
-    const stripes = [-2, 0, 2].map((offset) =>
-      this.scene.add.rectangle(
-        offset * stripeWidth,
-        awningY,
-        stripeWidth * 0.55,
-        OVERHEAD_BAR_HEIGHT,
-        AWNING_STRIPE_COLOR,
-      ),
-    );
-    return this.scene.add.container(x, groundY, [shade, ...stripes]);
-  }
-
-  private createStreetBannerGameObject(x: number, groundY: number): Phaser.GameObjects.Container {
-    const bannerY = -OVERHEAD_GAP - OVERHEAD_BAR_HEIGHT * 0.5;
-    const banner = this.scene.add.rectangle(
-      0,
-      bannerY,
-      OVERHEAD_BAR_WIDTH,
-      OVERHEAD_BAR_HEIGHT,
-      STREET_BANNER_COLOR,
-    );
-    const pennantY = bannerY + OVERHEAD_BAR_HEIGHT * 0.5;
-    const leftPennant = this.scene.add.triangle(
-      -OVERHEAD_BAR_WIDTH * 0.24,
-      pennantY,
-      -6,
-      0,
-      6,
-      0,
-      0,
-      8,
-      STREET_BANNER_COLOR,
-    );
-    const rightPennant = this.scene.add.triangle(
-      OVERHEAD_BAR_WIDTH * 0.24,
-      pennantY,
-      -6,
-      0,
-      6,
-      0,
-      0,
-      8,
-      STREET_BANNER_COLOR,
-    );
-    return this.scene.add.container(x, groundY, [banner, leftPennant, rightPennant]);
-  }
-
-  /** Rotate wheel hubs with approach speed so vehicles look like they're rolling. */
-  private spinVehicleWheels(delta: number): void {
-    const baseDx = (this.options.scrollSpeed * delta) / 1000;
-    for (const item of this.items) {
-      if (!item.wheelHubs) continue;
-      const roll = baseDx * item.scrollMultiplier;
-      const degrees = (roll / WHEEL_RADIUS) * Phaser.Math.RAD_TO_DEG;
-      for (const hub of item.wheelHubs) hub.angle += degrees;
-    }
-  }
-
-  private carColor(power: PowerColor | undefined): number {
-    if (power === "fire") return FIRE_CAR_COLOR;
-    if (power === "water") return WATER_CAR_COLOR;
-    return GREY_CAR_COLOR;
-  }
-}
-
-function assertNeverAppearance(appearance: never): never {
-  throw new Error(`Unhandled obstacle appearance: ${String(appearance)}`);
 }

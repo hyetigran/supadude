@@ -1,20 +1,15 @@
 import { describe, expect, it } from "vitest";
-import {
-  DUCK_HEIGHT,
-  JUMP_HEIGHT,
-  GROUND_OBSTACLE_HEIGHT,
-  OVERHEAD_GAP,
-  PLAYER_STAND_HEIGHT,
-} from "./VisualScale";
+import { GROUND_Y_RATIO, PLAYER_SIZE, groundYForViewport } from "./VisualScale";
 
-describe("VisualScale clearance contract", () => {
-  it("keeps duck under overhead gap under stand height", () => {
-    expect(DUCK_HEIGHT).toBeLessThan(OVERHEAD_GAP);
-    expect(OVERHEAD_GAP).toBeLessThan(PLAYER_STAND_HEIGHT);
+describe("single-plane visual scale", () => {
+  it("places the ground low enough to leave a large readable play field", () => {
+    expect(GROUND_Y_RATIO).toBeGreaterThan(0.7);
+    expect(GROUND_Y_RATIO).toBeLessThan(0.9);
+    expect(groundYForViewport(450)).toBe(369);
   });
 
-  it("keeps jump just above the tallest ground obstacle", () => {
-    expect(JUMP_HEIGHT).toBeGreaterThan(GROUND_OBSTACLE_HEIGHT);
-    expect(JUMP_HEIGHT).toBeLessThan(PLAYER_STAND_HEIGHT);
+  it("keeps the player icon compact relative to the play field", () => {
+    expect(PLAYER_SIZE).toBeGreaterThanOrEqual(32);
+    expect(PLAYER_SIZE).toBeLessThanOrEqual(48);
   });
 });

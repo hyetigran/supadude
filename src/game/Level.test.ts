@@ -1,105 +1,69 @@
 import { describe, expect, it } from "vitest";
-import { LANES } from "./Lane";
 import { buildLevel } from "./Level";
-import { OBSTACLE_CATALOG, OBSTACLE_IDS } from "./ObstacleCatalog";
+import { RUNNER_TUNING } from "./Runner";
 
 describe("buildLevel", () => {
-  it("is deterministic — no procedural/random generation (ADR-0003)", () => {
-    expect(buildLevel()).toEqual(buildLevel());
-  });
-
-  it("has a finite 100–260 second authored length at the game scroll speed", () => {
+  it("is deterministic and finite", () => {
     const level = buildLevel();
-    const seconds = level.length / 220;
 
+    expect(level).toEqual(buildLevel());
     expect(Number.isFinite(level.length)).toBe(true);
-    expect(seconds).toBeGreaterThanOrEqual(100);
-    expect(seconds).toBeLessThanOrEqual(260);
   });
 
-  it("places one Checkpoint immediately before the Final Boss and keeps both within bounds", () => {
-    const level = buildLevel();
+  it("builds a roughly 80–180 second authored course at 260 px/sec", () => {
+    const seconds = buildLevel().length / 260;
 
-    expect(level.checkpoint).toBeGreaterThan(0);
-    expect(level.bossMarker).toBeGreaterThan(level.checkpoint);
-    expect(level.bossMarker - level.checkpoint).toBeLessThan(300);
-    expect(level.bossMarker).toBeLessThan(level.length);
+    expect(seconds).toBeGreaterThanOrEqual(80);
+    expect(seconds).toBeLessThanOrEqual(180);
   });
 
-  it("keeps a closing obstacle stretch after the Final Boss", () => {
+  it("keeps every track object inside the Level", () => {
     const level = buildLevel();
 
-    expect(level.obstacles.some((obstacle) => obstacle.distance < level.checkpoint)).toBe(true);
-    expect(level.obstacles.some((obstacle) => obstacle.distance > level.bossMarker)).toBe(true);
-  });
-
-  it("sorts Obstacle events nondecreasing by distance and keeps them within bounds", () => {
-    const level = buildLevel();
-
-    expect(level.obstacles.length).toBeGreaterThan(0);
-    for (let i = 1; i < level.obstacles.length; i++) {
-      expect(level.obstacles[i].distance).toBeGreaterThanOrEqual(level.obstacles[i - 1].distance);
-    }
-    for (const obstacle of level.obstacles) {
-      expect(obstacle.distance).toBeGreaterThanOrEqual(0);
-      expect(obstacle.distance).toBeLessThan(level.length);
+    for (const event of [...level.hazards, ...level.solids, ...level.coins]) {
+      expect(event.x).toBeGreaterThan(0);
+      expect(event.x).toBeLessThan(level.length);
     }
   });
 
-  it("authors one or two Obstacles per beat without repeating a Lane", () => {
+  it("includes suburban obstacles, approaching cars, and both power objects", () => {
     const level = buildLevel();
-    const beats = new Map<number, typeof level.obstacles>();
+    const kinds = new Set(level.hazards.map(({ kind }) => kind));
 
-    for (const obstacle of level.obstacles) {
-      const beat = beats.get(obstacle.distance) ?? [];
-      beat.push(obstacle);
-      beats.set(obstacle.distance, beat);
-    }
-
-    for (const beat of beats.values()) {
-      expect(beat.length).toBeGreaterThanOrEqual(1);
-      expect(beat.length).toBeLessThanOrEqual(2);
-
-      const lanes = beat.map(({ obstacle }) => OBSTACLE_CATALOG[obstacle].lane);
-      expect(new Set(lanes).size).toBe(lanes.length);
-    }
+    expect(kinds).toEqual(new Set(["bush", "trashCan", "tree", "basketballHoop"]));
+    expect(level.solids.every(({ kind }) => kind === "car")).toBe(true);
+    expect(new Set(level.powers?.map(({ kind }) => kind))).toEqual(new Set(["flightPad", "jumpOrb"]));
+    expect(level.solids.some(({ height }) => height === 48)).toBe(true);
+    expect(level.solids.some(({ height }) => height === 72)).toBe(true);
   });
 
-  it("represents all three Lanes and every catalogued Obstacle", () => {
-    const level = buildLevel();
-    const obstacleIds = new Set(level.obstacles.map(({ obstacle }) => obstacle));
-    const lanes = new Set(level.obstacles.map(({ obstacle }) => OBSTACLE_CATALOG[obstacle].lane));
-
-    expect([...obstacleIds].sort()).toEqual([...OBSTACLE_IDS].sort());
-    expect(lanes).toEqual(new Set(LANES));
-  });
-
-  it("sorts Collectible events ascending by distance and keeps them within bounds", () => {
+  it("counts uniquely identified authored Coins", () => {
     const level = buildLevel();
 
-    expect(level.collectibles.length).toBeGreaterThan(0);
-    for (let i = 1; i < level.collectibles.length; i++) {
-      expect(level.collectibles[i].distance).toBeGreaterThan(level.collectibles[i - 1].distance);
-    }
-    for (const collectible of level.collectibles) {
-      expect(collectible.distance).toBeGreaterThanOrEqual(0);
-      expect(collectible.distance).toBeLessThan(level.length);
-    }
-  });
-
-  it("cycles Collectibles through Sidewalk, Tree Lawn, and Street", () => {
-    const level = buildLevel();
-    const firstTwoCycles = level.collectibles.slice(0, LANES.length * 2).map(({ lane }) => lane);
-
-    expect(firstTwoCycles).toEqual([...LANES, ...LANES]);
-  });
-
-  it("counts Coins separately from Hearts", () => {
-    const level = buildLevel();
-    const coinCount = level.collectibles.filter(({ kind }) => kind === "coin").length;
-
-    expect(level.totalCoins).toBe(coinCount);
+    expect(level.totalCoins).toBe(level.coins.length);
     expect(level.totalCoins).toBeGreaterThan(0);
-    expect(level.collectibles.some(({ kind }) => kind === "heart")).toBe(true);
+    expect(new Set(level.coins.map(({ id }) => id)).size).toBe(level.coins.length);
+  });
+
+  it("sustains at least one obstacle encounter per second on average", () => {
+    const level = buildLevel();
+    // A block with spikes on top is one encounter, not two.
+    const encounters = new Set([...level.hazards, ...level.solids, ...(level.powers ?? [])].map(({ x }) => x));
+    const seconds = level.length / RUNNER_TUNING.runSpeed;
+
+    expect(encounters.size / seconds).toBeGreaterThanOrEqual(1);
+  });
+
+  it("keeps recovery gaps short, including room to land after flight", () => {
+    const level = buildLevel();
+    const geometry = [...level.hazards, ...level.solids, ...(level.powers ?? []).map((power) => ({ ...power, width: 64 }))]
+      .map(({ x, width }) => ({ start: x - width / 2, end: x + width / 2 }))
+      .sort((a, b) => a.start - b.start);
+    let previousEnd = geometry[0].end;
+
+    for (const object of geometry.slice(1)) {
+      expect((object.start - previousEnd) / RUNNER_TUNING.runSpeed).toBeLessThanOrEqual(1.75);
+      previousEnd = Math.max(previousEnd, object.end);
+    }
   });
 });

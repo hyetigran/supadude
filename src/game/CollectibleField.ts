@@ -1,66 +1,57 @@
 import Phaser from "phaser";
-import type { Lane } from "./Lane";
-import type { CollectibleEvent, CollectibleKind } from "./Level";
-import { ScrollingField, type ScrollingFieldOptions } from "./ScrollingField";
-import { COLLECTIBLE_HEIGHT_ABOVE_LANE, COLLECTIBLE_RADIUS } from "./VisualScale";
+import type { CoinEvent } from "./Level";
+import { COIN_RADIUS, DEPTH_TRACK } from "./VisualScale";
 
-interface SpawnedCollectible {
-  gameObject: Phaser.GameObjects.Arc;
-  lane: Lane;
-  kind: CollectibleKind;
-  resolved: boolean;
-  distance: number;
+const VIEW_MARGIN = 80;
+
+interface RenderedCoin {
+  event: CoinEvent;
+  gameObject: Phaser.GameObjects.Container;
 }
 
-export interface CollectibleFieldOptions extends ScrollingFieldOptions {
-  getLane: () => Lane;
-  onHeartCollected: () => void;
-  onCoinCollected: () => void;
-}
+/** Render-only Coin projection. Collection state is driven by Runner events. */
+export class CollectibleField {
+  private readonly coins = new Map<string, RenderedCoin>();
+  private readonly collected = new Set<string>();
 
-/**
- * Owns Heart/Coin pickup-resolution for the authored Level's Collectible
- * events (see Level.ts) — the collectible sibling to ObstacleField, sharing
- * the spawn-timing/scroll/cleanup lifecycle via ScrollingField. Collection
- * only depends on being in the matching Lane (unlike Obstacles, pose is
- * irrelevant here); missing a pickup by being in a different Lane has no
- * penalty, it just scrolls past.
- *
- * A Coin already collected this Attempt is never re-awarded if a Checkpoint
- * respawn replays the stretch it sits in (see shouldReplay) — Coins are a
- * persistent "collected/total" completion stat (CONTEXT.md), so double-
- * counting one across a respawn would overcount it. Hearts have no such
- * stat and are harmless to re-collect, so they always replay.
- */
-export class CollectibleField extends ScrollingField<CollectibleEvent, SpawnedCollectible, CollectibleFieldOptions> {
-  private readonly collectedCoinDistances = new Set<number>();
-
-  protected shouldReplay(event: CollectibleEvent): boolean {
-    return event.kind !== "coin" || !this.collectedCoinDistances.has(event.distance);
-  }
-
-  protected spawnEvent(event: CollectibleEvent): void {
-    const presentation = this.options.lanePresentation(event.lane);
-    const groundY = presentation.groundY;
-    const x = this.spawnX();
-    const y = groundY - COLLECTIBLE_HEIGHT_ABOVE_LANE;
-    const color = event.kind === "heart" ? 0xff4d6d : 0xffd700;
-
-    const gameObject = this.scene.add.circle(x, y, COLLECTIBLE_RADIUS, color);
-    gameObject.setDepth(presentation.depth).setScale(presentation.scale);
-    this.items.push({ gameObject, lane: event.lane, kind: event.kind, resolved: false, distance: event.distance });
-  }
-
-  protected resolve(collectible: SpawnedCollectible): boolean {
-    if (collectible.lane !== this.options.getLane()) return false;
-
-    if (collectible.kind === "heart") {
-      this.options.onHeartCollected();
-    } else {
-      this.collectedCoinDistances.add(collectible.distance);
-      this.options.onCoinCollected();
+  constructor(
+    private readonly scene: Phaser.Scene,
+    private readonly groundY: number,
+    private readonly characterX: number,
+    events: readonly CoinEvent[],
+    private readonly reducedMotion = false,
+  ) {
+    for (const event of events) {
+      this.coins.set(event.id, { event, gameObject: this.createCoin(event) });
     }
+    this.render(0);
+  }
 
-    return true; // vanish on contact, unlike an obstacle that scrolls off
+  render(distance: number): void {
+    for (const { event, gameObject } of this.coins.values()) {
+      const x = this.characterX + event.x - distance;
+      const onScreen = x > -VIEW_MARGIN && x < this.scene.scale.width + VIEW_MARGIN;
+      gameObject.x = x;
+      gameObject.angle = this.reducedMotion ? 0 : distance * 0.8 % 360;
+      gameObject.setVisible(onScreen && !this.collected.has(event.id));
+    }
+  }
+
+  collect(id: string): void {
+    this.collected.add(id);
+    this.coins.get(id)?.gameObject.setVisible(false);
+  }
+
+  reset(): void {
+    this.collected.clear();
+  }
+
+  private createCoin(event: CoinEvent): Phaser.GameObjects.Container {
+    const rim = this.scene.add.circle(0, 0, COIN_RADIUS, 0xffd166).setStrokeStyle(2, 0xfff4b8, 1);
+    const center = this.scene.add.circle(0, 0, COIN_RADIUS * 0.48, 0xf59e0b).setStrokeStyle(1, 0x8a5a00, 0.8);
+    const shine = this.scene.add.rectangle(-3, -2, 3, 9, 0xfff9db, 0.9).setAngle(25);
+    return this.scene.add
+      .container(0, this.groundY - event.altitude, [rim, center, shine])
+      .setDepth(DEPTH_TRACK + 0.5);
   }
 }

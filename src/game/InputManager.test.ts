@@ -2,66 +2,91 @@ import { describe, expect, it, vi } from "vitest";
 import { InputManager } from "./InputManager";
 
 describe("InputManager", () => {
-  it("calls a listener registered for an action when that action is triggered", () => {
+  it("fires once on press and exposes held state until release", () => {
     const input = new InputManager();
     const onJump = vi.fn();
     input.on("jump", onJump);
 
-    input.trigger("jump");
+    input.press("jump");
+    input.press("jump");
 
     expect(onJump).toHaveBeenCalledTimes(1);
+    expect(input.isHeld("jump")).toBe(true);
+
+    input.release("jump");
+    expect(input.isHeld("jump")).toBe(false);
+    expect(input.consumePress("jump")).toBe(true);
+    expect(input.consumePress("jump")).toBe(false);
   });
 
-  it("does not call listeners registered for a different action", () => {
+  it("allows a new press after release", () => {
+    const input = new InputManager();
+    const onPause = vi.fn();
+    input.on("pause", onPause);
+
+    input.trigger("pause");
+    input.trigger("pause");
+
+    expect(onPause).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps an Action held until every physical source releases", () => {
+    const input = new InputManager();
+
+    input.press("jump", "Space");
+    input.press("jump", "ArrowUp");
+    input.release("jump", "Space");
+
+    expect(input.isHeld("jump")).toBe(true);
+
+    input.release("jump", "ArrowUp");
+    expect(input.isHeld("jump")).toBe(false);
+  });
+
+  it("can clear a UI dismissal gesture without leaving a buffered Jump", () => {
+    const input = new InputManager();
+    input.press("jump", "pointer-1");
+
+    input.clear("jump");
+
+    expect(input.isHeld("jump")).toBe(false);
+    expect(input.consumePress("jump")).toBe(false);
+  });
+
+  it("clears all held sources when focus is lost", () => {
+    const input = new InputManager();
+    input.press("jump", "Space");
+    input.press("pause", "KeyP");
+
+    input.clearAll();
+
+    expect(input.isHeld("jump")).toBe(false);
+    expect(input.isHeld("pause")).toBe(false);
+    expect(input.consumePress("jump")).toBe(false);
+  });
+
+  it("keeps shooting separate from Jump and ignores keyboard repeat", () => {
+    const input = new InputManager();
+    input.press("shoot", "KeyF");
+    expect(input.consumePress("shoot")).toBe(true);
+    input.press("shoot", "KeyF");
+    expect(input.consumePress("shoot")).toBe(false);
+    expect(input.isHeld("jump")).toBe(false);
+    input.release("shoot", "KeyF");
+    input.trigger("shoot");
+    expect(input.consumePress("shoot")).toBe(true);
+    input.clearAll();
+    expect(input.consumePress("shoot")).toBe(false);
+  });
+
+  it("stops calling a listener after unsubscribe", () => {
     const input = new InputManager();
     const onJump = vi.fn();
-    const onDuck = vi.fn();
-    input.on("jump", onJump);
-    input.on("duck", onDuck);
-
-    input.trigger("jump");
-
-    expect(onJump).toHaveBeenCalledTimes(1);
-    expect(onDuck).not.toHaveBeenCalled();
-  });
-
-  it("supports multiple listeners on the same action", () => {
-    const input = new InputManager();
-    const first = vi.fn();
-    const second = vi.fn();
-    input.on("punch", first);
-    input.on("punch", second);
-
-    input.trigger("punch");
-
-    expect(first).toHaveBeenCalledTimes(1);
-    expect(second).toHaveBeenCalledTimes(1);
-  });
-
-  it("stops calling a listener once unsubscribed via the returned function", () => {
-    const input = new InputManager();
-    const onLaneLeft = vi.fn();
-    const unsubscribe = input.on("laneLeft", onLaneLeft);
+    const unsubscribe = input.on("jump", onJump);
 
     unsubscribe();
-    input.trigger("laneLeft");
+    input.trigger("jump");
 
-    expect(onLaneLeft).not.toHaveBeenCalled();
-  });
-
-  it("stops calling a listener once removed via off", () => {
-    const input = new InputManager();
-    const onPowerActivate = vi.fn();
-    input.on("powerActivate", onPowerActivate);
-
-    input.off("powerActivate", onPowerActivate);
-    input.trigger("powerActivate");
-
-    expect(onPowerActivate).not.toHaveBeenCalled();
-  });
-
-  it("triggering an action with no listeners does not throw", () => {
-    const input = new InputManager();
-    expect(() => input.trigger("laneRight")).not.toThrow();
+    expect(onJump).not.toHaveBeenCalled();
   });
 });

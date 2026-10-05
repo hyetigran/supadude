@@ -34,6 +34,8 @@ export class Fx {
 
   /** One-shot particle burst at (x, y); the emitter cleans itself up after its particles expire. */
   burst(x: number, y: number, color: number, options: BurstOptions = {}): void {
+    if (this.shouldReduceMotion()) return;
+
     const lifespan = options.lifespanMs ?? 380;
     const emitter = this.scene.add.particles(x, y, PARTICLE_TEXTURE, {
       lifespan,
@@ -50,11 +52,17 @@ export class Fx {
   }
 
   shake(durationMs = 140, intensity = 0.008): void {
+    if (this.shouldReduceMotion()) return;
     this.scene.cameras.main.shake(durationMs, intensity);
   }
 
   flash(color: number, durationMs = 120): void {
+    if (this.shouldReduceMotion()) return;
     const rgb = Phaser.Display.Color.IntegerToColor(color);
     this.scene.cameras.main.flash(durationMs, rgb.red, rgb.green, rgb.blue);
+  }
+
+  private shouldReduceMotion(): boolean {
+    return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 }

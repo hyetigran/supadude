@@ -2,122 +2,105 @@
 
 ## 1. Overview
 
-Supa Dude is a 2D browser-based side-scrolling auto-runner. The player controls Supa Dude, a stick-figure superhero, as he auto-runs through a single, finite, hand-authored neighborhood level — roughly the length of a long Geometry Dash level (~2-4 minutes of gameplay). The player dodges obstacles, collects power-ups, and defeats a Final Boss to reach the end.
+Supa Dude is a 2D browser-based, single-plane precision auto-runner. The player guides a square superhero icon through one finite, hand-authored course using one button for Jump and temporary Flight. The target experience is the classic Geometry Dash cube-mode loop: read the geometry, internalize the rhythm, crash, retry quickly, and reach 100%.
 
-This is a personal/portfolio project. No monetization.
+Supa Dude retains original visuals, sounds, course layouts, and branding. Geometry Dash is a mechanical reference, not an asset or content source.
 
-Terminology in this document follows `CONTEXT.md`, which is the source of truth for definitions — consult it if a term here seems ambiguous. Key architectural decisions are recorded in `docs/adr/`.
+Terminology follows `CONTEXT.md`. Architectural decisions live in `docs/adr/`.
 
-## 2. Core Gameplay
+## 2. Core gameplay
 
-### 2.1 Auto-run & lanes
+### 2.1 Auto-run and Jump
 
-- Supa Dude runs automatically at all times outside of Boss Fights — the player never controls forward movement.
-- Three parallel lanes, ordered **Sidewalk Lane ↔ Tree Lawn Lane ↔ Street Lane**. Each Attempt starts in the Tree Lawn Lane.
-- A **Lane Shift** moves Supa Dude one adjacent Lane toward the Sidewalk (Left / swipe left) or Street (Right / swipe right). A shift stops at the outer Lanes; it never skips the Tree Lawn Lane or wraps between the Sidewalk and Street.
-- Independently of Lane choice, the player can **Jump** (Up/Space, swipe up) and **Duck** (Down, swipe down) to clear Obstacles within the current Lane — but each Lane has its own obstacle vocabulary (see §2.2).
-- All three Lanes carry a comparable density of Obstacles — a Lane Shift is a tactical choice about which hazard pattern to face, not a safe detour.
+- Supa Dude moves forward at a constant speed; the player never controls horizontal movement.
+- Jump is the primary control; during Flight the same input controls ascent.
+- Jump works only while grounded on the Ground or a car roof.
+- Holding Jump repeats it immediately after landing; an airborne Jump Orb grants a single automatic double jump.
+- Airborne rotation is visual feedback derived from the same deterministic simulation as collision.
 
-### 2.2 Obstacles
+### 2.2 Neighborhood course and powers
 
-Every normal Obstacle has one of two clearance shapes:
+- The Level is fixed and hand-authored. A single Ground plane remains beneath the course.
+- Cars and vans travel on the road, 24 world pixels below the sidewalk, with roofs reachable from the sidewalk and fatal sides/undersides. Rendering and collision share the same deterministic movement function.
+- Bushes and Trash Cans replace geometric spikes. Low Tree branches and Basketball Hoops require staying grounded in the one-button version; each is marked “STAY LOW”.
+- Landing on a blue Flight Trampoline grants four seconds of flight. Hold Jump to rise; release to descend. The HUD shows remaining time. Flight ends into normal gravity and never grants invulnerability.
+- Touching a gold Jump Orb in midair automatically applies a second jump impulse. It does not require another press and does not trigger while flying.
+- Power objects activate once per Attempt and reset on Crash. Pause freezes movement and ability timers.
+- Ground sequences stay dense; flight sections include a clear landing area before ground hazards resume. The course contains two flight sections and two jump orbs.
+- Visible geometry must cover its collision area. Neighborhood scenery is visually distinct from obstacles.
 
-- **Ground Obstacle** — jump over it.
-- **Overhead Obstacle** — duck under it.
+### Difficulty
 
-Each Obstacle type belongs to exactly one Lane:
+- The start screen offers Normal and Hard, with mouse/touch buttons and Space/Enter or H shortcuts.
+- Hard increases forward speed by 23%; jump height, gravity, and Flight duration remain unchanged.
+- HUD and results identify the selected mode. Automatic retries keep it; a new playthrough returns to mode selection.
 
-- **Sidewalk Lane** — **Trash Can** (Ground) and **Awning** (Overhead).
-- **Tree Lawn Lane** — **Fire Hydrant** (Ground), **Low Branch** (Overhead / Wood Blocker), and **Utility Box** (Ground / Electric Blocker).
-- **Street Lane** — **Motorcycle** and **Power-up Cars** (Ground), and **Street Banner** (Overhead).
+### 2.3 Failure and retry
 
-The Tree Lawn Lane's two **Blocker Obstacles** are still cleared normally: Duck under a Low Branch and Jump over a Utility Box. As an optional alternate clear, Fire Power destroys the Wood Low Branch and Water Power destroys the Electric Utility Box.
+- Any fatal contact causes a Crash; there are no Lives or health points.
+- A Crash freezes the current frame briefly, plays feedback, then automatically restarts from 0%.
+- Each restart increments Attempt Count and resets Coins and successful-Attempt time.
+- There are no Checkpoints in normal play.
 
-### 2.3 Lives & failure
+### 2.4 Progress and completion
 
-- Supa Dude has **3 Lives**, capped at 3. Colliding with an obstacle costs 1 Life.
-- **Hearts** are collectibles that restore 1 Life, up to the cap.
-- Reaching 0 Lives respawns the player at the most recent **Checkpoint** with Lives reset to 3. The Checkpoint is placed immediately before the Final Boss.
-- This is a shared life pool — Boss Fights use the same 3 Lives as the rest of the level.
-
-### 2.4 Power-up Cars
-
-- Cars appear in the Street Lane in three colors. Jumping on top of one auto-collects its Power (the same Jump clear as a Motorcycle):
-  - **Red → Fire Power** — destroys Wood Low Branches.
-  - **Blue → Water Power** — destroys Electric Utility Boxes.
-  - **Grey → no power** — behaves as a plain Ground Obstacle, same as a Motorcycle.
-- A collected Power is held for a fixed duration (e.g. ~5s, to be tuned) and triggered with a dedicated activation input (F on desktop, an on-screen button on mobile).
-- Only one Power can be held at a time; collecting a new one replaces the old.
+- HUD shows Attempt Count, integer Progress percentage, and Coins collected.
+- A persistent progress bar maps traveled distance to 0–100%.
+- Reaching the finish gate completes the Level and stops simulation.
+- Results show Attempts, Completion Time for the successful Attempt, and Coins collected.
 
 ### 2.5 Coins
 
-- Collectibles scattered through the level. Tracked as a "collected / total" completion stat shown on the results screen. Not required to reach the end of the level.
-- Each Coin collected is the basis of **Score** — see §2.7. See ADR-0005 for why this changed from an earlier deaths-based Score.
+- Coins are optional and placed on intentional jump arcs.
+- Coins reset when an Attempt restarts.
+- Score is the number of Coins collected in the completed Attempt, with Completion Time as a future Leaderboard tie-breaker.
 
-### 2.6 Final Boss
+## 3. Controls
 
-- A single fixed encounter placed near the end of the level, immediately before the finish line. Reaching it **stops auto-run** and starts a **Boss Fight**. See ADR-0004 for why this is one encounter rather than several distributed through the level.
-- **Combat loop (dodge-and-riposte):** the boss telegraphs an attack → player dodges with Jump/Duck → enough consecutive successful dodges opens a **Vulnerable Window** → player uses **Punch** (a new input, active only during this window) to deal damage → repeat until the boss's HP (~3-5 hits) reaches 0.
-- Getting hit by a boss attack costs a Life exactly like a normal obstacle collision. 0 Lives mid-fight respawns at the Checkpoint immediately before the boss.
-- The boss's identity, visual theme, and attack pattern are **not yet finalized** — flagged as follow-up creative/level-design work (see §7).
-
-### 2.7 Scoring & completion
-
-- **Score** = number of Coins collected over the course of completing the level, tie-broken by total completion time. Higher is better. Losing Lives/dying never costs Score.
-- Score is only recorded once the level is completed end-to-end — there's no partial-progress score.
-
-## 3. Meta systems
-
-### 3.1 Accounts & identity
-
-- Authentication is **email/password via Supabase Auth**, and is **optional**:
-  - A **Guest** can play unlimited attempts with no account.
-  - Upon completing the level, a Guest is prompted to log in/sign up to submit their Score to the Leaderboard, or skip.
-- Signup collects email, password, and a **Username** — the Username (never the email) is what's shown publicly on the Leaderboard.
-
-### 3.2 Leaderboard
-
-- Global, cross-device ranking of completed attempts, sorted by most Coins collected, tie-broken by completion time.
-- Backed by Supabase (Postgres + auto-generated API + row-level security for basic score validation). See ADR-0002.
-- Only Accounts (not Guests) can appear on it.
-
-## 4. Controls
-
-| Action | Desktop | Mobile |
+| Action | Desktop | Pointer / mobile |
 |---|---|---|
-| Jump | Up / Space | Swipe up |
-| Duck | Down | Swipe down |
-| Lane Shift | Left toward Sidewalk / Right toward Street | Swipe left / right |
-| Activate Power | F | On-screen button |
-| Punch (Boss Fight only) | E | On-screen button |
+| Jump / hold Jump | Space or Up Arrow | Press and hold anywhere in the play area |
+| Flight (while powered) | Hold Space / Up to rise; release to descend | Hold to rise; release to descend |
+| Pause | Escape, P, or pause button | Pause button |
 
-## 5. Art & audio
+The pause target is at least 44×44 CSS/game pixels. Browser pinch zoom remains available. Decorative motion respects `prefers-reduced-motion`; core track movement remains because it communicates gameplay state.
 
-- **Character:** Supa Dude is a classic stick figure (circle head, line limbs) with a small cape and chest emblem/mask, nodding at the "Supa" name.
-- **Environment:** single seamless looping neighborhood background (houses, sidewalk, trees) — no zone transitions.
-- **Asset pipeline:** hand-drawn/vector sprite sheets (Aseprite, Figma, or Illustrator), exported as PNG sprite sheets + JSON atlas. Needed poses: run, jump, duck, Lane Shift, hit, punch, idle/game-over, plus the Final Boss (poses TBD once designed).
-- **Audio:** basic SFX (jump, duck, coin pickup, heart pickup, hit, punch, boss defeat, game over) plus one looping background music track. Royalty-free/CC or custom.
+## 4. Presentation
 
-## 6. Technical
+- **Player:** a compact square superhero icon with a red cape, face, and chest emblem. It rotates in air and snaps square on landing.
+- **Environment:** a daytime suburban neighborhood with houses, pitched roofs, yards, fences, mailboxes, trees, a sidewalk, and road markings with a single readable Ground plane.
+- **Hazards:** approaching cars/vans, bushes, trash cans, low branches, and basketball hoops; blue trampolines and gold jump orbs have distinct shapes and labels.
+- **Feedback:** synthesized jump, landing, coin, crash, pause, orb, flight, and completion sounds; particles and short screen shake; a reduced-motion fallback.
+- **Readability:** gameplay geometry, player, and HUD must remain distinguishable without relying on color alone.
 
-- **Engine:** Phaser 3. See ADR-0001 for rationale and rejected alternatives (Kaplay, PixiJS, Godot).
-- **Language/build:** TypeScript + Vite.
-- **Backend:** Supabase (Postgres, Auth, auto-generated REST API). See ADR-0002 and ADR-0003.
-- **Deployment:** static site on Vercel or Netlify, auto-deploy on push.
-- **Level structure:** one finite, hand-authored level — not procedurally generated. See ADR-0003 for why this superseded the original endless-runner scope.
+## 5. Technical design
 
-## 7. Open follow-up work (not blocking PRD sign-off)
+- Phaser 3, TypeScript, and Vite remain the client stack.
+- `Runner` is the authoritative pure gameplay module. It owns fixed-step motion, collision, Coins, Crash/retry, Attempt Count, Progress, and completion.
+- Phaser classes render authored Level geometry and shared deterministic Traffic positions and consume `RunnerFrame`; they do not make collision decisions or maintain a second distance clock.
+- Simulation runs at a fixed 120 Hz and clamps unusually long browser frames.
+- The Level remains finite and authored, preserving ADR-0003.
+- Supabase remains the planned Account/Leaderboard backend; it is not required for local gameplay.
 
-- The Final Boss's identity, visual theme, and specific attack pattern.
-- Exact level length/pacing and precise obstacle/power-up/coin placement (level design pass).
-- Tuning values: Power duration, boss HP, dodge-streak length required to open a Vulnerable Window, obstacle spawn density/pacing curve.
-- Password-reset flow and any account-management UI beyond signup/login.
+## 6. Explicitly removed by the single-plane pivot
 
-## 8. Reference documents
+- Three Lanes and Lane Shift
+- Dedicated Duck control (overhead obstacles now use stay-grounded timing)
+- Lives, Hearts, and Checkpoints
+- Power-up Cars, Fire/Water Powers, and Blockers
+- Final Boss, Punch, and the separate Boss Fight loop
 
-- `CONTEXT.md` — glossary of all terms used in this document.
-- `docs/adr/0001-phaser-3-as-game-engine.md`
-- `docs/adr/0002-supabase-for-leaderboard-backend.md`
-- `docs/adr/0003-finite-authored-level-not-endless-runner.md`
-- `docs/adr/0004-single-final-boss-not-three-mini-bosses.md`
-- `docs/adr/0005-score-is-coins-not-deaths.md`
+## 7. Follow-up work
+
+- Playtest and tune speed, gravity, jump impulse, hitbox forgiveness, and authored spacing.
+- Expand the verified completion timing test as final course patterns are authored.
+- Produce final icon/environment art and a music track without changing gameplay geometry.
+- Decide whether the planned Account/Leaderboard scope is still worthwhile for the portfolio release.
+
+### Car elemental powers
+
+- Land on a red car roof for six seconds of Fire; land on a blue car roof for six seconds of Water.
+- Press F, X, or the on-screen Shoot button: Fire burns Bushes ahead; Water clears Trash Cans ahead (180 px range, 400 ms between attacks).
+- One active element; a new powered roof replaces it and refreshes its timer. Each car activates once per Attempt.
+- Show roof labels, a colored aura, attack effects, and an active countdown. Each press fires one shot; holding does not repeat.
+- Other collisions remain fatal. Timers pause with gameplay; cars, powers, and cleared obstacles reset on retry.
