@@ -1,3 +1,4 @@
+import { VIEWPORT } from "./Viewport";
 import Phaser from "phaser";
 import type { CoinEvent } from "./Level";
 import { COIN_RADIUS, DEPTH_TRACK } from "./VisualScale";
@@ -30,7 +31,7 @@ export class CollectibleField {
   render(distance: number, visible = true): void {
     for (const { event, gameObject } of this.coins.values()) {
       const x = this.characterX + event.x - distance;
-      const onScreen = x > -VIEW_MARGIN && x < this.scene.scale.width + VIEW_MARGIN;
+      const onScreen = x > -VIEW_MARGIN && x < VIEWPORT.width + VIEW_MARGIN;
       gameObject.x = x;
       gameObject.angle = this.reducedMotion ? 0 : distance * 0.8 % 360;
       gameObject.setVisible(visible && onScreen && !this.collected.has(event.id));

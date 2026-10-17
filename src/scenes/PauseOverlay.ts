@@ -1,3 +1,4 @@
+import { VIEWPORT } from "../game/Viewport";
 import Phaser from "phaser";
 import type { Difficulty } from "../game/Difficulty";
 import { DEPTH_HUD } from "../game/VisualScale";
@@ -39,7 +40,7 @@ export class PauseOverlay {
   show(kind: PauseOverlayKind, onDismiss: (difficulty?: Difficulty) => void, onMainMenu?: () => void): void {
     this.destroy();
 
-    const { width, height } = this.scene.scale;
+    const { width, height } = VIEWPORT;
     const copy = COPY[kind];
     const panelWidth = kind === "start" ? 520 : 460;
     const panelHeight = kind === "start" ? 302 : 240;

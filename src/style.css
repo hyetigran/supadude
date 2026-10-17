@@ -1,0 +1,18 @@
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #1d1f27; }
+body { box-sizing: border-box; height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); display: flex; flex-direction: column; }
+#game { width: 100%; flex: 1; min-height: 0; overflow: hidden; }
+#game canvas { display: block; touch-action: none; }
+.touch-controls { display: none; }
+@media (max-width: 1366px) {
+  .touch-controls:not([hidden]) { display: block; position: fixed; pointer-events: none; user-select: none; -webkit-user-select: none; }
+  .touch-controls button { position: absolute; bottom: 12px; pointer-events: auto; border: 2px solid #dbeafe99; color: #fff; background: #172033b8; font: bold 14px Arial, sans-serif; touch-action: none; text-transform: capitalize; -webkit-touch-callout: none; }
+  .movement-zone:not([hidden]) { position: absolute; left: 0; top: 22%; bottom: 0; width: 50%; pointer-events: auto; touch-action: none; }
+  .touch-controls .control-joystick { width: 104px; height: 80px; bottom: auto; transform: translate(-50%, -50%); border-radius: 50%; display: grid; place-items: center; pointer-events: none; }
+  .touch-controls [hidden] { display: none; }
+  .joystick-thumb { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #6b8aa8cc; font-size: 24px; pointer-events: none; }
+  .control-power { right: 12px; width: 80px; height: 80px; border-radius: 50%; }
+  .touch-controls .powered { background: #87490cdb; border-color: #facc15; }
+  .touch-controls .pressed { background: #467ca6; }
+  .touch-controls button:disabled { opacity: .35; }
+  .touch-controls button:focus-visible { outline: 3px solid #facc15; outline-offset: 2px; }
+}

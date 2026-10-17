@@ -1,3 +1,5 @@
+import { VIEWPORT, RENDER_SCALE } from "../game/Viewport";
+import { TouchControls } from "../game/TouchControls";
 import Phaser from "phaser";
 import { CollectibleField } from "../game/CollectibleField";
 import { InputManager } from "../game/InputManager";
@@ -64,6 +66,7 @@ export class GameScene extends Phaser.Scene {
   private runner!: Runner;
   private frame!: RunnerFrame;
   private playerInput!: InputManager;
+  private touchControls?: TouchControls;
   private keyboardAdapter?: KeyboardAdapter;
   private battleField!: BattleField;
   private obstacleField!: ObstacleField;
@@ -82,7 +85,6 @@ export class GameScene extends Phaser.Scene {
   private hudText?: Phaser.GameObjects.Text;
   private progressFill?: Phaser.GameObjects.Rectangle;
   private abilityText?: Phaser.GameObjects.Text;
-  private shootButton?: Phaser.GameObjects.Container;
   private pauseButton?: Phaser.GameObjects.Container;
 
   private groundY = 0;
@@ -100,14 +102,16 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(data: { autoStart?: boolean; practiceBattle?: 0.5 | 0.9 } = {}): void {
+    this.cameras.main.setOrigin(0, 0).setZoom(RENDER_SCALE);
     this.qaOpen = false;
     this.level = qaLevel(this.qaSettings);
     this.runner = new Runner(this.level);
     this.frame = this.runner.step(0, { jumpHeld: false });
     this.playerInput = new InputManager();
+    this.touchControls = new TouchControls(this.playerInput, this.game.canvas);
     this.pauseOverlay = new PauseOverlay(this);
     this.fx = new Fx(this);
-    this.groundY = groundYForViewport(this.scale.height);
+    this.groundY = groundYForViewport(VIEWPORT.height);
     this.isPaused = true;
     this.isComplete = false;
     this.reducedMotion =
@@ -116,11 +120,11 @@ export class GameScene extends Phaser.Scene {
     this.createBackgroundTexture();
     this.createSceneryTexture();
     this.background = this.add
-      .tileSprite(0, 0, this.scale.width, this.scale.height, BACKGROUND_TEXTURE)
+      .tileSprite(0, 0, VIEWPORT.width, VIEWPORT.height, BACKGROUND_TEXTURE)
       .setOrigin(0, 0)
       .setDepth(DEPTH_BACKGROUND);
     this.scenery = this.add
-      .tileSprite(0, 0, this.scale.width, this.scale.height, SCENERY_TEXTURE)
+      .tileSprite(0, 0, VIEWPORT.width, VIEWPORT.height, SCENERY_TEXTURE)
       .setOrigin(0, 0)
       .setDepth(DEPTH_SCENERY);
 
@@ -136,13 +140,12 @@ export class GameScene extends Phaser.Scene {
 
     this.createHud();
     this.pauseButton = this.createPauseButton();
-    this.qaButton = this.add.text(this.scale.width - 112, 14, "QA", {
+    this.qaButton = this.add.text(VIEWPORT.width - 112, 14, "QA", {
       fontFamily: HUD_FONT, fontSize: "18px", color: "#ffffff", backgroundColor: "#245764", padding: { x: 12, y: 10 },
     }).setDepth(DEPTH_HUD + 30).setInteractive({ useHandCursor: true });
     this.qaButton.on("pointerdown", (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
       event.stopPropagation(); this.openQA();
     });
-    this.shootButton = this.createShootButton();
     this.input.addPointer(1);
     this.renderFrame(this.frame);
 
@@ -157,6 +160,7 @@ export class GameScene extends Phaser.Scene {
       this.pauseOverlay.destroy();
       this.qaPanel.destroy();
       this.keyboardAdapter?.destroy();
+      this.touchControls?.destroy();
       this.input.off("pointerdown", this.handlePointerDown);
       this.input.off("pointerup", this.handlePointerUp);
       this.input.off("pointerupoutside", this.handlePointerUp);
@@ -167,6 +171,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    this.touchControls?.update(!this.isPaused && !this.isComplete && this.frame.phase === "running", !!this.frame.battle, this.frame.carPower);
     if (this.isPaused || this.isComplete) return;
 
     const upPressed = this.playerInput.consumePress("up");
@@ -309,16 +314,16 @@ export class GameScene extends Phaser.Scene {
   private createBackgroundTexture(): void {
     if (this.textures.exists(BACKGROUND_TEXTURE)) return;
     const g = this.add.graphics();
-    g.fillStyle(SKY_COLOR); g.fillRect(0, 0, TEXTURE_WIDTH, this.scale.height);
+    g.fillStyle(SKY_COLOR); g.fillRect(0, 0, TEXTURE_WIDTH, VIEWPORT.height);
     g.fillStyle(0xa8c58b); g.fillRect(0, this.groundY - 35, TEXTURE_WIDTH, 35);
     g.fillStyle(0xc8c2af); g.fillRect(0, this.groundY - 14, TEXTURE_WIDTH, 14);
-    g.fillStyle(0x58636c); g.fillRect(0, this.groundY, TEXTURE_WIDTH, this.scale.height - this.groundY);
+    g.fillStyle(0x58636c); g.fillRect(0, this.groundY, TEXTURE_WIDTH, VIEWPORT.height - this.groundY);
     g.fillStyle(0xf2e2b8); g.fillRect(0, this.groundY, TEXTURE_WIDTH, 4);
     g.lineStyle(1, 0x9d998c);
     for (let x = 0; x < TEXTURE_WIDTH; x += 64) g.lineBetween(x, this.groundY - 14, x + 10, this.groundY);
     g.fillStyle(0xecc46a);
     for (let x = 0; x < TEXTURE_WIDTH; x += 120) g.fillRoundedRect(x, this.groundY + 46, 62, 3, 1);
-    g.generateTexture(BACKGROUND_TEXTURE, TEXTURE_WIDTH, this.scale.height); g.destroy();
+    g.generateTexture(BACKGROUND_TEXTURE, TEXTURE_WIDTH, VIEWPORT.height); g.destroy();
   }
 
   private createSceneryTexture(): void {
@@ -359,7 +364,7 @@ export class GameScene extends Phaser.Scene {
       g.fillStyle(0x8e7966); g.fillRect(house.x + house.w - 5, base - 20, 4, 29);
       g.fillStyle(0x77929a); g.fillRoundedRect(house.x + house.w - 13, base - 30, 24, 13, 4);
     }
-    g.generateTexture(SCENERY_TEXTURE, TEXTURE_WIDTH, this.scale.height); g.destroy();
+    g.generateTexture(SCENERY_TEXTURE, TEXTURE_WIDTH, VIEWPORT.height); g.destroy();
   }
 
   private createPlayerIcon(): Phaser.GameObjects.Container {
@@ -400,17 +405,17 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0.5)
       .setDepth(DEPTH_HUD + 1);
 
-    this.abilityText = this.add.text(this.scale.width / 2, 62, "", {
+    this.abilityText = this.add.text(VIEWPORT.width / 2, 62, "", {
       fontFamily: HUD_FONT, fontSize: "14px", fontStyle: "bold", color: "#075985", backgroundColor: "#ecfeff",
       padding: { x: 12, y: 7 }, resolution: TEXT_RESOLUTION,
     }).setOrigin(0.5).setDepth(DEPTH_HUD + 1);
-    this.carPowerText = this.add.text(this.scale.width / 2, 62, "", {
+    this.carPowerText = this.add.text(VIEWPORT.width / 2, 62, "", {
       fontFamily: HUD_FONT, fontSize: "13px", fontStyle: "bold", color: "#991b1b", backgroundColor: "#fff7ed",
       padding: { x: 12, y: 7 }, resolution: TEXT_RESOLUTION,
     }).setOrigin(0.5).setDepth(DEPTH_HUD + 1);
-    const y = this.scale.height - PROGRESS_HEIGHT;
+    const y = VIEWPORT.height - PROGRESS_HEIGHT;
     this.add
-      .rectangle(0, y, this.scale.width, PROGRESS_HEIGHT, 0x020617, 0.72)
+      .rectangle(0, y, VIEWPORT.width, PROGRESS_HEIGHT, 0x020617, 0.72)
       .setOrigin(0, 0)
       .setDepth(DEPTH_HUD);
     this.progressFill = this.add
@@ -426,34 +431,17 @@ export class GameScene extends Phaser.Scene {
       .setY(flying ? 99 : 62)
       .setColor(frame.carPower === "fire" ? "#991b1b" : frame.carPower === "water" ? "#1e40af" : "#854d0e")
       .setText(`${frame.carPower?.toUpperCase() ?? ""} ${(frame.carPowerRemainingMs / 1000).toFixed(1)}s  ·  ${frame.carPower === "fire" ? "F / X: BURN BUSHES" : frame.carPower === "water" ? "F / X: CLEAR TRASH CANS" : "F / X: ZAP HYDRANTS"}`);
-    this.shootButton?.setVisible(frame.carPower !== null && frame.phase === "running" && !this.isPaused && !this.isComplete);
     const percent = Math.floor(frame.progress * 100);
     const text = `${this.difficulty.toUpperCase()}    ATTEMPT ${frame.attempt}    ${percent}%    COINS ${frame.coinsCollected}/${this.level.totalCoins}`;
     if (this.hudText && this.hudText.text !== text) {
       this.hudText.setText(text);
       this.hudPanel?.setSize(this.hudText.width + 24, 38);
     }
-    this.progressFill?.setSize(this.scale.width * frame.progress, PROGRESS_HEIGHT);
-  }
-
-  private createShootButton(): Phaser.GameObjects.Container {
-    const background = this.add.rectangle(0, 0, 116, 52, HUD_COLOR, 0.95)
-      .setStrokeStyle(2, 0xf8fafc, 0.85);
-    const label = this.add.text(0, 0, "SHOOT · F / X", {
-      fontFamily: HUD_FONT, fontSize: "13px", fontStyle: "bold", color: "#ffffff",
-      resolution: TEXT_RESOLUTION,
-    }).setOrigin(0.5);
-    const hit = this.add.zone(0, 0, 116, 52).setInteractive({ useHandCursor: true });
-    hit.on("pointerdown", (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      if (!this.isPaused && !this.isComplete) this.playerInput.trigger("shoot");
-    });
-    return this.add.container(this.scale.width - 76, this.scale.height - 52, [background, label, hit])
-      .setDepth(DEPTH_HUD + 2).setVisible(false);
+    this.progressFill?.setSize(VIEWPORT.width * frame.progress, PROGRESS_HEIGHT);
   }
 
   private createPauseButton(): Phaser.GameObjects.Container {
-    const x = this.scale.width - PAUSE_BUTTON_PAD - PAUSE_BUTTON_SIZE / 2;
+    const x = VIEWPORT.width - PAUSE_BUTTON_PAD - PAUSE_BUTTON_SIZE / 2;
     const y = PAUSE_BUTTON_PAD + PAUSE_BUTTON_SIZE / 2;
     const background = this.add
       .rectangle(0, 0, PAUSE_BUTTON_SIZE, PAUSE_BUTTON_SIZE, HUD_COLOR, 0.9)
@@ -484,7 +472,7 @@ export class GameScene extends Phaser.Scene {
   private handlePause(): void {
     if (this.isPaused || this.isComplete || this.qaOpen) return;
     this.isPaused = true;
-    this.shootButton?.setVisible(false);
+    this.playerInput.clearAll();
     this.sfx.play("pause");
     this.pauseButton?.setVisible(false);
     this.pauseOverlay.show("pause", () => {
@@ -503,7 +491,6 @@ export class GameScene extends Phaser.Scene {
     this.isPaused = true;
     this.playerInput.clearAll();
     this.pauseOverlay.destroy();
-    this.shootButton?.setVisible(false);
     this.qaPanel.show(this.qaSettings, (settings, practiceBattle) => {
       this.qaSettings = settings;
       this.qaOpen = false;
@@ -523,7 +510,6 @@ export class GameScene extends Phaser.Scene {
     if (this.isComplete) return;
     this.isComplete = true;
     this.qaButton?.setVisible(false);
-    this.shootButton?.setVisible(false);
     this.pauseButton?.setVisible(false);
     this.sfx.play("levelComplete");
     this.fx.burst(CHARACTER_X, this.player?.y ?? this.groundY, 0x4ade80, {
@@ -535,7 +521,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private showResultsOverlay(): void {
-    const { width, height } = this.scale;
+    const { width, height } = VIEWPORT;
     const backdrop = this.add.rectangle(width / 2, height / 2, width, height, 0x020617, 0.68);
     const panel = this.add
       .rectangle(width / 2, height / 2, 460, 280, HUD_COLOR, 0.96)

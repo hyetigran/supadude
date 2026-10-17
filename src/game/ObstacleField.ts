@@ -1,3 +1,4 @@
+import { VIEWPORT } from "./Viewport";
 import Phaser from "phaser";
 import { solidWorldX, solidBottom, type HazardEvent, type Level, type SolidEvent } from "./Level";
 import { type RunnerFrame } from "./Runner";
@@ -69,7 +70,7 @@ export class ObstacleField {
     for (const item of this.objects) {
       const worldX = item.solid ? solidWorldX(item.solid, frame.distance) : item.x;
       const screenX = this.characterX + worldX - frame.distance;
-      item.object.setPosition(screenX, item.object.y).setVisible(!frame.battle && screenX > -180 && screenX < this.scene.scale.width + 180 && !frame.clearedHazardIds.includes(item.hazardId ?? ""));
+      item.object.setPosition(screenX, item.object.y).setVisible(!frame.battle && screenX > -180 && screenX < VIEWPORT.width + 180 && !frame.clearedHazardIds.includes(item.hazardId ?? ""));
       item.object.setAlpha(item.powerId && frame.usedPowerIds.includes(item.powerId) ? 0.3 : 1);
       item.powerLabel?.setAlpha(frame.usedCarIds.includes(item.solid?.id ?? "") ? 0.3 : 1);
       for (const wheel of item.wheels ?? []) wheel.rotation = -frame.distance / 12;
