@@ -1,4 +1,4 @@
-export type HazardKind = "spike" | "doubleSpike" | "tripleSpike" | "bush" | "trashCan" | "tree" | "basketballHoop";
+export type HazardKind = "spike" | "doubleSpike" | "tripleSpike" | "bush" | "trashCan" | "tree" | "basketballHoop" | "fireHydrant" | "constructionPit" | "fallenTree";
 
 export interface HazardEvent {
   id: string;
@@ -11,7 +11,7 @@ export interface HazardEvent {
   kind: HazardKind;
 }
 
-export type CarPower = "fire" | "water";
+export type CarPower = "fire" | "water" | "electricity";
 
 export interface SolidEvent {
   power?: CarPower;
@@ -52,6 +52,7 @@ export function solidWorldX(solid: SolidEvent, distance: number): number {
 }
 
 export interface Level {
+  battles?: readonly { id: string; x: number; robberCount: number }[];
   powers?: readonly PowerEvent[];
   hazards: readonly HazardEvent[];
   solids: readonly SolidEvent[];
@@ -67,7 +68,7 @@ type CourseToken =
   | { type: "tree" }
   | { type: "basketballHoop" }
   | { type: "gap"; width: number }
-  | { type: "garden"; count: 1 | 2 | 3; coin?: boolean }
+  | { type: "garden"; count: 1 | 2 | 3; kind?: "fireHydrant" | "constructionPit" | "fallenTree"; coin?: boolean }
   | { type: "car"; width: 64 | 96 | 128 | 160; height: 48 | 72; coin?: boolean };
 
 const GARDEN_UNIT_WIDTH = 30;
@@ -91,7 +92,7 @@ const INTRO: readonly CourseToken[] = [
   { type: "gap", width: 200 },
   { type: "garden", count: 3, coin: true },
   { type: "gap", width: 190 },
-  { type: "garden", count: 1 },
+  { type: "garden", kind: "constructionPit", count: 1 },
 ];
 
 // Alternate short and long beats; close bin pairs share one jump.
@@ -100,7 +101,7 @@ const RHYTHM: readonly CourseToken[] = [
   { type: "gap", width: 150 },
   { type: "garden", count: 1 },
   { type: "gap", width: 200 },
-  { type: "garden", count: 3, coin: true },
+  { type: "garden", kind: "fallenTree", count: 3, coin: true },
   { type: "gap", width: 140 },
   { type: "garden", count: 2 },
   { type: "gap", width: 210 },
@@ -112,13 +113,13 @@ const RHYTHM: readonly CourseToken[] = [
   { type: "gap", width: 150 },
   { type: "garden", count: 3 },
   { type: "gap", width: 200 },
-  { type: "garden", count: 1 },
+  { type: "garden", kind: "fireHydrant", count: 1 },
   { type: "gap", width: 40 },
   { type: "garden", count: 1, coin: true },
   { type: "gap", width: 220 },
   { type: "garden", count: 3, coin: true },
   { type: "gap", width: 150 },
-  { type: "garden", count: 2 },
+  { type: "garden", kind: "constructionPit", count: 2 },
 ];
 
 // Land on car roofs, then jump again to clear the hedges at the exit.
@@ -134,7 +135,7 @@ const STEPS: readonly CourseToken[] = [
   { type: "car", width: 160, height: 48, coin: true },
   { type: "car", width: 96, height: 72, coin: true },
   { type: "gap", width: 180 },
-  { type: "garden", count: 2 },
+  { type: "garden", kind: "fallenTree", count: 2 },
   { type: "gap", width: 170 },
   { type: "car", width: 64, height: 48, coin: true },
   { type: "gap", width: 180 },
@@ -153,7 +154,7 @@ const SYNCOPATION: readonly CourseToken[] = [
   { type: "gap", width: 40 },
   { type: "garden", count: 1, coin: true },
   { type: "gap", width: 170 },
-  { type: "garden", count: 3, coin: true },
+  { type: "garden", kind: "fireHydrant", count: 3, coin: true },
   { type: "gap", width: 140 },
   { type: "garden", count: 2 },
   { type: "gap", width: 220 },
@@ -161,7 +162,7 @@ const SYNCOPATION: readonly CourseToken[] = [
   { type: "gap", width: 180 },
   { type: "garden", count: 2 },
   { type: "gap", width: 150 },
-  { type: "garden", count: 1 },
+  { type: "garden", kind: "constructionPit", count: 1 },
   { type: "gap", width: 40 },
   { type: "garden", count: 1, coin: true },
   { type: "gap", width: 210 },
@@ -171,7 +172,7 @@ const SYNCOPATION: readonly CourseToken[] = [
   { type: "gap", width: 190 },
   { type: "car", width: 96, height: 48, coin: true },
   { type: "gap", width: 190 },
-  { type: "garden", count: 2 },
+  { type: "garden", kind: "fallenTree", count: 2 },
 ];
 
 // Linked car roofs and hedge exits reward controlled landings.
@@ -201,7 +202,7 @@ const ROOFTOPS: readonly CourseToken[] = [
 
 // Sustain the rhythm across hedges, bins, and approaching traffic.
 const GAUNTLET: readonly CourseToken[] = [
-  { type: "garden", count: 3, coin: true },
+  { type: "garden", kind: "fireHydrant", count: 3, coin: true },
   { type: "gap", width: 140 },
   { type: "garden", count: 2 },
   { type: "gap", width: 180 },
@@ -211,13 +212,13 @@ const GAUNTLET: readonly CourseToken[] = [
   { type: "gap", width: 190 },
   { type: "car", width: 96, height: 48, coin: true },
   { type: "gap", width: 170 },
-  { type: "garden", count: 1 },
+  { type: "garden", kind: "constructionPit", count: 1 },
   { type: "gap", width: 40 },
   { type: "garden", count: 1, coin: true },
   { type: "gap", width: 170 },
   { type: "garden", count: 3, coin: true },
   { type: "gap", width: 140 },
-  { type: "garden", count: 2 },
+  { type: "garden", kind: "fallenTree", count: 2 },
   { type: "gap", width: 190 },
   { type: "car", width: 160, height: 48, coin: true },
   { type: "car", width: 96, height: 72, coin: true },
@@ -239,7 +240,7 @@ const PRESSURE: readonly CourseToken[] = [
   { type: "gap", width: 180 },
   { type: "garden", count: 1 },
   { type: "gap", width: 40 },
-  { type: "garden", count: 1, coin: true },
+  { type: "garden", kind: "fireHydrant", count: 1, coin: true },
   { type: "gap", width: 200 },
   { type: "garden", count: 3, coin: true },
 ];
@@ -250,7 +251,7 @@ const FINALE: readonly CourseToken[] = [
   { type: "gap", width: 170 },
   { type: "garden", count: 3 },
   { type: "gap", width: 140 },
-  { type: "garden", count: 2, coin: true },
+  { type: "garden", kind: "constructionPit", count: 2, coin: true },
   { type: "gap", width: 180 },
   { type: "car", width: 160, height: 48, coin: true },
   { type: "car", width: 128, height: 72, coin: true },
@@ -261,7 +262,7 @@ const FINALE: readonly CourseToken[] = [
   { type: "gap", width: 170 },
   { type: "garden", count: 1 },
   { type: "gap", width: 40 },
-  { type: "garden", count: 1, coin: true },
+  { type: "garden", kind: "fallenTree", count: 1, coin: true },
   { type: "gap", width: 170 },
   { type: "garden", count: 3, coin: true },
   { type: "gap", width: 140 },
@@ -361,8 +362,8 @@ export function buildLevel(script: readonly CourseToken[] = SCRIPT): Level {
         x,
         bottom: 0,
         width,
-        height: GARDEN_HEIGHT,
-        kind: token.count === 1 ? "trashCan" : "bush",
+        height: token.kind === "constructionPit" ? 8 : GARDEN_HEIGHT,
+        kind: token.kind ?? (token.count === 1 ? "trashCan" : "bush"),
       });
       if (token.coin) addCoin(x, 88);
       cursor += width;
@@ -370,7 +371,7 @@ export function buildLevel(script: readonly CourseToken[] = SCRIPT): Level {
     }
 
     const x = cursor + token.width / 2;
-    const power: CarPower | undefined = solidIndex % 4 === 0 ? "fire" : solidIndex % 4 === 1 ? "water" : undefined;
+    const power: CarPower | undefined = solidIndex % 4 === 0 ? "fire" : solidIndex % 4 === 1 ? "water" : solidIndex % 4 === 2 ? "electricity" : undefined;
     solids.push({ id: `solid-${solidIndex++}`, x, width: token.width, height: token.height, kind: "car", power });
 
     if (token.coin) addCoin(x, token.height + 54);
@@ -378,7 +379,8 @@ export function buildLevel(script: readonly CourseToken[] = SCRIPT): Level {
   }
 
   const length = cursor + FINISH_CLEARANCE;
-  return { hazards, solids, coins, powers, length, totalCoins: coins.length };
+  return { hazards, solids, coins, powers, length, totalCoins: coins.length,
+    battles: [0.5, 0.9].map((progress, index) => ({ id: `battle-${index}`, x: length * progress, robberCount: 2 })) };
 }
 
 export const LEVEL = buildLevel();

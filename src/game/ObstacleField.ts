@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { solidWorldX, solidBottom, type HazardEvent, type Level, type SolidEvent } from "./Level";
-import type { RunnerFrame } from "./Runner";
+import { type RunnerFrame } from "./Runner";
 import { DEPTH_TRACK } from "./VisualScale";
 
 interface TrackObject {
@@ -69,7 +69,7 @@ export class ObstacleField {
     for (const item of this.objects) {
       const worldX = item.solid ? solidWorldX(item.solid, frame.distance) : item.x;
       const screenX = this.characterX + worldX - frame.distance;
-      item.object.setPosition(screenX, item.object.y).setVisible(screenX > -180 && screenX < this.scene.scale.width + 180 && !frame.clearedHazardIds.includes(item.hazardId ?? ""));
+      item.object.setPosition(screenX, item.object.y).setVisible(!frame.battle && screenX > -180 && screenX < this.scene.scale.width + 180 && !frame.clearedHazardIds.includes(item.hazardId ?? ""));
       item.object.setAlpha(item.powerId && frame.usedPowerIds.includes(item.powerId) ? 0.3 : 1);
       item.powerLabel?.setAlpha(frame.usedCarIds.includes(item.solid?.id ?? "") ? 0.3 : 1);
       for (const wheel of item.wheels ?? []) wheel.rotation = -frame.distance / 12;
@@ -79,8 +79,7 @@ export class ObstacleField {
   private createCar(solid: SolidEvent): void {
     const { width: w, height: h } = solid;
     const g = this.scene.add.graphics();
-    const colors = [0xe9b44c, 0x8b6bb1];
-    const color = solid.power === "fire" ? 0xef4444 : solid.power === "water" ? 0x2563eb : colors[Number(solid.id.split("-").pop()) % colors.length] ?? colors[0];
+    const color = solid.power === "fire" ? 0xef4444 : solid.power === "water" ? 0x2563eb : solid.power === "electricity" ? 0xfacc15 : 0x8b6bb1;
     g.fillStyle(0x172033, 0.18);
     g.fillEllipse(0, 1, w + 12, 10);
     g.fillStyle(color);
@@ -108,9 +107,9 @@ export class ObstacleField {
     });
     const object = this.scene.add.container(0, this.groundY - solidBottom(solid), [g, ...wheels]).setDepth(DEPTH_TRACK);
     const powerLabel = solid.power ? this.scene.add.text(0, -h - 16,
-      solid.power === "fire" ? "FIRE ↓" : "WATER ↓", {
+      `${solid.power.toUpperCase()} ↓`, {
         fontFamily: "Arial, sans-serif", fontSize: "10px", fontStyle: "bold",
-        color: solid.power === "fire" ? "#991b1b" : "#1e40af", backgroundColor: "#fffbeb",
+        color: solid.power === "fire" ? "#991b1b" : solid.power === "water" ? "#1e40af" : "#854d0e", backgroundColor: "#fffbeb",
         padding: { x: 5, y: 3 },
       }).setOrigin(0.5) : undefined;
     if (powerLabel) object.add(powerLabel);
@@ -120,7 +119,24 @@ export class ObstacleField {
   private createHazard(hazard: HazardEvent): void {
     const { width: w, height: h } = hazard;
     const g = this.scene.add.graphics();
-    if (hazard.kind === "tree") {
+    if (hazard.kind === "fireHydrant") {
+      g.fillStyle(0xfacc15); g.fillRoundedRect(-w / 2 + 5, -h + 4, w - 10, h - 4, 4);
+      g.fillStyle(0xeab308); g.fillRect(-w / 2, -h * 0.65, w, 9);
+      g.fillStyle(0x854d0e); g.fillRect(-w / 2 + 2, -4, w - 4, 4);
+      g.fillStyle(0xfef08a); g.fillEllipse(0, -h + 3, w - 6, 9);
+      g.lineStyle(2, 0x854d0e); g.strokeCircle(0, -h / 2, 5);
+    } else if (hazard.kind === "constructionPit") {
+      g.fillStyle(0x172033); g.fillRect(-w / 2, -3, w, 22);
+      g.fillStyle(0x806344); g.fillRect(-w / 2 + 4, 10, w - 8, 9);
+      g.lineStyle(4, 0xfbbf24); g.lineBetween(-w / 2, -3, w / 2, -3);
+      g.lineStyle(3, 0x172033);
+      for (let x = -w / 2 + 4; x < w / 2; x += 12) g.lineBetween(x, -5, x + 4, -1);
+    } else if (hazard.kind === "fallenTree") {
+      g.fillStyle(0x795032); g.fillRoundedRect(-w / 2, -h, w, h, 9);
+      g.lineStyle(2, 0xc49a6c); g.lineBetween(-w / 2 + 8, -h + 8, w / 2 - 6, -h + 8);
+      g.fillStyle(0xd5b382); g.fillEllipse(w / 2 - 7, -h / 2, 13, h - 4);
+      g.lineStyle(2, 0x795032); g.strokeEllipse(w / 2 - 7, -h / 2, 7, h - 12);
+    } else if (hazard.kind === "tree") {
       // The trunk stands behind the curb; the outlined low branch is in the player's path.
       g.fillStyle(0x9b7653, 0.65); g.fillRect(w / 2 - 8, -h + 12, 12, h + 24);
       g.fillStyle(0x467c44); g.fillRoundedRect(-w / 2, -h, w, h, 18);

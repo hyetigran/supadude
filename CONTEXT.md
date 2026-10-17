@@ -29,7 +29,7 @@ The continuous baseline beneath the Level. Supa Dude may run and jump from it.
 Approaching cars and vans replacing the old Solid Blocks. Cars sit 24 world pixels below the sidewalk on the road. Their roofs remain reachable from the sidewalk; roof landing and side/underside collisions use the same lowered position as the artwork. The same deterministic world position is used for drawing and collision. Traffic freezes on Pause or Crash and resets on retry.
 
 **Hazard**:
-Fatal suburban obstacles: Bushes, Trash Cans, low Tree branches, and Basketball Hoops. Low overhead obstacles are marked “STAY LOW”; the current one-button version passes beneath them by staying grounded.
+Fatal suburban obstacles: Bushes, Trash Cans, Fire Hydrants, Fallen Trees, Construction Pits, low Tree branches, and Basketball Hoops. Hydrants and fallen trunks are jumped over; construction pits are ground-level hazards that must be cleared in a jump. Low overhead obstacles are marked “STAY LOW”; the current one-button version passes beneath them by staying grounded.
 
 **Flight Trampoline**:
 A blue mat that grants four seconds of Flight when Supa Dude lands on it from above. Running through it does not activate it. Each mat can activate once per Attempt.
@@ -41,7 +41,7 @@ Temporary airborne control: hold Jump to climb, release to descend. A visible co
 A gold orb that automatically applies a second upward impulse on airborne contact. It triggers once per Attempt, requires no second button press, and does not activate while flying. This is a localized double jump, not an unrestricted midair action.
 
 **Car Power**:
-Landing on a red Traffic roof grants Fire; a blue roof grants Water. Each powered car activates once per Attempt. The latest landing replaces the active element and grants six seconds of active play time. Press F, X, or the on-screen Shoot button to fire once. Fire burns nearby Bushes; Water clears nearby Trash Cans. Holding the button does not repeat. Attacks reach 180 world pixels ahead and fire at most once every 400 ms. Cleared Hazards stay gone for the Attempt. Other obstacles remain fatal. Powers and cleared obstacles reset on retry; Flight can coexist with a Car Power.
+Landing on a red Traffic roof grants Fire; a blue roof grants Water; a yellow roof grants Electricity. Each powered car activates once per Attempt. The latest landing replaces the active element and grants six seconds of active play time. Press F, X, or the on-screen Shoot button to fire once. Fire burns nearby Bushes; Water clears nearby Trash Cans; Electricity destroys nearby Fire Hydrants. Holding the button does not repeat. One shot can queue during cooldown, and taps up to 150 ms before power acquisition are buffered. All three powers auto-aim at the nearest compatible target within 180 world pixels in any direction, measured from the player center. Attacks and fire at most once every 400 ms. Cleared Hazards stay gone for the Attempt. Other obstacles remain fatal. Powers and cleared obstacles reset on retry; Flight can coexist with a Car Power.
 
 **Crash**:
 Fatal contact with a Hazard or a non-top face of Traffic. A Crash briefly freezes the Level, then begins a new Attempt from 0%.
@@ -74,3 +74,17 @@ A player without an Account. Guests can play unlimited Attempts.
 
 **Difficulty**:
 Normal uses the original forward speed. Optional Hard mode increases forward speed by 23%, keeping jump physics and the four-second Flight timer unchanged. Choose at the start; automatic retries preserve the chosen mode.
+
+**QA Settings**:
+The QA button opens a paused settings panel from the main menu, active play, or Pause. Adjust speed (0.25–2× the chosen difficulty), jump height (0.5–2×), gravity (0.5–2×), and obstacle frequency (0.5–2×, implemented by scaling all authored course positions). Toggle each Hazard type, Traffic, Flight Trampolines, and Jump Orbs. Apply restarts the Level; Cancel restores the previous screen; Reset Defaults edits the form before applying. Settings persist across retries and menu returns until page reload. Extreme combinations need not be completable. The default authored course remains unchanged by QA settings.
+
+**Pause**:
+Freezes simulation and offers Resume or Main Menu. Main Menu ends the current Attempt and returns to the difficulty selection screen.
+
+**Robber Battle**:
+Two arena fights trigger at 50% and 90% of the Level. Auto-scroll, Traffic, Hazards, Coins, Flight, and Car Power expiration freeze during combat; course objects are hidden. A/D or Left/Right move along the sidewalk; Space or tap jumps. There is no up/down movement and no separate arena floor. Descending onto a robber deals one damage, knocks the robber back, and bounces Supa Dude. Each jump can stomp once. Jump requires a fresh press, and landing has 350 ms of recovery before another jump; holding Jump never repeats during combat. F/X or Shoot uses an active Car Power to auto-aim at the nearest robber within 260 pixels, with the usual 400 ms cooldown and one queued shot. Each robber has two health and chases Supa Dude, warns for 450 ms, punches, then recovers. There are two robbers per fight by default; QA can set 1–50 or disable battles.
+
+Supa Dude begins each fight with three health: two extra hits before the third hit ends the Attempt. A hit grants one second of protection against overlapping punches. Battle health does not grant protection on the course and refills for the next fight. Defeating all robbers shows a brief victory beat, then resumes the exact saved course position and jump state. Losing restarts the whole Attempt and restores both fights. Pause freezes combat too.
+
+**Boss Practice**:
+QA's “Go to 50% fight” and “Go to 90% fight” buttons apply the current form settings, enable battles, and start the chosen fight immediately. Retry returns to that fight with full health. Earlier fights are marked skipped; winning resumes the course at the chosen milestone, initially airborne to clear geometry at the skipped approach. Normal play retains its saved position and jump state when entering and leaving combat.

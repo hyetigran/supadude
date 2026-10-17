@@ -1,4 +1,4 @@
-export type Action = "jump" | "shoot" | "pause";
+export type Action = "jump" | "shoot" | "pause" | "up" | "down" | "left" | "right";
 
 type Listener = () => void;
 

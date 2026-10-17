@@ -182,7 +182,7 @@ describe("Runner", () => {
   ])("completes $difficulty mode on the authored course at $frameMs ms/frame with $timingOffset px timing offset", ({ difficulty, frameMs, timingOffset }) => {
     const tuning = tuningForDifficulty(difficulty);
     const speedRatio = tuning.runSpeed / RUNNER_TUNING.runSpeed;
-    const runner = new Runner(LEVEL, tuning);
+    const runner = new Runner({ ...LEVEL, battles: [] }, tuning);
     let frame = runner.step(0, { jumpHeld: false });
     let crash = "none";
 

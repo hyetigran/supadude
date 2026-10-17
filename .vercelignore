@@ -1,0 +1,6 @@
+.claude/
+.DS_Store
+.wizardgenie/
+node_modules/
+dist/
+.env*

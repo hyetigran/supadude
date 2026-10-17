@@ -4,3 +4,5 @@ dist
 *.log
 .env*
 .wizardgenie
+.DS_Store
+.claude/worktrees/

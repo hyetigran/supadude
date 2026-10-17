@@ -30,11 +30,16 @@ describe("buildLevel", () => {
     const level = buildLevel();
     const kinds = new Set(level.hazards.map(({ kind }) => kind));
 
-    expect(kinds).toEqual(new Set(["bush", "trashCan", "tree", "basketballHoop"]));
+    expect(kinds).toEqual(new Set(["bush", "trashCan", "tree", "basketballHoop", "fireHydrant", "constructionPit", "fallenTree"]));
     expect(level.solids.every(({ kind }) => kind === "car")).toBe(true);
     expect(new Set(level.powers?.map(({ kind }) => kind))).toEqual(new Set(["flightPad", "jumpOrb"]));
     expect(level.solids.some(({ height }) => height === 48)).toBe(true);
     expect(level.solids.some(({ height }) => height === 72)).toBe(true);
+  });
+
+  it("places two arena fights at 50% and 90% with two robbers each", () => {
+    const level = buildLevel();
+    expect(level.battles?.map(({ x, robberCount }) => [x / level.length, robberCount])).toEqual([[0.5, 2], [0.9, 2]]);
   });
 
   it("counts uniquely identified authored Coins", () => {

@@ -151,6 +151,64 @@ describe("car elemental powers", () => {
     expect(advance(runner, 100).phase).toBe("running");
   });
 
+  const hydrant = { ...bush, id: "hydrant", kind: "fireHydrant" as const };
+  const yellowCar = { ...fireCar, power: "electricity" as const };
+
+  it.each(["fire", "water", "electricity"] as const)("auto-aims %s at the nearest compatible target", (power) => {
+    const near = { ...bush, id: "near", x: 280,
+      kind: power === "fire" ? "bush" as const : power === "water" ? "trashCan" as const : "fireHydrant" as const };
+    const runner = new Runner({ ...EMPTY, solids: [{ ...fireCar, power }],
+      hazards: [{ ...near, id: "far", x: 310 }, near] });
+    expect(landOnCar(runner).carPower).toBe(power);
+    const shot = runner.step(10, { jumpHeld: false, shootPressed: true });
+    expect(shot.clearedHazardIds).toEqual(["near"]);
+  });
+
+  it("electricity clears hydrants while cars remain solid", () => {
+    const runner = new Runner({ ...EMPTY, solids: [yellowCar, { ...fireCar, id: "target-car", x: 340 }],
+      hazards: [{ ...hydrant, x: 280 }] });
+    landOnCar(runner);
+    expect(runner.step(10, { jumpHeld: false, shootPressed: true }).clearedHazardIds).toEqual(["hydrant"]);
+    let frame = runner.step(0, { jumpHeld: false });
+    for (let i = 0; i < 100 && frame.phase === "running"; i++) frame = runner.step(10, { jumpHeld: false, shootPressed: true });
+    expect(frame.events).toContainEqual({ type: "died", obstacleId: "target-car" });
+  });
+
+  it("fires a tap on the same tick electricity is collected", () => {
+    const level = { ...EMPTY, solids: [yellowCar], hazards: [{ ...hydrant, x: 280 }] };
+    const probe = new Runner(level);
+    const tick = 1000 / 120;
+    probe.step(tick, { jumpHeld: true });
+    let landingTick = 0;
+    while (!probe.step(tick, { jumpHeld: false }).carPower) landingTick++;
+    const runner = new Runner(level);
+    runner.step(tick, { jumpHeld: true });
+    for (let i = 0; i < landingTick; i++) runner.step(tick, { jumpHeld: false });
+    expect(runner.step(tick, { jumpHeld: false, shootPressed: true }).clearedHazardIds).toEqual(["hydrant"]);
+  });
+
+  it("queues one rapid second shot at a hydrant without repeating", () => {
+    const runner = new Runner({ ...EMPTY, solids: [yellowCar], hazards: [
+      { ...hydrant, id: "first", x: 270, width: 20 }, { ...hydrant, id: "second", x: 330, width: 20 },
+    ] });
+    landOnCar(runner);
+    expect(runner.step(10, { jumpHeld: false, shootPressed: true }).clearedHazardIds).toEqual(["first"]);
+    expect(runner.step(10, { jumpHeld: false, shootPressed: true }).clearedHazardIds).toEqual(["first"]);
+    expect(advance(runner, 40).clearedHazardIds).toEqual(["first", "second"]);
+    const events = Array.from({ length: 60 }, () => runner.step(10, { jumpHeld: false }).events).flat();
+    expect(events.some(({ type }) => type === "shotFired")).toBe(false);
+  });
+
+  it("restores cleared hydrants on retry", () => {
+    const runner = new Runner({ ...EMPTY, solids: [yellowCar], hazards: [hydrant, { ...bush, x: 500 }] });
+    landOnCar(runner);
+    expect(runner.step(10, { jumpHeld: false, shootPressed: true }).clearedHazardIds).toEqual(["hydrant"]);
+    let frame = runner.step(0, { jumpHeld: false });
+    for (let i = 0; i < 300 && frame.attempt === 1; i++) frame = runner.step(10, { jumpHeld: false });
+    expect(frame.attempt).toBe(2);
+    expect(frame.clearedHazardIds).toEqual([]);
+  });
+
   it("does not grant a power for a side collision or passing above the roof", () => {
     const crash = advance(new Runner({ ...EMPTY, solids: [fireCar] }), 55);
     expect(crash.phase).toBe("dead");
@@ -212,7 +270,7 @@ describe("car elemental powers", () => {
     expect(landOnCar(runner).clearedHazardIds).toEqual([]);
     expect(runner.step(10, { jumpHeld: false, shootPressed: true }).clearedHazardIds).toEqual(["bush"]);
     expect(runner.step(10, { jumpHeld: false, shootPressed: true }).clearedHazardIds).toEqual(["bush"]);
-    expect(advance(runner, 42).clearedHazardIds).toEqual(["bush"]);
+    expect(advance(runner, 42).clearedHazardIds).toEqual(["bush", "second"]);
     expect(runner.step(10, { jumpHeld: false, shootPressed: true }).clearedHazardIds).toEqual(["bush", "second"]);
   });
 });

@@ -2,9 +2,12 @@ import Phaser from "phaser";
 import { CollectibleField } from "../game/CollectibleField";
 import { InputManager } from "../game/InputManager";
 import { KeyboardAdapter } from "../game/KeyboardAdapter";
-import { LEVEL } from "../game/Level";
+import { type Level } from "../game/Level";
+import { defaultQASettings, qaLevel, qaTuning } from "../game/QASettings";
+import { BattleField } from "../game/BattleField";
+import { QAPanel } from "./QAPanel";
 import { ObstacleField } from "../game/ObstacleField";
-import { tuningForDifficulty, type Difficulty } from "../game/Difficulty";
+import { type Difficulty } from "../game/Difficulty";
 import { Runner, type RunnerEvent, type RunnerFrame } from "../game/Runner";
 import { Sfx } from "../game/Sfx";
 import {
@@ -52,11 +55,17 @@ const PAUSE_BUTTON_PAD = 12;
  * immutable RunnerFrame snapshots into Phaser presentation.
  */
 export class GameScene extends Phaser.Scene {
+  private qaSettings = defaultQASettings();
+  private level!: Level;
+  private readonly qaPanel = new QAPanel();
+  private qaOpen = false;
+  private qaButton?: Phaser.GameObjects.Text;
   private difficulty: Difficulty = "normal";
   private runner!: Runner;
   private frame!: RunnerFrame;
   private playerInput!: InputManager;
   private keyboardAdapter?: KeyboardAdapter;
+  private battleField!: BattleField;
   private obstacleField!: ObstacleField;
   private collectibleField!: CollectibleField;
   private pauseOverlay!: PauseOverlay;
@@ -90,8 +99,10 @@ export class GameScene extends Phaser.Scene {
     super("GameScene");
   }
 
-  create(): void {
-    this.runner = new Runner(LEVEL);
+  create(data: { autoStart?: boolean; practiceBattle?: 0.5 | 0.9 } = {}): void {
+    this.qaOpen = false;
+    this.level = qaLevel(this.qaSettings);
+    this.runner = new Runner(this.level);
     this.frame = this.runner.step(0, { jumpHeld: false });
     this.playerInput = new InputManager();
     this.pauseOverlay = new PauseOverlay(this);
@@ -113,8 +124,9 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setDepth(DEPTH_SCENERY);
 
-    this.obstacleField = new ObstacleField(this, this.groundY, CHARACTER_X, LEVEL);
-    this.collectibleField = new CollectibleField(this, this.groundY, CHARACTER_X, LEVEL.coins, this.reducedMotion);
+    this.battleField = new BattleField(this, this.groundY);
+    this.obstacleField = new ObstacleField(this, this.groundY, CHARACTER_X, this.level);
+    this.collectibleField = new CollectibleField(this, this.groundY, CHARACTER_X, this.level.coins, this.reducedMotion);
     this.player = this.createPlayerIcon();
     this.powerAura = this.add.circle(CHARACTER_X, this.groundY, 27, 0xef4444, 0.16)
       .setStrokeStyle(3, 0xef4444, 0.9).setDepth(DEPTH_PLAYER - 0.1).setVisible(false);
@@ -124,6 +136,12 @@ export class GameScene extends Phaser.Scene {
 
     this.createHud();
     this.pauseButton = this.createPauseButton();
+    this.qaButton = this.add.text(this.scale.width - 112, 14, "QA", {
+      fontFamily: HUD_FONT, fontSize: "18px", color: "#ffffff", backgroundColor: "#245764", padding: { x: 12, y: 10 },
+    }).setDepth(DEPTH_HUD + 30).setInteractive({ useHandCursor: true });
+    this.qaButton.on("pointerdown", (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation(); this.openQA();
+    });
     this.shootButton = this.createShootButton();
     this.input.addPointer(1);
     this.renderFrame(this.frame);
@@ -137,21 +155,25 @@ export class GameScene extends Phaser.Scene {
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.pauseOverlay.destroy();
+      this.qaPanel.destroy();
       this.keyboardAdapter?.destroy();
       this.input.off("pointerdown", this.handlePointerDown);
       this.input.off("pointerup", this.handlePointerUp);
       this.input.off("pointerupoutside", this.handlePointerUp);
     });
 
-    this.pauseOverlay.show("start", (difficulty) => this.beginPlay(difficulty ?? "normal"));
+    if (data.autoStart) this.beginPlay(this.difficulty, data.practiceBattle);
+    else this.pauseOverlay.show("start", (difficulty) => this.beginPlay(difficulty ?? "normal"));
   }
 
   update(_time: number, delta: number): void {
     if (this.isPaused || this.isComplete) return;
 
+    const upPressed = this.playerInput.consumePress("up");
     this.frame = this.runner.step(delta, {
-      jumpHeld: this.playerInput.isHeld("jump"),
-      jumpPressed: this.playerInput.consumePress("jump"),
+      moveX: Number(this.playerInput.isHeld("right")) - Number(this.playerInput.isHeld("left")),
+      jumpHeld: this.playerInput.isHeld("jump") || (!this.frame.battle && this.playerInput.isHeld("up")),
+      jumpPressed: this.playerInput.consumePress("jump") || (!this.frame.battle && upPressed),
       shootPressed: this.playerInput.consumePress("shoot"),
     });
 
@@ -163,11 +185,11 @@ export class GameScene extends Phaser.Scene {
     switch (event.type) {
       case "carPowerStarted":
         this.sfx.play("orb");
-        this.fx.burst(CHARACTER_X, this.player?.y ?? this.groundY, event.power === "fire" ? 0xf97316 : 0x38bdf8,
+        this.fx.burst(CHARACTER_X, this.player?.y ?? this.groundY, event.power === "fire" ? 0xf97316 : event.power === "water" ? 0x38bdf8 : 0xfacc15,
           { count: 14, lifespanMs: 360, speedMax: 120 });
         return;
       case "shotFired": {
-        const color = event.power === "fire" ? 0xf97316 : 0x38bdf8;
+        const color = event.power === "fire" ? 0xf97316 : event.power === "water" ? 0x38bdf8 : 0xfacc15;
         const targetX = CHARACTER_X + event.targetX - this.frame.distance;
         const targetY = this.groundY - event.targetY;
         const blast = this.add.graphics().setDepth(DEPTH_PLAYER + 1);
@@ -179,10 +201,15 @@ export class GameScene extends Phaser.Scene {
         this.sfx.play("orb");
         return;
       }
+      case "battleStarted":
+      case "battleWon":
+        this.playerInput.clearAll();
+        this.sfx.play("orb");
+        return;
       case "hazardCleared": {
-        const hazard = LEVEL.hazards.find(({ id }) => id === event.hazardId);
+        const hazard = this.level.hazards.find(({ id }) => id === event.hazardId);
         if (hazard) this.fx.burst(CHARACTER_X + hazard.x - this.frame.distance,
-          this.groundY - hazard.height / 2, event.power === "fire" ? 0xf97316 : 0x38bdf8,
+          this.groundY - hazard.height / 2, event.power === "fire" ? 0xf97316 : event.power === "water" ? 0x38bdf8 : 0xfacc15,
           { count: 12, lifespanMs: 300, speedMax: 130, gravityY: 100 });
         return;
       }
@@ -245,23 +272,27 @@ export class GameScene extends Phaser.Scene {
 
   private renderFrame(frame: RunnerFrame): void {
     const playerVisible = frame.phase !== "dead";
+    const playerX = frame.battle?.playerX ?? CHARACTER_X;
+    const feetY = this.groundY + (frame.battle?.playerY ?? 0);
+    const altitude = frame.battle?.jumpHeight ?? frame.altitude;
     if (this.player) {
       this.player
-        .setPosition(CHARACTER_X, this.groundY - PLAYER_SIZE / 2 - frame.altitude)
-        .setAngle(frame.flightRemainingMs > 0 ? -12 : this.reducedMotion ? 0 : frame.rotation)
+        .setPosition(playerX, feetY - PLAYER_SIZE / 2 - altitude)
+        .setAlpha(frame.battle?.invulnerable ? 0.55 : 1)
+        .setAngle(frame.battle ? 0 : frame.flightRemainingMs > 0 ? -12 : this.reducedMotion ? 0 : frame.rotation)
         .setVisible(playerVisible);
     }
 
-    const powerColor = frame.carPower === "fire" ? 0xf97316 : 0x38bdf8;
-    this.powerAura?.setPosition(CHARACTER_X, this.groundY - PLAYER_SIZE / 2 - frame.altitude)
+    const powerColor = frame.carPower === "fire" ? 0xf97316 : frame.carPower === "water" ? 0x38bdf8 : 0xfacc15;
+    this.powerAura?.setPosition(playerX, feetY - PLAYER_SIZE / 2 - altitude)
       .setFillStyle(powerColor, 0.16).setStrokeStyle(3, powerColor, 0.9)
       .setVisible(playerVisible && frame.carPower !== null);
 
     if (this.playerShadow) {
-      const shadowScale = Phaser.Math.Clamp(1 - frame.altitude / 180, 0.42, 1);
-      const restingSurface = frame.grounded ? frame.altitude : 0;
+      const shadowScale = Phaser.Math.Clamp(1 - altitude / 180, 0.42, 1);
+      const restingSurface = !frame.battle && frame.grounded ? frame.altitude : 0;
       this.playerShadow
-        .setPosition(CHARACTER_X, this.groundY - restingSurface + 3)
+        .setPosition(playerX, feetY - restingSurface + 3)
         .setScale(shadowScale, shadowScale)
         .setAlpha(playerVisible ? 0.18 + shadowScale * 0.24 : 0)
         .setVisible(playerVisible);
@@ -270,7 +301,8 @@ export class GameScene extends Phaser.Scene {
     if (this.background) this.background.tilePositionX = frame.distance;
     if (this.scenery) this.scenery.tilePositionX = frame.distance * (this.reducedMotion ? 1 : 0.24);
     this.obstacleField.render(frame);
-    this.collectibleField.render(frame.distance);
+    this.collectibleField.render(frame.distance, !frame.battle);
+    this.battleField.render(frame.battle, frame.carPower, frame.phase === "dead");
     this.updateHud(frame);
   }
 
@@ -392,11 +424,11 @@ export class GameScene extends Phaser.Scene {
     this.abilityText?.setVisible(flying).setText(`FLIGHT ${(frame.flightRemainingMs / 1000).toFixed(1)}s  ·  HOLD TO RISE / RELEASE TO DESCEND`);
     this.carPowerText?.setVisible(frame.carPower !== null && frame.phase !== "dead")
       .setY(flying ? 99 : 62)
-      .setColor(frame.carPower === "fire" ? "#991b1b" : "#1e40af")
-      .setText(`${frame.carPower?.toUpperCase() ?? ""} ${(frame.carPowerRemainingMs / 1000).toFixed(1)}s  ·  ${frame.carPower === "fire" ? "F / X: BURN BUSHES" : "F / X: CLEAR TRASH CANS"}`);
+      .setColor(frame.carPower === "fire" ? "#991b1b" : frame.carPower === "water" ? "#1e40af" : "#854d0e")
+      .setText(`${frame.carPower?.toUpperCase() ?? ""} ${(frame.carPowerRemainingMs / 1000).toFixed(1)}s  ·  ${frame.carPower === "fire" ? "F / X: BURN BUSHES" : frame.carPower === "water" ? "F / X: CLEAR TRASH CANS" : "F / X: ZAP HYDRANTS"}`);
     this.shootButton?.setVisible(frame.carPower !== null && frame.phase === "running" && !this.isPaused && !this.isComplete);
     const percent = Math.floor(frame.progress * 100);
-    const text = `${this.difficulty.toUpperCase()}    ATTEMPT ${frame.attempt}    ${percent}%    COINS ${frame.coinsCollected}/${LEVEL.totalCoins}`;
+    const text = `${this.difficulty.toUpperCase()}    ATTEMPT ${frame.attempt}    ${percent}%    COINS ${frame.coinsCollected}/${this.level.totalCoins}`;
     if (this.hudText && this.hudText.text !== text) {
       this.hudText.setText(text);
       this.hudPanel?.setSize(this.hudText.width + 24, 38);
@@ -439,9 +471,9 @@ export class GameScene extends Phaser.Scene {
     return this.add.container(x, y, [background, left, right, hit]).setDepth(DEPTH_HUD + 2).setVisible(false);
   }
 
-  private beginPlay(difficulty: Difficulty): void {
+  private beginPlay(difficulty: Difficulty, practiceBattle?: 0.5 | 0.9): void {
     this.difficulty = difficulty;
-    this.runner = new Runner(LEVEL, tuningForDifficulty(difficulty));
+    this.runner = new Runner(this.level, qaTuning(this.qaSettings, difficulty), practiceBattle);
     this.frame = this.runner.step(0, { jumpHeld: false });
     this.playerInput.clearAll();
     this.renderFrame(this.frame);
@@ -450,7 +482,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handlePause(): void {
-    if (this.isPaused || this.isComplete) return;
+    if (this.isPaused || this.isComplete || this.qaOpen) return;
     this.isPaused = true;
     this.shootButton?.setVisible(false);
     this.sfx.play("pause");
@@ -460,12 +492,37 @@ export class GameScene extends Phaser.Scene {
       this.playerInput.clearAll();
       this.isPaused = false;
       this.pauseButton?.setVisible(true);
+    }, () => this.scene.restart({ autoStart: false }));
+  }
+
+  private openQA(): void {
+    if (this.qaOpen || this.isComplete) return;
+    const wasPaused = this.isPaused;
+    const wasMenu = wasPaused && this.frame.attemptElapsedMs === 0;
+    this.qaOpen = true;
+    this.isPaused = true;
+    this.playerInput.clearAll();
+    this.pauseOverlay.destroy();
+    this.shootButton?.setVisible(false);
+    this.qaPanel.show(this.qaSettings, (settings, practiceBattle) => {
+      this.qaSettings = settings;
+      this.qaOpen = false;
+      this.scene.restart({ autoStart: true, practiceBattle });
+    }, () => {
+      this.qaOpen = false;
+      this.playerInput.clearAll();
+      if (wasMenu) this.pauseOverlay.show("start", (difficulty) => this.beginPlay(difficulty ?? "normal"));
+      else {
+        this.isPaused = false;
+        if (wasPaused) this.handlePause();
+      }
     });
   }
 
   private completeLevel(): void {
     if (this.isComplete) return;
     this.isComplete = true;
+    this.qaButton?.setVisible(false);
     this.shootButton?.setVisible(false);
     this.pauseButton?.setVisible(false);
     this.sfx.play("levelComplete");
@@ -496,7 +553,7 @@ export class GameScene extends Phaser.Scene {
       .text(
         width / 2,
         height / 2,
-        `${this.difficulty.toUpperCase()} MODE\nAttempts: ${this.frame.attempt}\nTime: ${formatCompletionTime(this.frame.attemptElapsedMs)}\nCoins: ${this.frame.coinsCollected}/${LEVEL.totalCoins}`,
+        `${this.difficulty.toUpperCase()} MODE\nAttempts: ${this.frame.attempt}\nTime: ${formatCompletionTime(this.frame.attemptElapsedMs)}\nCoins: ${this.frame.coinsCollected}/${this.level.totalCoins}`,
         {
           fontFamily: HUD_FONT,
           fontSize: "18px",

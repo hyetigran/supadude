@@ -27,13 +27,13 @@ export class CollectibleField {
     this.render(0);
   }
 
-  render(distance: number): void {
+  render(distance: number, visible = true): void {
     for (const { event, gameObject } of this.coins.values()) {
       const x = this.characterX + event.x - distance;
       const onScreen = x > -VIEW_MARGIN && x < this.scene.scale.width + VIEW_MARGIN;
       gameObject.x = x;
       gameObject.angle = this.reducedMotion ? 0 : distance * 0.8 % 360;
-      gameObject.setVisible(onScreen && !this.collected.has(event.id));
+      gameObject.setVisible(visible && onScreen && !this.collected.has(event.id));
     }
   }
 

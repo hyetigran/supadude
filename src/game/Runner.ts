@@ -1,8 +1,10 @@
+import { RobberBattle, type BattleFrame } from "./RobberBattle";
 import { solidWorldX, solidTop, solidBottom, type CarPower, type CoinEvent, type HazardEvent, type Level, type SolidEvent } from "./Level";
 
 export interface RunnerInput {
   /** Current button state. Holding jump repeats on the first tick after landing. */
   jumpHeld: boolean;
+  moveX?: number;
   /** Rising edge buffered by the input adapter until at least one fixed tick runs. */
   jumpPressed?: boolean;
   /** One shot per press; holding does not repeat. */
@@ -45,6 +47,8 @@ export type RunnerPhase = "running" | "dead" | "complete";
 export type RunnerEvent =
   | { type: "shotFired"; power: CarPower; targetX: number; targetY: number }
   | { type: "carPowerStarted"; carId: string; power: CarPower }
+  | { type: "battleStarted" }
+  | { type: "battleWon" }
   | { type: "hazardCleared"; hazardId: string; power: CarPower }
   | { type: "carPowerEnded" }
   | { type: "flightStarted"; powerId: string }
@@ -62,6 +66,7 @@ export interface RunnerFrame {
   carPowerRemainingMs: number;
   usedCarIds: readonly string[];
   clearedHazardIds: readonly string[];
+  battle: BattleFrame | null;
   flightRemainingMs: number;
   usedPowerIds: readonly string[];
   phase: RunnerPhase;
@@ -90,6 +95,11 @@ export class Runner {
   private carPowerRemainingMs = 0;
   private carAttackCooldownMs = 0;
   private readonly usedCarIds = new Set<string>();
+  private battle: RobberBattle | null = null;
+  private readonly completedBattleIds = new Set<string>();
+  private battleId: string | null = null;
+  private battleExitMs = 0;
+  private battleProgress = 0;
   private readonly clearedHazardIds = new Set<string>();
   private flightRemainingMs = 0;
   private readonly usedPowerIds = new Set<string>();
@@ -103,18 +113,37 @@ export class Runner {
   private accumulatorMs = 0;
   private deathRemainingMs = 0;
   private jumpPressBuffered = false;
-  private shootPressBuffered = false;
+  private shotBufferRemainingMs = 0;
   private attemptElapsedMs = 0;
   private readonly collectedCoinIds = new Set<string>();
 
   constructor(
     private readonly level: Level,
     private readonly tuning: RunnerTuning = RUNNER_TUNING,
-  ) {}
+    private readonly practiceBattle?: 0.5 | 0.9,
+  ) { this.enterPracticeBattle(); }
+
+  private enterPracticeBattle(): void {
+    if (!this.practiceBattle) return;
+    const encounter = this.level.battles?.find(({ x }) => Math.abs(x / this.level.length - this.practiceBattle!) < 0.001);
+    if (!encounter) return;
+    for (const previous of this.level.battles ?? []) {
+      if (previous.x < encounter.x) this.completedBattleIds.add(previous.id);
+    }
+    this.distance = encounter.x;
+    // Practice skips the approach; resume above any course geometry at this location.
+    this.altitude = FLIGHT_CEILING;
+    this.grounded = false;
+    this.battle = new RobberBattle(encounter.robberCount);
+    this.battleId = encounter.id;
+    this.battleProgress = this.practiceBattle;
+  }
 
   step(deltaMs: number, input: RunnerInput): RunnerFrame {
     const events: RunnerEvent[] = [];
-    if (input.shootPressed) this.shootPressBuffered = true;
+    if (input.shootPressed && this.phase === "running") {
+      this.shotBufferRemainingMs = this.carPower ? CAR_ATTACK_INTERVAL_MS + 50 : 150;
+    }
     if (input.jumpPressed) this.jumpPressBuffered = true;
     this.accumulatorMs += Math.max(0, Math.min(deltaMs, this.tuning.maxFrameMs));
     const fixedStepMs = this.tuning.fixedStepSeconds * 1_000;
@@ -128,10 +157,9 @@ export class Runner {
   }
 
   private fixedStep(input: RunnerInput, events: RunnerEvent[]): void {
-    const jumpRequested = input.jumpHeld || this.jumpPressBuffered;
+    const jumpPressed = this.jumpPressBuffered;
+    const jumpRequested = input.jumpHeld || jumpPressed;
     this.jumpPressBuffered = false;
-    const shootRequested = this.shootPressBuffered;
-    this.shootPressBuffered = false;
 
     if (this.phase === "complete") return;
 
@@ -143,14 +171,47 @@ export class Runner {
 
     this.attemptElapsedMs += this.tuning.fixedStepSeconds * 1_000;
 
+    if (this.battle) {
+      const battleFrame = this.battle.step(this.tuning.fixedStepSeconds,
+        { ...input, jumpPressed, shootPressed: this.shotBufferRemainingMs > 0 }, this.carPower !== null);
+      this.shotBufferRemainingMs = 0;
+      if (battleFrame.outcome === "lost") this.die("robber-battle", events);
+      if (battleFrame.outcome === "won") {
+        this.battleExitMs += this.tuning.fixedStepSeconds * 1000;
+        if (this.battleExitMs >= 750) {
+          this.completedBattleIds.add(this.battleId!);
+          this.battle = null;
+          this.battleId = null;
+          this.battleExitMs = 0;
+          events.push({ type: "battleWon" });
+        }
+      }
+      return;
+    }
+    const encounter = this.level.battles?.find((battle) => !this.completedBattleIds.has(battle.id) &&
+      battle.robberCount > 0 && this.distance + this.tuning.runSpeed * this.tuning.fixedStepSeconds >= battle.x);
+    if (encounter) {
+      this.battle = new RobberBattle(encounter.robberCount);
+      this.battleId = encounter.id;
+      this.battleProgress = encounter.x / this.level.length;
+      this.shotBufferRemainingMs = 0;
+      events.push({ type: "battleStarted" });
+      return;
+    }
+
     if (this.carPower !== null) {
       this.carPowerRemainingMs = Math.max(0, this.carPowerRemainingMs - this.tuning.fixedStepSeconds * 1_000);
       this.carAttackCooldownMs = Math.max(0, this.carAttackCooldownMs - this.tuning.fixedStepSeconds * 1_000);
       if (this.carPowerRemainingMs === 0) {
         this.carPower = null;
+        this.shotBufferRemainingMs = 0;
         events.push({ type: "carPowerEnded" });
       }
     }
+
+    this.resolveShot(events);
+
+    this.shotBufferRemainingMs = Math.max(0, this.shotBufferRemainingMs - this.tuning.fixedStepSeconds * 1_000);
 
     const wasFlying = this.flightRemainingMs > 0;
     if (wasFlying) {
@@ -193,7 +254,7 @@ export class Runner {
       if (Math.abs(support - this.altitude) <= COLLISION_EPSILON) {
         this.distance = nextDistance;
         this.altitude = support;
-        this.resolveHazardsAndCoins(events, shootRequested);
+        this.resolveHazardsAndCoins(events);
         this.resolveCompletion(events);
         return;
       }
@@ -261,8 +322,9 @@ export class Runner {
     this.distance = nextDistance;
     this.altitude = nextAltitude;
     this.velocityY = nextVelocity;
+    this.resolveShot(events);
     this.resolvePowers(previousAltitude, events);
-    this.resolveHazardsAndCoins(events, shootRequested);
+    this.resolveHazardsAndCoins(events);
     this.resolveCompletion(events);
   }
 
@@ -299,24 +361,28 @@ export class Runner {
     return support;
   }
 
-  private resolveHazardsAndCoins(events: RunnerEvent[], shootRequested: boolean): void {
-    // Powers target only matching ground obstacles ahead; traffic and branches stay dangerous.
-    if (shootRequested && this.carPower && this.carAttackCooldownMs === 0) {
-      const targetKind = this.carPower === "fire" ? "bush" : "trashCan";
-      const target = this.level.hazards
-        .filter((hazard) => hazard.kind === targetKind && hazard.bottom === 0 &&
-          !this.clearedHazardIds.has(hazard.id) && hazard.x >= this.distance &&
-          hazard.x - this.distance <= CAR_POWER_RANGE)
-        .sort((a, b) => a.x - b.x)[0];
-      this.carAttackCooldownMs = CAR_ATTACK_INTERVAL_MS;
-      events.push({ type: "shotFired", power: this.carPower,
-        targetX: target?.x ?? this.distance + CAR_POWER_RANGE,
-        targetY: target ? target.bottom + target.height / 2 : this.altitude + this.tuning.playerHeight / 2 });
-      if (target) {
-        this.clearedHazardIds.add(target.id);
-        events.push({ type: "hazardCleared", hazardId: target.id, power: this.carPower });
-      }
-    }
+  private resolveShot(events: RunnerEvent[]): void {
+    if (this.shotBufferRemainingMs <= 0 || !this.carPower || this.carAttackCooldownMs > 0) return;
+    this.shotBufferRemainingMs = 0;
+    const power = this.carPower;
+    const playerY = this.altitude + this.tuning.playerHeight / 2;
+    const targetKind = power === "fire" ? "bush" : power === "water" ? "trashCan" : "fireHydrant";
+    const candidates = this.level.hazards.filter((hazard) => hazard.kind === targetKind &&
+      hazard.bottom === 0 && !this.clearedHazardIds.has(hazard.id))
+      .map((hazard) => ({ id: hazard.id, x: hazard.x, y: hazard.bottom + hazard.height / 2 }));
+    const targets = candidates.map((target) => ({ ...target, distance: Math.hypot(target.x - this.distance, target.y - playerY) }));
+    const target = targets.filter((target) => target.distance <= CAR_POWER_RANGE)
+      .sort((a, b) => a.distance - b.distance)[0];
+    this.carAttackCooldownMs = CAR_ATTACK_INTERVAL_MS;
+    events.push({ type: "shotFired", power,
+      targetX: target?.x ?? this.distance + CAR_POWER_RANGE,
+      targetY: target?.y ?? playerY });
+    if (!target) return;
+    this.clearedHazardIds.add(target.id);
+    events.push({ type: "hazardCleared", hazardId: target.id, power });
+  }
+
+  private resolveHazardsAndCoins(events: RunnerEvent[]): void {
     for (const hazard of this.level.hazards) {
       if (this.clearedHazardIds.has(hazard.id)) continue;
       // Spikes render larger than their collision core so edge clears feel fair.
@@ -369,6 +435,7 @@ export class Runner {
   private die(obstacleId: string, events: RunnerEvent[]): void {
     if (this.phase !== "running") return;
     this.phase = "dead";
+    this.shotBufferRemainingMs = 0;
     this.deathRemainingMs = this.tuning.deathDelayMs;
     events.push({ type: "died", obstacleId });
   }
@@ -383,7 +450,7 @@ export class Runner {
     this.attempt += 1;
     this.deathRemainingMs = 0;
     this.jumpPressBuffered = false;
-    this.shootPressBuffered = false;
+    this.shotBufferRemainingMs = 0;
     this.attemptElapsedMs = 0;
     this.collectedCoinIds.clear();
     this.usedPowerIds.clear();
@@ -393,6 +460,11 @@ export class Runner {
     this.carAttackCooldownMs = 0;
     this.usedCarIds.clear();
     this.clearedHazardIds.clear();
+    this.battle = null;
+    this.battleId = null;
+    this.battleExitMs = 0;
+    this.completedBattleIds.clear();
+    this.enterPracticeBattle();
     events.push({ type: "restarted" });
   }
 
@@ -402,6 +474,7 @@ export class Runner {
       carPowerRemainingMs: this.carPowerRemainingMs,
       usedCarIds: [...this.usedCarIds],
       clearedHazardIds: [...this.clearedHazardIds],
+      battle: this.battle?.frame() ?? null,
       flightRemainingMs: this.flightRemainingMs,
       usedPowerIds: [...this.usedPowerIds],
       phase: this.phase,
@@ -410,7 +483,7 @@ export class Runner {
       velocityY: this.velocityY,
       rotation: this.rotation,
       grounded: this.grounded,
-      progress: Math.min(1, this.distance / this.level.length),
+      progress: this.battle ? this.battleProgress : Math.min(1, this.distance / this.level.length),
       attempt: this.attempt,
       coinsCollected: this.collectedCoinIds.size,
       attemptElapsedMs: this.attemptElapsedMs,
