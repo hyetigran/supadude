@@ -1,0 +1,21 @@
+{
+  "name": "mc-master",
+  "character": "Supa Dude",
+  "image": "mc-master.png",
+  "width": 1024,
+  "height": 1536,
+  "background": "green chroma plate; not keyed",
+  "generator": "built-in image_gen",
+  "prompt": "mc-master.prompt.txt",
+  "references": [
+    "../../../docs/art/references/approved-art-style.png",
+    "../../../docs/art/references/supa-dude-final.png"
+  ],
+  "originalOutput": "/Users/tig/.codex/generated_images/01a1751b-48cc-7b13-9b05-6e8a8f46cbdf/exec-2a851757-615b-4ad7-9c46-04011c4090c5.png",
+  "autoSpriteCharacterAssetId": null,
+  "registrationStatus": "pending: hosted image URL required by connector; browser upload requires sign-in",
+  "groundAnchor": null,
+  "effectAnchors": null,
+  "anchorStatus": "not measured; establish shared anchors before animation export",
+  "animationsGenerated": []
+}
