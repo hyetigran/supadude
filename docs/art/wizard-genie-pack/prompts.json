@@ -1,0 +1,867 @@
+{
+  "status": "prompt-plan-only",
+  "prompts": [
+    {
+      "group": "01-setup",
+      "id": "project-setup",
+      "references": [
+        "approved-art-style.png",
+        "supa-dude-final.png"
+      ],
+      "prompt": "We are creating reusable assets for Supa Dude, a 2D side-view suburban superhero game. Treat the uploaded approved-art-style image as the primary art direction and the uploaded original MC image as the character identity reference.\n\nLock this visual language: clean bold black outer outlines, rounded shapes, sparse thin interior lines, mostly flat colors, one broad cel-shadow shape, small restrained highlights, sunny playful palette. Houses get simple window trim, one divider, a door panel and doorstep. Cars get windows, a door seam, handle, mirror, lights and simple wheel hubs. Trees and bushes use three or four broad foliage lobes and one shadow patch. Match the selected cleaner-cartoon image's detail level.\n\nNo photorealism, 3D rendering, pixel art, hatching, halftone, paper grain, dense texture, individual leaves, bark marks, roof shingles, elaborate architecture or garden clutter. No text, logos, watermark or baked checkerboard.\n\nUse side elevation throughout. Supa Dude faces right. Traffic faces left. The MC is a thin black stick figure with oversized white circular head, two small black oval eyes, curved smile and red cape. No suit, shoes, gloves, hair or chest emblem. There is no ducking.\n\nGenerate only the asset or step I request, not a complete scene or an entire library at once. Keep characters, scenery, gameplay objects, effects and interface elements separate. Preserve references, prompts and original outputs. Use descriptive filenames. Do not change gameplay code or physics while creating these assets.\n\nThe stick-figure character in these references is the requested new art direction even if existing code or older design documents describe a square icon. Create assets only; do not modify the game. Approaching traffic remains a left-facing side-view sprite moving toward the hero; do not make front-facing or perspective-zoom sprites."
+    },
+    {
+      "group": "01-setup",
+      "id": "export-settings",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "For isolated static assets, use reference-image generation with genuine transparent PNG output when the chosen model supports it. Check the selected model\u2019s available settings and enable its actual transparent-background setting when supported; the word transparent alone is insufficient. Start with square source canvases for props and taller canvases for characters where supported. Leave clear padding, preserve the whole silhouette, and do not crop line ends or capes. Source dimensions are production masters, not in-game sizes.\n\nIf a model produces opaque output, use a uniform green or blue chroma plate and Wizard Genie's Corridor Key to obtain the final RGBA PNG. Choose a plate color absent from that asset: green works for the MC and blue car; blue works for green foliage and green trashcans. For assets containing both colors, prefer native transparency or key separate component assets before assembly. Keep ground shadows separate.\n\nFor character animation, create a clean chroma master, use AutoSprite V3, then Corridor Key for the transparent sprite sheet. Preserve sheet metadata and animation tags. Do not deliver the chroma MP4 as the final sprite.\n\nKeep all poses of a character on a consistent canvas, at the same visual scale, with consistent ground and effect anchors. Record actual export dimensions and anchors; do not invent metadata. Save final keyed sheets, frame dimensions, columns, rows, playback fps and tag ranges together. Check that the MC's white head and black limbs survive background removal."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-master",
+      "references": [
+        "approved-art-style.png",
+        "supa-dude-final.png"
+      ],
+      "prompt": "Create one full-body production master of Supa Dude using the original MC for identity and the approved cleaner-cartoon scene for style. Oversized white round head, two small black oval eyes, happy curved smile, very thin black stick-line torso and limbs, rounded line ends, small flowing red cape at the neck. Preserve the original proportions.\n\nSide-facing body looking right, with a slight face turn so both eyes and smile remain readable. Relaxed neutral standing pose, arms slightly separated from torso, legs separated enough to read. Keep the entire figure centered with generous padding around head, limbs and cape. Uniform pure green chroma background, no ground, no contact shadow, no scenery, no effects or props. No clothing or superhero emblem.\n\nSave as mc-master. Register this master as the Supa Dude character in AutoSprite V3 so subsequent animations share the same source identity. Export this master before deriving animations. Keep it as the common identity reference."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-run",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-run. Loop a cheerful run in place. Alternate bent stick legs and gently swinging arms; cape trails left. No horizontal drift.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-idle",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-idle. Loop a restrained ready stance with a tiny body bob and gentle cape movement.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-jump-rise",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-jump-rise. Show the upward Jump pose: leading knee raised, other leg trailing, arms balancing, cape lifting. Keep body origin steady so the game supplies vertical travel.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-jump-apex",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-jump-apex. Hold a readable airborne apex pose with tucked legs and trailing cape.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-fall",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-fall. Show a descending pose with feet preparing to meet the Ground. Keep body origin steady.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-land",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-land. One small landing compression and quick recovery to running; keep feet aligned to the shared ground anchor.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-flight-start",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-flight-start. Transition from an airborne pose into a forward superhero lean. Leading arm extends, legs trail, cape flows left.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-flight-loop",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-flight-loop. Loop the forward airborne superhero pose with a small cape flutter, no translation or rotation of the whole figure.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-flight-end",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-flight-end. Recover from forward flight into the ordinary falling pose.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-shoot-ground",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-shoot-ground. One quick forward arm extension and recovery from a grounded ready pose. No projectile; effects will be separate.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-shoot-air",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-shoot-air. One quick forward arm extension from an airborne pose. Preserve the airborne leg position. No projectile.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-hit",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-hit. A brief readable recoil with a surprised face and quick recovery; no gore.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-stomp",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-stomp. A brief downward feet-leading airborne pose for landing on a robber; no horizontal travel.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-crash",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-crash. A short playful startled reaction with a loose limb splay; the separate Crash effect will hide the transition.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "02-hero",
+      "id": "mc-victory",
+      "references": [
+        "approved-art-style.png",
+        "mc-master"
+      ],
+      "prompt": "Using the existing Supa Dude AutoSprite character, create this motion:\nSave as mc-victory. A cheerful fist-up celebration with a bouncing cape, finishing in a holdable pose.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "03-traffic",
+      "id": "car-blue",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create car-blue. Rounded blue compact hatchback facing LEFT, two black tires with simple gray hubs, pale-blue windows, one door seam, handle, small mirror and headlight. One broad lower-body shadow. Match the approved blue car.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as car-blue.png. Keep the top roof edge readable as a landing surface. Record roof endpoints and wheel/ground anchors. This is a static sprite; the game supplies approaching movement."
+    },
+    {
+      "group": "03-traffic",
+      "id": "car-red",
+      "references": [
+        "approved-art-style.png",
+        "car-blue"
+      ],
+      "prompt": "Create car-red. Recolor only the approved compact car's blue body to red. Preserve silhouette, windows, wheels, lights, roof, anchor and canvas exactly.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as car-red.png. Keep the top roof edge readable as a landing surface. Record roof endpoints and wheel/ground anchors. This is a static sprite; the game supplies approaching movement."
+    },
+    {
+      "group": "03-traffic",
+      "id": "car-yellow",
+      "references": [
+        "approved-art-style.png",
+        "car-blue"
+      ],
+      "prompt": "Create car-yellow. Recolor only the approved compact car's blue body to yellow. Preserve all geometry and non-body colors.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as car-yellow.png. Keep the top roof edge readable as a landing surface. Record roof endpoints and wheel/ground anchors. This is a static sprite; the game supplies approaching movement."
+    },
+    {
+      "group": "03-traffic",
+      "id": "van-blue",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create van-blue. Rounded blue small suburban van facing LEFT, longer cabin than the compact car, two windows, simple sliding-door seam, handle, mirror, two tires, lights and broad lower-body shadow.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as van-blue.png. Keep the top roof edge readable as a landing surface. Record roof endpoints and wheel/ground anchors. This is a static sprite; the game supplies approaching movement."
+    },
+    {
+      "group": "03-traffic",
+      "id": "van-red",
+      "references": [
+        "approved-art-style.png",
+        "van-blue"
+      ],
+      "prompt": "Create van-red. Recolor only the approved van body to red. Preserve roof, geometry, wheels and canvas.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as van-red.png. Keep the top roof edge readable as a landing surface. Record roof endpoints and wheel/ground anchors. This is a static sprite; the game supplies approaching movement."
+    },
+    {
+      "group": "03-traffic",
+      "id": "van-yellow",
+      "references": [
+        "approved-art-style.png",
+        "van-blue"
+      ],
+      "prompt": "Create van-yellow. Recolor only the approved van body to yellow. Preserve roof, geometry, wheels and canvas.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as van-yellow.png. Keep the top roof edge readable as a landing surface. Record roof endpoints and wheel/ground anchors. This is a static sprite; the game supplies approaching movement."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "bush",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create bush. Low green bush made of three or four rounded foliage lobes, one broad darker-green shadow patch, no leaf marks or twigs. Clear solid outer mass.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as bush.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "trashcan",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create trashcan. Green wheeled Trash Can matching the approved image: closed hinged lid, top rim, side handle, two small dark wheels and three restrained vertical ribs.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as trashcan.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "trashcan-lid",
+      "references": [
+        "approved-art-style.png",
+        "trashcan"
+      ],
+      "prompt": "Create trashcan-lid. Only the detached lid of the approved green Trash Can, matching its proportions and hinge side.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as trashcan-lid.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "hydrant",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create hydrant. Short red Fire Hydrant: domed cap, two side outlets, one circular front fitting, simple base and one shadow patch.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as hydrant.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "fallen-tree",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create fallen-tree. Horizontal brown fallen trunk with a simple broken end and two short branch stubs, minimal interior marks. Grounded jump-obstacle silhouette.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as fallen-tree.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "pit-overlay",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create pit-overlay. A side-view Construction Pit opening for the sidewalk: clearly defined left and right concrete lips, dark interior and simple broken ends. Transparent outside the opening; no continuous pavement across the gap.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as pit-overlay.png. Deliver separate left lip and right lip exports as pit-left-lip.png and pit-right-lip.png as well, so gap width can follow the level. The game must interrupt its sidewalk art at the actual pit; this image must not define new collision geometry."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "tree-overhead",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create tree-overhead. Simple trunk and low horizontal branch with broad green foliage. Clearly defined underside clearance; no decorative hanging leaves that hide the contact edge. No Duck symbol or instruction.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as tree-overhead.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "basketball-hoop",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create basketball-hoop. Suburban hoop with plain pole, white rectangular backboard, red rim and a few net lines. Clear overhead clearance, simple construction.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as basketball-hoop.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "trampoline",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create trampoline. Small blue Flight Trampoline matching the approved image: low oval mat, dark center, rounded blue edge and four short legs.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as trampoline.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "coin",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create coin. Warm gold Coin with bold circular outline, one rim line and one small white highlight. Plain center; no arrow or text.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as coin.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "jump-orb",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create jump-orb. Gold open ring with a simple upward arrow inside, clearly distinct from a filled Coin. Sparse outline and highlight.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as jump-orb.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "finish-gate",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create finish-gate. Friendly finish arch or gate with simple posts and a checkered top band. Clear opening, no text and no baked scenery.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as finish-gate.png."
+    },
+    {
+      "group": "05-scenery",
+      "id": "house-cream",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create house-cream. Simple cream suburban house with coral triangular roof, chimney, two trimmed windows with one divider each, red door with one inset panel, and a doorstep. One broad eave shadow. No elaborate porch.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as house-cream.png."
+    },
+    {
+      "group": "05-scenery",
+      "id": "house-peach",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create house-peach. Variation of the cream house with peach walls and a different door/window arrangement. Same scale, construction detail and outline weight.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as house-peach.png."
+    },
+    {
+      "group": "05-scenery",
+      "id": "house-blue",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create house-blue. Variation with pale-blue walls, warm cream trim and a simple dark roof. Same scale and detail budget.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as house-blue.png."
+    },
+    {
+      "group": "05-scenery",
+      "id": "fence",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create fence. Short section of six plain wooden pickets with one crossbar, warm tan, simple shadow. No wood grain.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as fence.png."
+    },
+    {
+      "group": "05-scenery",
+      "id": "tree",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create tree. Brown trunk with a crown of three or four large rounded green lobes and one broad shadow patch. No leaf texture or bark marks.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as tree.png."
+    },
+    {
+      "group": "05-scenery",
+      "id": "mailbox",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create mailbox. Small suburban mailbox on a plain post, rounded lid, small red flag, one simple shadow.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as mailbox.png."
+    },
+    {
+      "group": "05-scenery",
+      "id": "cloud",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create cloud. One soft rounded off-white cloud cluster, minimal outline or none, no texture.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as cloud.png."
+    },
+    {
+      "group": "05-scenery",
+      "id": "contact-shadow",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create contact-shadow. One restrained soft oval shadow on transparency, no character or object.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or objects; the oval shadow itself is the only content. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as contact-shadow.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "fire-projectile",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create fire-projectile. Compact right-facing orange flame with pale-yellow core and two small ember accents. Rounded flame tongues, clear dark outline, no smoke cloud.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as fire-projectile.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "water-projectile",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create water-projectile. Compact right-facing curling blue water jet with white highlight and three rounded droplets, clean dark outline.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as water-projectile.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "lightning-projectile",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create lightning-projectile. Short angular yellow zigzag edged in dark ink with one small sharp spark. Clearly distinct from Fire and Water.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as lightning-projectile.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "fire-impact",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create fire-impact. Small orange flare and brief soot puff at a central impact point, playful rather than realistic.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as fire-impact.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "water-impact",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create water-impact. Small curling blue splash with a few droplets, transparent center gaps, no giant puddle.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as water-impact.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "lightning-impact",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create lightning-impact. Compact jagged yellow star pop with two small sparks, no full-screen glow.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as lightning-impact.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "flight-trail",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create flight-trail. Short tapered pale streak following an airborne character, minimal shape, no character included.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as flight-trail.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "landing-dust",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create landing-dust. Two or three small cream puffs spreading from a shared ground point.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as landing-dust.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "coin-sparkle",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create coin-sparkle. Three small warm-gold star sparkles, clean readable shape.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as coin-sparkle.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "crash-burst",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create crash-burst. Compact playful red, white and dark comic burst, no character parts or gore.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as crash-burst.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "completion-confetti",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create completion-confetti. Sparse small red, gold and blue paper shapes with open space between them.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nSide elevation. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors.\n\nSave the final export as completion-confetti.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "trampoline-compressed",
+      "references": [
+        "approved-art-style.png",
+        "trampoline"
+      ],
+      "prompt": "Derive trampoline-compressed from the attached trampoline master. Depress only the mat slightly under an implied landing weight; no character or effect. Preserve the frame, legs, ground anchor, outline, colors, scale and canvas exactly. Match the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Save as trampoline-compressed.png."
+    },
+    {
+      "group": "04-gameplay-objects",
+      "id": "trampoline-rebound",
+      "references": [
+        "approved-art-style.png",
+        "trampoline"
+      ],
+      "prompt": "Derive trampoline-rebound from the attached trampoline master. Raise only the mat slightly into its rebound state; no character or effect. Preserve the frame, legs, ground anchor, outline, colors, scale and canvas exactly. Match the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Save as trampoline-rebound.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "power-pickup",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create power-pickup: A compact open circular burst with three small outward rays, white fill with dark outline; keep its center empty for the hero. Neutral colors so the game can tint for Fire, Water or Electricity.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Save as power-pickup.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "jump-orb-pop",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create jump-orb-pop: A sparse gold expanding ring and three tiny upward sparkles. No orb, hero or arrow inside.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Save as jump-orb-pop.png."
+    },
+    {
+      "group": "06-effects",
+      "id": "robber-warning",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create robber-warning: One bold orange exclamation mark with dark outline, no enclosing panel. This explicit warning symbol is allowed; no other text.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Save as robber-warning.png."
+    },
+    {
+      "group": "07-robber",
+      "id": "robber-master",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create one friendly cartoon robber antagonist in the approved cleaner-cartoon style. Use the same round-head/stick-limb construction and outline weight as Supa Dude, but a light-gray head, simple dark eye mask, small dark cap and no cape. Compact recognizable silhouette, no weapon, no text. Side-facing neutral pose, arms and legs visibly separated, full figure with padding on a uniform green chroma background. Save as robber-master and register as a separate AutoSprite V3 character. Face right so the game can mirror the sprite for pursuit. Keep the same canvas scale and ground anchor across all robber animations."
+    },
+    {
+      "group": "07-robber",
+      "id": "robber-idle",
+      "references": [
+        "approved-art-style.png",
+        "robber-master"
+      ],
+      "prompt": "Using the existing robber AutoSprite character, create this motion:\nSave as robber-idle. Loop a restrained ready stance.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and gray head, dark eye mask and cap; no cape. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "07-robber",
+      "id": "robber-run",
+      "references": [
+        "approved-art-style.png",
+        "robber-master"
+      ],
+      "prompt": "Using the existing robber AutoSprite character, create this motion:\nSave as robber-run. Loop a light run in place with alternating arms and legs, no horizontal travel.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and gray head, dark eye mask and cap; no cape. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "07-robber",
+      "id": "robber-windup",
+      "references": [
+        "approved-art-style.png",
+        "robber-master"
+      ],
+      "prompt": "Using the existing robber AutoSprite character, create this motion:\nSave as robber-windup. Pull one arm back and lean slightly in preparation for a punch; finish in a holdable warning pose.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and gray head, dark eye mask and cap; no cape. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "07-robber",
+      "id": "robber-punch",
+      "references": [
+        "approved-art-style.png",
+        "robber-master"
+      ],
+      "prompt": "Using the existing robber AutoSprite character, create this motion:\nSave as robber-punch. Starting from the approved windup pose, perform one short unarmed forward punch. No projectile, opponent or impact effect.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and gray head, dark eye mask and cap; no cape. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "07-robber",
+      "id": "robber-recover",
+      "references": [
+        "approved-art-style.png",
+        "robber-master"
+      ],
+      "prompt": "Using the existing robber AutoSprite character, create this motion:\nSave as robber-recover. Starting from the approved punch end pose, return to the ready stance.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and gray head, dark eye mask and cap; no cape. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "07-robber",
+      "id": "robber-hit",
+      "references": [
+        "approved-art-style.png",
+        "robber-master"
+      ],
+      "prompt": "Using the existing robber AutoSprite character, create this motion:\nSave as robber-hit. One brief surprised recoil and recovery. No blood, stars or particles baked into the sprite.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and gray head, dark eye mask and cap; no cape. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "07-robber",
+      "id": "robber-defeat",
+      "references": [
+        "approved-art-style.png",
+        "robber-master"
+      ],
+      "prompt": "Using the existing robber AutoSprite character, create this motion:\nSave as robber-defeat. A playful short topple ending in a holdable defeated pose, no gore, weapon or explosion.\n\nKeep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and gray head, dark eye mask and cap; no cape. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.\n\nUse a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark."
+    },
+    {
+      "group": "08-backgrounds",
+      "id": "bg-sky",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create only an opaque sunny-sky layer for the Supa Dude cleaner-cartoon style. Bright blue sky, generous open space and two or three simple off-white rounded clouds, restrained color variation, no houses, foliage, ground, MC, traffic, objects, words or UI. Wide landscape, preferably 21:9 on a supporting model. Make left and right edges match for horizontal repetition. Fill the full frame; no transparency or chroma background. Save as bg-sky.\n\nInspect the output repeated three times horizontally. Repair any edge discontinuity before export. Keep foreground slot 3 unused."
+    },
+    {
+      "group": "08-backgrounds",
+      "id": "bg-neighborhood",
+      "references": [
+        "approved-art-style.png",
+        "house-cream",
+        "house-peach",
+        "house-blue",
+        "fence",
+        "tree"
+      ],
+      "prompt": "Build a reusable neighborhood midground strip from our approved house, fence and tree modules. Preserve those asset designs and their detail level. Arrange two simple houses, a short fence and a few broad trees along one common baseline, with generous open gaps. Softer outlines and lower contrast than interactive objects. No MC, Traffic, obstacles, collectibles, interactive trampoline, sidewalk or road.\n\nUse a wide shared canvas, transparent above and between silhouettes. Keep complete houses and trees inside the frame with empty transparent side margins so the strip can repeat cleanly. Preserve a consistent house scale. Export a true-alpha PNG as bg-neighborhood and record the canvas size and baseline. Prefer assembling the already-approved transparent modules over redrawing them. If generating a new layer, use a model with native alpha, or separately key components before assembly: the layer contains both green foliage and blue windows.\n\nInspect the output repeated three times horizontally. Repair any edge discontinuity before export. Keep foreground slot 3 unused."
+    },
+    {
+      "group": "08-backgrounds",
+      "id": "ground-street",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create a horizontally repeating side-view Ground strip for Supa Dude. Warm light-gray sidewalk with sparse slab dividers, one clean curb edge, and a darker asphalt road one step below. Match the approved cleaner-cartoon reference. A little broad cel shading, no gravel texture, cracks, grass tufts or baked cast shadows. No characters, Traffic, obstacles, pits, collectibles or props.\n\nKeep the sidewalk top edge perfectly horizontal and at a recorded consistent height. Left and right borders must match exactly with no gap or duplicated slab seam. Transparent above the strip. Export as ground-street with its canvas dimensions, top surface and curb line recorded. This is decorative art; preserve the game's actual collision and road offset when integrating.\n\nInspect the output repeated three times horizontally. Repair any edge discontinuity before export. Keep foreground slot 3 unused."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-jump",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-jump: an upward arrow.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-jump.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-flight",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-flight: a small wing with a trailing streak.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-flight.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-fire",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-fire: a rounded flame.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-fire.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-water",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-water: a water droplet.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-water.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-electricity",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-electricity: an angular zigzag.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-electricity.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-coin",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-coin: the approved gold Coin.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-coin.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-heart",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-heart: a red heart for battle health.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-heart.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-pause",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-pause: two vertical bars.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-pause.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-play",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-play: a right-pointing triangle.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-play.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-home",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-home: a simple house.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-home.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-settings",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-settings: a simple gear.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-settings.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-shoot",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-shoot: a compact comic energy burst.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-shoot.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-retry",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-retry: a curved circular arrow.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-retry.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-sound-on",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-sound-on: a speaker with two sound arcs.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-sound-on.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "icon-sound-off",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create icon-sound-off: the matching speaker with a diagonal slash.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as icon-sound-off.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "button-base",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create button-base: an empty rounded blue button face with cream inset and bold border.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as button-base.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "panel-base",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create panel-base: an empty cream comic panel with rounded dark border; plain scalable center.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as panel-base.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "progress-track",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create progress-track: a long empty rounded progress track with a plain scalable center.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as progress-track.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "joystick-base",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create joystick-base: a translucent circular neutral control base with bold rim.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as joystick-base.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "joystick-thumb",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Create joystick-thumb: a smaller round blue joystick thumb.\n\nMatch the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.\n\nUse genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors. Keep the icon centered and readable at small gameplay size. No labels, numbers or baked drop shadow. Save as joystick-thumb.png. For panels, buttons and tracks record measured nine-slice border insets so corners are preserved; live text and progress fills will be drawn by the game."
+    },
+    {
+      "group": "09-interface",
+      "id": "button-pressed",
+      "references": [
+        "approved-art-style.png",
+        "button-base"
+      ],
+      "prompt": "Derive button-pressed.png from button-base with a slightly darker fill and inset highlight. Preserve exact dimensions, outline geometry, corner radii and nine-slice insets. No text or embedded icon. Match the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors."
+    },
+    {
+      "group": "09-interface",
+      "id": "button-disabled",
+      "references": [
+        "approved-art-style.png",
+        "button-base"
+      ],
+      "prompt": "Derive button-disabled.png from button-base with a muted low-saturation gray-blue fill. Preserve exact dimensions, outline geometry, corner radii and nine-slice insets. No text or embedded icon. Match the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark. Use genuine transparent RGBA PNG output. If native alpha is unavailable, generate on a uniform chroma color absent from the asset and use Wizard Genie Corridor Key to export real alpha. Preserve white fills and thin dark outlines. No checkerboard, scenery, ground or cast shadow. One object only, fully visible with padding. Record actual dimensions and anchors."
+    },
+    {
+      "group": "10-package",
+      "id": "package-and-check",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Package the Supa Dude assets created so far into characters, traffic, obstacles, pickups, scenery, backgrounds, effects and ui folders. Keep each editable/original source and its prompt alongside an exports folder. Include only actual generated files in the asset manifest; mark anything unfinished as missing rather than claiming it exists.\n\nFor PNGs record filenames, actual dimensions, transparency and ground/effect anchors. For animations include the final keyed sheet, frame dimensions, rows, columns, playback fps and named frame tags. Preserve source references. Keep optional audio separate.\n\nCreate a review contact sheet and one composited gameplay preview using these exports, not newly regenerated approximations. Check consistency against approved-art-style.png; intact white head and black limbs; matching body proportions between frames; no chroma fringe or cropped capes; readable Traffic roofs and obstacle edges; separated power silhouettes; open backgrounds; and matching parallax tile joins. Review at intended gameplay size. Do not change gameplay, physics or collisions during packaging.\n\nInclude a missing-assets list, never placeholder files presented as finished art. Keep gameplay previews separate from runtime assets. The three background layers are sky (0\u20130.1 course scroll), neighborhood (~0.5), ground (1.0); these values are tuning suggestions. Do not bake interactive objects into them. For any effects delivered as still PNGs, identify them as stills; animation can be supplied by scale, rotation and fade in the game. Do not invent sprite-sheet metadata."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-jump",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: Short friendly cartoon springy jump whoosh, clean transient, no voice, no music. Keep it short and leave no long leading silence. Export separately as sfx-jump.wav using a supported audio format. No visual assets."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-landing",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: Small soft cartoon landing tap with a brief puff, no heavy impact, voice or music. Keep it short and leave no long leading silence. Export separately as sfx-landing.wav using a supported audio format. No visual assets."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-coin",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: One bright playful collectible chime, clean short tail, no voice or music. Keep it short and leave no long leading silence. Export separately as sfx-coin.wav using a supported audio format. No visual assets."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-flight",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: Brief light superhero boost whoosh, airy and cheerful, no voice or music. Keep it short and leave no long leading silence. Export separately as sfx-flight.wav using a supported audio format. No visual assets."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-fire",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: Compact playful flame whoosh and pop, no realistic explosion, voice or music. Keep it short and leave no long leading silence. Export separately as sfx-fire.wav using a supported audio format. No visual assets."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-water",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: Short clean cartoon water jet and splash, no voice or music. Keep it short and leave no long leading silence. Export separately as sfx-water.wav using a supported audio format. No visual assets."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-electricity",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: Short playful electrical zap and crackle, no sustained harsh buzz, voice or music. Keep it short and leave no long leading silence. Export separately as sfx-electricity.wav using a supported audio format. No visual assets."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-crash",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: Brief playful comic impact, readable transient, no gore, scream or music. Keep it short and leave no long leading silence. Export separately as sfx-crash.wav using a supported audio format. No visual assets."
+    },
+    {
+      "group": "11-optional-audio",
+      "id": "sfx-completion",
+      "references": [
+        "approved-art-style.png"
+      ],
+      "prompt": "Generate one standalone game sound: Short cheerful superhero success flourish, no vocals. Keep it short and leave no long leading silence. Export separately as sfx-completion.wav using a supported audio format. No visual assets."
+    }
+  ]
+}

@@ -45,6 +45,28 @@ describe("robber arenas", () => {
     expect(winBattle(new RobberBattle(count)).outcome).toBe("won");
   });
 
+  it("Easy repeats held jumps and chains multiple stomps without landing", () => {
+    const battle = new RobberBattle(1, "easy");
+    let frame = battle.frame();
+    let takeoffs = 0;
+    let landedAfterHit = false;
+    let firstHit = false;
+    for (let i = 0; i < 120 * 12 && frame.outcome === "fighting"; i++) {
+      const previous = frame;
+      const dx = frame.robbers[0].x - frame.playerX;
+      frame = battle.step(DT, { moveX: Math.abs(dx) > 4 ? Math.sign(dx) : 0, jumpHeld: true }, false);
+      if (previous.jumpHeight === 0 && frame.jumpHeight > 0) takeoffs++;
+      if (firstHit && frame.jumpHeight === 0) landedAfterHit = true;
+      if (frame.robbers[0].health === 1) firstHit = true;
+    }
+    expect(takeoffs).toBeGreaterThan(1);
+    expect(firstHit).toBe(true);
+    expect(landedAfterHit).toBe(false);
+    expect(frame.outcome).toBe("won");
+    expect(frame.difficulty).toBe("easy");
+    expect(new RobberBattle().frame().difficulty).toBe("medium");
+  });
+
   it("requires a fresh jump press after landing recovery", () => {
     const battle = new RobberBattle(1);
     let frame = battle.step(DT, { jumpHeld: true }, false);

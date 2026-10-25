@@ -37,9 +37,9 @@ describe("buildLevel", () => {
     expect(level.solids.some(({ height }) => height === 72)).toBe(true);
   });
 
-  it("places two arena fights at 50% and 90% with two robbers each", () => {
+  it("places two arena fights at 50% and 90% with two then three robbers", () => {
     const level = buildLevel();
-    expect(level.battles?.map(({ x, robberCount }) => [x / level.length, robberCount])).toEqual([[0.5, 2], [0.9, 2]]);
+    expect(level.battles?.map(({ x, robberCount }) => [x / level.length, robberCount])).toEqual([[0.5, 2], [0.9, 3]]);
   });
 
   it("counts uniquely identified authored Coins", () => {

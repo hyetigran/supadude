@@ -1,3 +1,5 @@
+export type BossDifficulty = "easy" | "medium";
+
 export interface BattleInput {
   moveX?: number;
   jumpHeld: boolean;
@@ -13,6 +15,7 @@ export interface RobberState {
   timer: number;
 }
 export interface BattleFrame {
+  difficulty: BossDifficulty;
   playerX: number;
   playerY: number;
   jumpHeight: number;
@@ -46,7 +49,7 @@ export class RobberBattle {
   private outcome: BattleFrame["outcome"] = "fighting";
   private readonly robbers: RobberState[];
 
-  constructor(count = 2) {
+  constructor(count = 2, private readonly difficulty: BossDifficulty = "medium") {
     const total = Math.max(1, Math.min(MAX_ROBBERS, Math.round(count)));
     this.robbers = Array.from({ length: total }, (_, index) => ({
       id: `robber-${index}`,
@@ -68,13 +71,13 @@ export class RobberBattle {
     const mx = Math.max(-1, Math.min(1, input.moveX ?? 0));
     this.x = Math.max(32, Math.min(768, this.x + mx * 235 * dt));
     const previousZ = this.z;
-    if (this.z === 0 && this.landingRecovery === 0 && jumpPressed) {
+    if (this.z === 0 && this.landingRecovery === 0 && (jumpPressed || (this.difficulty === "easy" && input.jumpHeld))) {
       this.velocityZ = 470;
       this.stompAvailable = true;
     }
     this.z = Math.max(0, this.z + this.velocityZ * dt - 900 * dt * dt);
     this.velocityZ = this.z === 0 ? 0 : this.velocityZ - 1800 * dt;
-    if (previousZ > 0 && this.z === 0) this.landingRecovery = 0.35;
+    if (previousZ > 0 && this.z === 0) this.landingRecovery = this.difficulty === "easy" ? 0 : 0.35;
     if (powered && input.shootPressed) this.shotQueued = true;
     if (!powered) this.shotQueued = false;
     if (this.shotQueued && this.shotCooldown === 0) {
@@ -91,12 +94,12 @@ export class RobberBattle {
       const distance = Math.abs(dx);
       if (this.stompAvailable && this.velocityZ < 0 && previousZ >= 28 && this.z <= 28 && distance < 38) {
         robber.health--;
-        this.stompAvailable = false;
+        this.stompAvailable = this.difficulty === "easy";
         this.z = 29;
         this.velocityZ = 340;
         robber.attack = "recover";
         robber.timer = 0.7;
-        robber.x = Math.max(32, Math.min(768, robber.x + (dx <= 0 ? 1 : -1) * 65));
+        if (this.difficulty === "medium") robber.x = Math.max(32, Math.min(768, robber.x + (dx <= 0 ? 1 : -1) * 65));
         continue;
       }
       if (robber.attack === "chase") {
@@ -123,7 +126,7 @@ export class RobberBattle {
   }
 
   frame(): BattleFrame {
-    return { playerX: this.x, playerY: this.y, jumpHeight: this.z, jumpReady: this.z === 0 && this.landingRecovery === 0, health: this.health,
+    return { difficulty: this.difficulty, playerX: this.x, playerY: this.y, jumpHeight: this.z, jumpReady: this.z === 0 && this.landingRecovery === 0, health: this.health,
       invulnerable: this.invulnerability > 0, robbers: this.robbers.map((robber) => ({ ...robber })),
       outcome: this.outcome, shot: this.shot && { ...this.shot } };
   }

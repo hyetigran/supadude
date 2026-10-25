@@ -1,3 +1,5 @@
+import type { BossDifficulty } from "./RobberBattle";
+
 export type HazardKind = "spike" | "doubleSpike" | "tripleSpike" | "bush" | "trashCan" | "tree" | "basketballHoop" | "fireHydrant" | "constructionPit" | "fallenTree";
 
 export interface HazardEvent {
@@ -52,7 +54,7 @@ export function solidWorldX(solid: SolidEvent, distance: number): number {
 }
 
 export interface Level {
-  battles?: readonly { id: string; x: number; robberCount: number }[];
+  battles?: readonly { id: string; x: number; robberCount: number; difficulty?: BossDifficulty }[];
   powers?: readonly PowerEvent[];
   hazards: readonly HazardEvent[];
   solids: readonly SolidEvent[];
@@ -380,7 +382,7 @@ export function buildLevel(script: readonly CourseToken[] = SCRIPT): Level {
 
   const length = cursor + FINISH_CLEARANCE;
   return { hazards, solids, coins, powers, length, totalCoins: coins.length,
-    battles: [0.5, 0.9].map((progress, index) => ({ id: `battle-${index}`, x: length * progress, robberCount: 2 })) };
+    battles: [0.5, 0.9].map((progress, index) => ({ id: `battle-${index}`, x: length * progress, robberCount: 2 + index, difficulty: "medium" })) };
 }
 
 export const LEVEL = buildLevel();

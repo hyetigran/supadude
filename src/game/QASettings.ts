@@ -1,3 +1,4 @@
+import { MAX_ROBBERS, type BossDifficulty } from "./RobberBattle";
 import { LEVEL, type HazardKind, type Level } from "./Level";
 import { tuningForDifficulty, type Difficulty } from "./Difficulty";
 
@@ -8,8 +9,10 @@ export const OBSTACLE_OPTIONS = [
 ] as const;
 
 export interface QASettings {
+  bossDifficulty: BossDifficulty;
   robbers: boolean;
-  robberCount: number;
+  robberCount50: number;
+  robberCount90: number;
   speed: number;
   jumpHeight: number;
   gravity: number;
@@ -21,7 +24,7 @@ export interface QASettings {
 }
 
 export function defaultQASettings(): QASettings {
-  return { robbers: true, robberCount: 2, speed: 1, jumpHeight: 1, gravity: 1, frequency: 1,
+  return { bossDifficulty: "medium", robbers: true, robberCount50: 2, robberCount90: 3, speed: 1, jumpHeight: 1, gravity: 1, frequency: 1,
     hazards: OBSTACLE_OPTIONS.map(([kind]) => kind), cars: true, flightPads: true, jumpOrbs: true };
 }
 
@@ -33,7 +36,7 @@ export function qaTuning(settings: QASettings, difficulty: Difficulty) {
 
 export function qaLevel(settings: QASettings, source: Level = LEVEL): Level {
   const position = <T extends { x: number }>(item: T): T => ({ ...item, x: item.x / settings.frequency });
-  return { ...source, battles: settings.robbers ? source.battles?.map((battle) => ({ ...position(battle), robberCount: settings.robberCount })) : [], length: source.length / settings.frequency,
+  return { ...source, battles: settings.robbers ? source.battles?.map((battle) => ({ ...position(battle), robberCount: Math.min(MAX_ROBBERS, battle.x >= source.length * 0.9 ? settings.robberCount90 : settings.robberCount50), difficulty: settings.bossDifficulty })) : [], length: source.length / settings.frequency,
     hazards: source.hazards.filter(({ kind }) => settings.hazards.includes(kind)).map(position),
     solids: settings.cars ? source.solids.map(position) : [],
     coins: source.coins.map(position),

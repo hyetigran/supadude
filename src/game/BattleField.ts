@@ -21,10 +21,10 @@ export class BattleField {
     this.controls.setVisible(!!frame);
     if (!frame) return;
     const g = this.graphics;
-    this.controls.setText(`A / D / ← / →: MOVE · SPACE / TAP: JUMP · F / X: SHOOT\n${frame.jumpReady ? "JUMP READY — RELEASE AND PRESS TO JUMP" : frame.jumpHeight > 0 ? "ONE STOMP PER JUMP" : "LANDING RECOVERY — KEEP MOVING"}`);
+    this.controls.setText(`A / D / ← / →: MOVE · SPACE / TAP: JUMP · F / X: SHOOT\n${frame.difficulty === "easy" ? "EASY — HOLD JUMP TO REPEAT AND CHAIN BOUNCES" : frame.jumpReady ? "JUMP READY — RELEASE AND PRESS TO JUMP" : frame.jumpHeight > 0 ? "ONE STOMP PER JUMP" : "LANDING RECOVERY — KEEP MOVING"}`);
     this.controls.setY(425);
     this.status.setText(frame.outcome === "won" ? "ROBBERS DEFEATED!" : dead ? "CAUGHT!" :
-      `ROBBER FIGHT  ·  HEALTH ${"♥".repeat(frame.health)}${"♡".repeat(3 - frame.health)}  ·  ${frame.robbers.filter(r => r.health > 0).length} LEFT`);
+      `ROBBER FIGHT · ${frame.difficulty.toUpperCase()} · HEALTH ${"♥".repeat(frame.health)}${"♡".repeat(3 - frame.health)}  ·  ${frame.robbers.filter(r => r.health > 0).length} LEFT`);
     for (const robber of frame.robbers) {
       if (robber.health <= 0) continue;
       const x = robber.x, y = this.groundY + robber.y;

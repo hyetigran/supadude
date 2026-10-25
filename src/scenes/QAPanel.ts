@@ -17,15 +17,24 @@ export class QAPanel {
         <p>Apply these settings and start the fight immediately. Battles are enabled automatically.</p>
         <button value="battle50">Go to 50% fight</button> <button value="battle90">Go to 90% fight</button>
       </fieldset>
+      <label style="display:block;margin:16px 0">Boss difficulty
+        <select name="bossDifficulty" style="display:block;margin-top:8px;padding:10px;font:inherit;width:100%">
+          <option value="medium">Medium (default)</option><option value="easy">Easy</option>
+        </select>
+      </label>
+      <p style="color:#cbd5e1;font-size:14px">Easy: hold Jump to repeat and chain bounce attacks. Medium: fresh jump presses, landing recovery, and one stomp per jump.</p>
       <div data-sliders></div>
+      <p style="color:#cbd5e1;font-size:14px">Set each fight independently, from 1 to 50 robbers.</p>
       <fieldset style="margin:18px 0;padding:12px"><legend>Obstacle types</legend><div data-obstacles style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div></fieldset>
       <fieldset style="margin:18px 0;padding:12px"><legend>Power objects</legend><div data-powers style="display:flex;gap:16px;flex-wrap:wrap"></div></fieldset>
       <p style="color:#cbd5e1;font-size:14px">Frequency changes spacing: 2× means half the distance between encounters. Speed multiplies the selected difficulty.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap"><button type="button" data-reset>Reset defaults</button><button value="cancel">Cancel</button><button value="apply">Apply & restart</button></div>
     </form>`;
     dialog.setAttribute("aria-label", "QA gameplay settings");
+    dialog.querySelector<HTMLSelectElement>('[name="bossDifficulty"]')!.value = settings.bossDifficulty;
     const ranges = [
-      ["robberCount", "Robbers per fight", 1, MAX_ROBBERS, 1],
+      ["robberCount50", "Robbers at 50%", 1, MAX_ROBBERS, 1],
+      ["robberCount90", "Robbers at 90%", 1, MAX_ROBBERS, 1],
       ["speed", "Speed", 0.25, 2, 0.05], ["jumpHeight", "Jump height", 0.5, 2, 0.1],
       ["gravity", "Gravity", 0.5, 2, 0.1], ["frequency", "Obstacle frequency", 0.5, 2, 0.1],
     ] as const;
@@ -35,7 +44,7 @@ export class QAPanel {
       label.innerHTML = `${title} <output></output><input name="${key}" aria-label="${title}" type="range" min="${min}" max="${max}" step="${step}" style="display:block;width:100%;margin-top:10px">`;
       const input = label.querySelector("input")!;
       input.value = String(settings[key]);
-      const update = () => { label.querySelector("output")!.textContent = key === "robberCount" ? input.value : `${Number(input.value).toFixed(2)}×`; };
+      const update = () => { label.querySelector("output")!.textContent = (key === "robberCount50" || key === "robberCount90") ? input.value : `${Number(input.value).toFixed(2)}×`; };
       input.addEventListener("input", update); update();
       dialog.querySelector("[data-sliders]")!.append(label);
     }
@@ -54,7 +63,7 @@ export class QAPanel {
     dialog.addEventListener("close", () => {
       if (!["apply", "battle50", "battle90"].includes(dialog.returnValue)) { this.destroy(); cancel(); return; }
       const form = new FormData(dialog.querySelector("form")!);
-      const next: QASettings = { robbers: form.has("robbers"), robberCount: Number(form.get("robberCount")), speed: Number(form.get("speed")), jumpHeight: Number(form.get("jumpHeight")),
+      const next: QASettings = { bossDifficulty: form.get("bossDifficulty") === "easy" ? "easy" : "medium", robbers: form.has("robbers"), robberCount50: Number(form.get("robberCount50")), robberCount90: Number(form.get("robberCount90")), speed: Number(form.get("speed")), jumpHeight: Number(form.get("jumpHeight")),
         gravity: Number(form.get("gravity")), frequency: Number(form.get("frequency")),
         hazards: OBSTACLE_OPTIONS.filter(([kind]) => form.has(kind)).map(([kind]) => kind),
         cars: form.has("cars"), flightPads: form.has("flightPads"), jumpOrbs: form.has("jumpOrbs") };

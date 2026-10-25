@@ -134,7 +134,7 @@ export class Runner {
     // Practice skips the approach; resume above any course geometry at this location.
     this.altitude = FLIGHT_CEILING;
     this.grounded = false;
-    this.battle = new RobberBattle(encounter.robberCount);
+    this.battle = new RobberBattle(encounter.robberCount, encounter.difficulty);
     this.battleId = encounter.id;
     this.battleProgress = this.practiceBattle;
   }
@@ -191,7 +191,7 @@ export class Runner {
     const encounter = this.level.battles?.find((battle) => !this.completedBattleIds.has(battle.id) &&
       battle.robberCount > 0 && this.distance + this.tuning.runSpeed * this.tuning.fixedStepSeconds >= battle.x);
     if (encounter) {
-      this.battle = new RobberBattle(encounter.robberCount);
+      this.battle = new RobberBattle(encounter.robberCount, encounter.difficulty);
       this.battleId = encounter.id;
       this.battleProgress = encounter.x / this.level.length;
       this.shotBufferRemainingMs = 0;

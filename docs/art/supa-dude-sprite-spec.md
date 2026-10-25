@@ -1,35 +1,43 @@
-# Supa Dude icon — art specification
+# Supa Dude — character art specification
 
-The current player is drawn procedurally in Phaser so gameplay has no missing-asset dependency. Final art may replace that drawing, but it must preserve the same silhouette and collision readability.
+Use [the art direction](art-direction.md) for shared drawing rules, palette, environment, effects, and production scope.
 
-## Character
+## Identity
 
-- Square superhero icon, not a licensed or copied Geometry Dash icon.
-- Cyan outer body (`#38BDF8`) with a near-navy inset (`#172554`).
-- Bright off-white outline (`#F8FAFC`) that remains legible against every Level color.
-- Small red cape (`#EF4444`) and yellow chest emblem (`#FACC15`) to retain the Supa Dude identity.
-- Minimal face with two rectangular eyes.
-- Flat colors and clean geometric shapes; no texture that obscures the square silhouette.
+The supplied [character reference](references/supa-dude-final.png) defines Supa Dude: an oversized white round head, black oval eyes and curved smile, black stick limbs, and a red cape. Preserve those proportions and simple construction.
 
-## Size and alignment
+The approved direction is the [cleaner-cartoon style reference](references/approved-art-style.png), selected by the user on 2026-10-17: a sunny suburb, bold outlines, simple rounded shapes, a few deliberate details, and broad cel shadows. Use this image for visual treatment and the original character reference for MC identity. This replaces the square superhero icon, cyan body, rectangular eyes, and chest emblem. The square silhouette is no longer an art requirement.
 
-- Presentation size: 38×38 game pixels.
-- Collision body: 28×32 game pixels, centered horizontally and aligned to the icon's feet.
-- Art must extend outside the collision body rather than inside it; the visible icon may look slightly more vulnerable than the actual hitbox, never the reverse.
-- Rotation origin is the exact center of the square.
+## Drawing and orientation
 
-## States
+- Bold near-black contours, rounded line ends, and restrained hand-drawn variation.
+- White head, friendly face, black limbs, and red cape.
+- Side-facing body with enough face turn to keep the expression visible.
+- Stable proportions and cape attachment across poses.
+- Transparent sprite background; render contact shadows separately.
+- Match nearby props' ink and lighting while keeping the MC visually simpler.
+- Match the approved cleaner-cartoon reference's detail level; keep the face and limbs free of added texture or costume detail.
 
-The core game does not require a traditional animation sheet. Rotation and translation are driven by the simulation. If authored frames are added later, the only required states are:
+## Pose coverage
 
-1. Running / grounded
-2. Airborne
-3. Crash burst source
-4. Completion pose
-5. Flight pose: tilt forward slightly, keep the cape readable, and show the remaining time in the HUD.
+1. Running / grounded, with a readable repeating stride.
+2. Jump and descent, using articulated limbs rather than whole-character quarter-turns.
+3. Brief Flight boost: activation, forward flight, and return to falling.
+4. Fire, Water, and Electricity attacks with consistent effect attachment points. A shared arm pose may support all three effects.
+5. Crash reaction and burst source.
+6. Completion pose.
+7. Battle movement, hit reaction, and airborne stomp for the existing Robber Battles.
 
-Lane Shift and Punch remain removed by ADR-0006. ADR-0007 adds Flight and Jump Orb feedback. The current one-button control scheme uses grounded timing beneath low branches rather than a dedicated Duck pose.
+There is no Duck pose. Grounded timing beneath overhead Hazards does not imply ducking.
 
-## Neighborhood presentation
+## Scale, anchors, and collision
 
-Use warm daytime houses, pitched roofs, fences, mailboxes, lawns, and sidewalk/road markings. Interactive Traffic has dark outlines, windows, headlights, and rolling wheels; it visibly approaches the player. Bushes and Trash Cans replace geometric spikes. Low Tree branches and Basketball Hoops carry “STAY LOW” labels. Flight Trampolines use a blue mat and arrow; Jump Orbs use a gold ring and upward arrow, visually distinct from Coins.
+Determine final visual scale in a gameplay proof scene. The old 38×38 presentation size and 28×32 collision body describe the square placeholder and are not an approved target for this character art.
+
+Use consistent ground and effect anchors. Keep the visible contact region aligned with gameplay collision. Thin limbs and a moving cape need an explicit hitbox-overlay review; a rectangular body cannot be assumed to match every pose. Do not silently resize collision or change Jump physics during asset replacement.
+
+Review at actual desktop and mobile display sizes before fixing export dimensions and frame counts. The smile, head shape, cape, and action must remain readable.
+
+## Documentation transition
+
+The renderer and `CONTEXT.md` still describe or display the square placeholder. This specification defines its intended replacement; it does not imply integration has happened. Flight and attacks follow ADR-0007 and ADR-0008; battle pose coverage follows ADR-0011.
