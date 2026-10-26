@@ -1,0 +1,16 @@
+{
+  "label": "mc-jump-rise",
+  "jobId": "95789d39-6716-4563-a8de-ce63acddf927",
+  "assetId": "81150dcc-9dca-45a7-b347-f5709e221947",
+  "characterAssetId": "8e2956bd-f4ab-4235-bf95-811b88b66760",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "keyed-and-inspected",
+  "nextStep": "Reconcile scale/anchors and review tagged playback",
+  "videoJobStatus": "succeeded",
+  "keyJobId": "910b075d-235c-4ab1-a780-ed30ed82ec09",
+  "sourceVideo": "mc-jump-rise-1792968676155.mp4",
+  "creditsChargedForVideo": 12,
+  "keyJobStatus": "succeeded",
+  "sheet": "mc-jump-rise.png",
+  "metadata": "mc-jump-rise.json"
+}

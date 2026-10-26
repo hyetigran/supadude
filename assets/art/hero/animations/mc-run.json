@@ -1,0 +1,330 @@
+{
+  "generatedBy": "WizardGenie sorceress_autosprite_get_character",
+  "type": "sprite-sheet-pack",
+  "assetId": "52610c5d-cd57-4960-9066-ccf9d9d2d16a",
+  "label": "mc-run",
+  "image": "mc-run.png",
+  "spriteSheetUrl": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/autosprite-v3-keyed/3c28c859-240d-491c-8f6d-267ebfaecb15/f61830d2-d131-413b-9c65-5a539c6acb4b-hd/keyed_sheet.png",
+  "sheet": {
+    "url": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/autosprite-v3-keyed/3c28c859-240d-491c-8f6d-267ebfaecb15/f61830d2-d131-413b-9c65-5a539c6acb4b-hd/keyed_sheet.png",
+    "cols": 8,
+    "rows": 6,
+    "frameW": 1024,
+    "frameH": 576,
+    "frameCount": 46,
+    "fps": 15,
+    "sampleEvery": 2,
+    "sourceFps": 30
+  },
+  "tags": [
+    {
+      "name": "mc-run",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "fps": 15,
+      "loop": true,
+      "indexBase": 0,
+      "selection": "Visually inspected first stride cycle; frame 5 repeats the extended stride near frame 0."
+    }
+  ],
+  "timing": {
+    "sourceFps": 30,
+    "formula": "playbackFps \u2248 sourceFps / sampleEvery (30/N)",
+    "note": "Source clips are treated as 30fps. After Corridor Key, sampleEvery=N means the sheet has every Nth frame; default playbackFps \u2248 30/N (e.g. every 4 \u2192 7.5fps) so wall-clock timing matches the original clip. Clip SFX from autosprite_get_sounds should start with the animation when played at that fps \u2014 changing fps without retiming audio desyncs sound.",
+    "soundSync": "Start the extracted MP3 with this animation when playing at spriteSheet.fps (default = sourceFps/sampleEvery)."
+  },
+  "inspection": {
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "frameBoundsAlpha128": [
+      [
+        327,
+        38,
+        648,
+        508
+      ],
+      [
+        344,
+        55,
+        642,
+        544
+      ],
+      [
+        340,
+        55,
+        642,
+        547
+      ],
+      [
+        333,
+        48,
+        642,
+        546
+      ],
+      [
+        328,
+        44,
+        644,
+        497
+      ],
+      [
+        327,
+        49,
+        642,
+        517
+      ],
+      [
+        341,
+        60,
+        642,
+        545
+      ],
+      [
+        338,
+        56,
+        642,
+        547
+      ],
+      [
+        332,
+        35,
+        641,
+        535
+      ],
+      [
+        327,
+        32,
+        646,
+        487
+      ],
+      [
+        326,
+        40,
+        647,
+        507
+      ],
+      [
+        342,
+        58,
+        642,
+        544
+      ],
+      [
+        342,
+        58,
+        642,
+        547
+      ],
+      [
+        331,
+        44,
+        642,
+        543
+      ],
+      [
+        328,
+        32,
+        645,
+        490
+      ],
+      [
+        326,
+        35,
+        648,
+        497
+      ],
+      [
+        338,
+        52,
+        642,
+        536
+      ],
+      [
+        344,
+        58,
+        642,
+        546
+      ],
+      [
+        331,
+        47,
+        642,
+        544
+      ],
+      [
+        333,
+        34,
+        644,
+        491
+      ],
+      [
+        327,
+        37,
+        650,
+        498
+      ],
+      [
+        331,
+        53,
+        642,
+        536
+      ],
+      [
+        341,
+        59,
+        642,
+        546
+      ],
+      [
+        334,
+        49,
+        642,
+        545
+      ],
+      [
+        333,
+        31,
+        642,
+        501
+      ],
+      [
+        329,
+        33,
+        644,
+        491
+      ],
+      [
+        328,
+        47,
+        642,
+        527
+      ],
+      [
+        336,
+        55,
+        642,
+        542
+      ],
+      [
+        340,
+        57,
+        642,
+        547
+      ],
+      [
+        333,
+        37,
+        641,
+        525
+      ],
+      [
+        331,
+        32,
+        644,
+        496
+      ],
+      [
+        325,
+        41,
+        644,
+        512
+      ],
+      [
+        333,
+        50,
+        642,
+        534
+      ],
+      [
+        341,
+        56,
+        642,
+        546
+      ],
+      [
+        331,
+        37,
+        641,
+        535
+      ],
+      [
+        334,
+        32,
+        643,
+        510
+      ],
+      [
+        326,
+        42,
+        646,
+        509
+      ],
+      [
+        328,
+        50,
+        642,
+        530
+      ],
+      [
+        342,
+        61,
+        642,
+        549
+      ],
+      [
+        329,
+        43,
+        642,
+        540
+      ],
+      [
+        333,
+        33,
+        642,
+        513
+      ],
+      [
+        328,
+        33,
+        650,
+        491
+      ],
+      [
+        326,
+        40,
+        647,
+        510
+      ],
+      [
+        340,
+        59,
+        642,
+        545
+      ],
+      [
+        335,
+        52,
+        642,
+        546
+      ],
+      [
+        329,
+        40,
+        642,
+        544
+      ]
+    ],
+    "whiteHeadAndBlackLimbs": "present in inspected frames",
+    "note": "Source changed portrait master to landscape framing; shared scale and anchors across other clips still require reconciliation."
+  },
+  "anchors": {
+    "status": "pending cross-animation alignment; no gameplay anchor invented"
+  }
+}

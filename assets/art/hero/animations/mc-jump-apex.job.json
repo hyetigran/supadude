@@ -1,0 +1,14 @@
+{
+  "label": "mc-jump-apex",
+  "jobId": "c8164f1e-97a4-4ab1-a3bf-681c8b12ff78",
+  "assetId": "ee915079-38e2-46ad-baf6-8fb3a6f9d050",
+  "characterAssetId": "8e2956bd-f4ab-4235-bf95-811b88b66760",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "rejected-motion",
+  "nextStep": "Generate dedicated tucked-leg start pose and retry once",
+  "videoJobStatus": "succeeded",
+  "keyJobId": "36b39b68-34e3-45ca-adbb-34b8487964b4",
+  "sourceVideo": "mc-jump-apex-1792968958651.mp4",
+  "creditsChargedForVideo": 12,
+  "keyJobStatus": "succeeded"
+}

@@ -1,0 +1,13 @@
+{
+  "label": "mc-stomp",
+  "jobId": "1c6eea56-cb01-436b-9f34-00d535b5458b",
+  "assetId": "7dfe29c7-97a8-4837-93dd-a201e37a39e0",
+  "characterAssetId": "0daaa8ea-80f9-41ab-843f-78a98e0761dd",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "keyed-and-inspected",
+  "nextStep": "Correct vertical origin drift and reconcile shared scale/anchors; verify tag playback.",
+  "videoJobStatus": "succeeded",
+  "sourceVideo": "mc-stomp-1792971306133.mp4",
+  "keyJobId": "a4928a65-b604-49ab-8a0e-09e32e1baf87",
+  "keyJobStatus": "succeeded"
+}

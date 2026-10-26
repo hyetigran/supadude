@@ -1,0 +1,10 @@
+Using the existing Supa Dude AutoSprite character, create this motion:
+Save as mc-flight-loop. Loop the forward airborne superhero pose with a small cape flutter, no translation or rotation of the whole figure.
+
+Keep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.
+
+Use a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.
+
+Match the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.
+
+Hold the supplied flight pose and framing exactly. Only a small cape flutter, no head or limb motion, no whole-figure translation, rotation, shrinking or zoom. Retain all four limbs including the rear arm overlapping cape. Uniform green plate, no floor, shadows or effects. Seamless loop.

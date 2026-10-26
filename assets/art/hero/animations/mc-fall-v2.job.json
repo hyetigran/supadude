@@ -1,0 +1,16 @@
+{
+  "label": "mc-fall-v2",
+  "jobId": "f48fb433-d45b-4dd9-8589-d56fa91d7cbe",
+  "assetId": "18ae6c9f-3cb7-4678-a47c-6e5d85401429",
+  "characterAssetId": "0daaa8ea-80f9-41ab-843f-78a98e0761dd",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "keyed-and-inspected",
+  "nextStep": "Reconcile scale/anchors and review tagged playback",
+  "videoJobStatus": "succeeded",
+  "keyJobId": "aa11d4a8-7019-4284-b022-bfee40d0165f",
+  "sourceVideo": "mc-fall-v2-1792970143383.mp4",
+  "creditsChargedForVideo": 12,
+  "keyJobStatus": "succeeded",
+  "sheet": "mc-fall.png",
+  "metadata": "mc-fall.json"
+}

@@ -1,0 +1,17 @@
+{
+  "label": "mc-run",
+  "jobId": "09208f98-4c7b-4321-a7dd-e6d4c256b13f",
+  "assetId": "52610c5d-cd57-4960-9066-ccf9d9d2d16a",
+  "characterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "complete",
+  "requestedDurationSeconds": 3,
+  "model": "imagine-1.5",
+  "resolution": "720p",
+  "nextStep": "Reconcile scale and anchors with subsequent clips",
+  "videoJobStatus": "succeeded",
+  "keyJobId": "f61830d2-d131-413b-9c65-5a539c6acb4b",
+  "creditsChargedForVideo": 12,
+  "keyJobStatus": "succeeded",
+  "sheet": "mc-run.png",
+  "metadata": "mc-run.json"
+}

@@ -1,0 +1,10 @@
+Using the existing Supa Dude AutoSprite character, create this motion:
+Save as mc-land. One small landing compression and quick recovery to running; keep feet aligned to the shared ground anchor.
+
+Keep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers or particles. Keep the character inside the frame with padding. Movement through the Level will be controlled by the game: do not animate the character travelling across the screen or a full jump trajectory.
+
+Use a short source clip within the tool's supported duration. After generation, run AutoSprite Corridor Key and wait until the transparent sheet is complete. Inspect the frames and tag the usable motion. Use actual sheet metadata, not guessed frame counts. For airborne actions, use a compatible airborne start pose rather than starting from standing.
+
+Match the attached approved-art-style.png: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.
+
+CRITICAL: Uniform pure green background throughout, including directly below the feet. NO ground, NO floor, NO oval, NO contact shadow, NO cast shadow, NO dark patch below the character. Only the figure and its attached red cape. Start from the supplied airborne falling pose, settle feet onto an invisible fixed anchor with one SMALL knee flex, then recover into running in place. No deep squat, no ducking. Preserve source head size and framing; no zoom or rescaling.

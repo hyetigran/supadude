@@ -1,0 +1,332 @@
+{
+  "label": "mc-shoot-ground",
+  "image": "mc-shoot-ground.png",
+  "sourceImage": "../animations/mc-shoot-ground.png",
+  "sourceAssetId": "7cf4cbf0-1303-4394-9c32-dfdcc152d83d",
+  "sheet": {
+    "frameW": 768,
+    "frameH": 768,
+    "cols": 4,
+    "rows": 2,
+    "frameCount": 8,
+    "fps": 15
+  },
+  "tags": [
+    {
+      "name": "mc-shoot-ground",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fromFrame": 0,
+      "toFrame": 7,
+      "fps": 15,
+      "loop": false,
+      "indexBase": 0
+    }
+  ],
+  "sourceFrameMap": [
+    9,
+    12,
+    15,
+    21,
+    24,
+    27,
+    30,
+    36
+  ],
+  "frames": [
+    {
+      "sourceFrame": 9,
+      "whiteHeadBounds": [
+        490,
+        105,
+        673,
+        278
+      ],
+      "alpha128Bounds": [
+        360,
+        96,
+        682,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        -1,
+        300
+      ],
+      "sourcePivot": [
+        547.25,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        252,
+        367,
+        479,
+        660
+      ]
+    },
+    {
+      "sourceFrame": 12,
+      "whiteHeadBounds": [
+        510,
+        108,
+        692,
+        281
+      ],
+      "alpha128Bounds": [
+        380,
+        99,
+        700,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        -1,
+        300
+      ],
+      "sourcePivot": [
+        547.25,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        265,
+        369,
+        492,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 15,
+      "whiteHeadBounds": [
+        464,
+        76,
+        645,
+        250
+      ],
+      "alpha128Bounds": [
+        352,
+        67,
+        726,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        -1,
+        300
+      ],
+      "sourcePivot": [
+        547.25,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        246,
+        346,
+        510,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 21,
+      "whiteHeadBounds": [
+        458,
+        74,
+        640,
+        248
+      ],
+      "alpha128Bounds": [
+        348,
+        65,
+        712,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        -1,
+        300
+      ],
+      "sourcePivot": [
+        547.25,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        243,
+        345,
+        502,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 24,
+      "whiteHeadBounds": [
+        455,
+        73,
+        636,
+        247
+      ],
+      "alpha128Bounds": [
+        346,
+        64,
+        701,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        -1,
+        300
+      ],
+      "sourcePivot": [
+        547.25,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        344,
+        493,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 27,
+      "whiteHeadBounds": [
+        452,
+        72,
+        634,
+        246
+      ],
+      "alpha128Bounds": [
+        346,
+        63,
+        683,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        -1,
+        300
+      ],
+      "sourcePivot": [
+        547.25,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        241,
+        344,
+        480,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 30,
+      "whiteHeadBounds": [
+        449,
+        71,
+        630,
+        245
+      ],
+      "alpha128Bounds": [
+        345,
+        62,
+        655,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        -1,
+        300
+      ],
+      "sourcePivot": [
+        547.25,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        241,
+        343,
+        460,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 36,
+      "whiteHeadBounds": [
+        442,
+        68,
+        624,
+        242
+      ],
+      "alpha128Bounds": [
+        346,
+        59,
+        633,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        -1,
+        300
+      ],
+      "sourcePivot": [
+        547.25,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        341,
+        444,
+        661
+      ]
+    }
+  ],
+  "anchors": {
+    "coordinates": "pixels from top-left",
+    "ground": [
+      384,
+      660
+    ],
+    "airborne": [
+      430,
+      320
+    ],
+    "alignment": "fixed measured support baseline; original bob retained"
+  },
+  "scaleMethod": "constant per clip; median opaque white head width normalized to 128px",
+  "reviewStatus": "structural export checks passed; sampled static review complete; playback unverified"
+}

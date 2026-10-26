@@ -1,0 +1,26 @@
+{
+  "generatedBy": "WizardGenie sorceress_autosprite_get_character",
+  "type": "sprite-sheet-pack",
+  "assetId": "7cf4cbf0-1303-4394-9c32-dfdcc152d83d",
+  "label": "mc-shoot-ground",
+  "image": "mc-shoot-ground-7cf4cbf0-sheet-1792967419810.png",
+  "spriteSheetUrl": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/autosprite-v3-keyed/3c28c859-240d-491c-8f6d-267ebfaecb15/21af264a-9334-4724-9ad7-a3358f9f3c78-hd/keyed_sheet.png",
+  "sheet": {
+    "url": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/autosprite-v3-keyed/3c28c859-240d-491c-8f6d-267ebfaecb15/21af264a-9334-4724-9ad7-a3358f9f3c78-hd/keyed_sheet.png",
+    "cols": 8,
+    "rows": 6,
+    "frameW": 1024,
+    "frameH": 576,
+    "frameCount": 46,
+    "fps": 15,
+    "sampleEvery": 2,
+    "sourceFps": 30
+  },
+  "tags": [],
+  "timing": {
+    "sourceFps": 30,
+    "formula": "playbackFps ≈ sourceFps / sampleEvery (30/N)",
+    "note": "Source clips are treated as 30fps. After Corridor Key, sampleEvery=N means the sheet has every Nth frame; default playbackFps ≈ 30/N (e.g. every 4 → 7.5fps) so wall-clock timing matches the original clip. Clip SFX from autosprite_get_sounds should start with the animation when played at that fps — changing fps without retiming audio desyncs sound.",
+    "soundSync": "Start the extracted MP3 with this animation when playing at spriteSheet.fps (default = sourceFps/sampleEvery)."
+  }
+}

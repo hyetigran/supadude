@@ -1,0 +1,19 @@
+{
+  "label": "mc-fall-start",
+  "jobId": "e4879a7a-bedb-4a79-a253-1e6ea8fb3394",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "registered",
+  "nextStep": "Use for falling animation",
+  "originalJobId": "f40ef6e8-ef17-4297-8676-2f9b8a873017",
+  "originalImage": "mc-fall-start-transparent.png",
+  "width": 848,
+  "height": 1264,
+  "alphaExtrema": [
+    0,
+    254
+  ],
+  "review": "Green chroma version retains two visible arms and feet-down legs",
+  "previousJobId": "b0227b67-58f5-43e3-b60a-0ce396a46929",
+  "image": "mc-fall-start.png",
+  "characterAssetId": "0daaa8ea-80f9-41ab-843f-78a98e0761dd"
+}

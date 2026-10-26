@@ -1,0 +1,13 @@
+{
+  "label": "mc-jump-apex-v2",
+  "jobId": "51b963b7-b304-4cec-b411-f1948ac69073",
+  "assetId": "997d8a94-1105-4e05-a019-26a9cb4bc054",
+  "characterAssetId": "8b7de55f-dced-40fa-a7f5-bffaa5e0dccb",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "keyed-and-inspected",
+  "nextStep": "Reconcile shared canvas, scale and anchors; inspect tagged exports.",
+  "videoJobStatus": "succeeded",
+  "sourceVideo": "mc-jump-apex-v2-1792972955023.mp4",
+  "keyJobId": "c5bb5e1f-a0de-4ecd-b8aa-2b72ffc5dd13",
+  "keyJobStatus": "succeeded"
+}

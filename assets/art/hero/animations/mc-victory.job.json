@@ -1,0 +1,15 @@
+{
+  "label": "mc-victory",
+  "jobId": "620b3ecd-efde-4e3d-afac-1954a2dc0387",
+  "assetId": "c40a502f-7221-4f14-98c7-114b71f1ab65",
+  "characterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "keyed-and-inspected",
+  "nextStep": "Reconcile scale/anchors and review tagged playback",
+  "videoJobStatus": "succeeded",
+  "keyJobId": "33acfe28-5712-4f34-8781-3fec350272b8",
+  "sourceVideo": "mc-victory-1792968203221.mp4",
+  "creditsChargedForVideo": 12,
+  "keyJobStatus": "succeeded",
+  "sheet": "mc-victory.png",
+  "metadata": "mc-victory.json"
+}

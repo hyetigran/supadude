@@ -1,0 +1,13 @@
+{
+  "label": "mc-land-v2",
+  "jobId": "cd9c2db4-56e3-4dea-ac87-30352bc69c2a",
+  "assetId": "1d6d3ba7-f860-4def-bb67-ed12fafe506b",
+  "characterAssetId": "0daaa8ea-80f9-41ab-843f-78a98e0761dd",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "keyed-and-inspected",
+  "nextStep": "Candidate tags saved; verify playback, common scale and anchors.",
+  "videoJobStatus": "succeeded",
+  "sourceVideo": "mc-land-v2-1792970749041.mp4",
+  "keyJobId": "84aacdc5-0def-4bb3-a9a4-dd236c1ea061",
+  "keyJobStatus": "succeeded"
+}

@@ -1,0 +1,15 @@
+{
+  "label": "mc-shoot-ground",
+  "jobId": "5e3fab96-d0e3-4309-ba67-1d5995fa5048",
+  "assetId": "7cf4cbf0-1303-4394-9c32-dfdcc152d83d",
+  "characterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "keyed-and-inspected",
+  "nextStep": "Reconcile scale/anchors and review tagged playback",
+  "videoJobStatus": "succeeded",
+  "keyJobId": "21af264a-9334-4724-9ad7-a3358f9f3c78",
+  "sourceVideo": "mc-shoot-ground-1792967270866.mp4",
+  "creditsChargedForVideo": 12,
+  "keyJobStatus": "succeeded",
+  "sheet": "mc-shoot-ground.png",
+  "metadata": "mc-shoot-ground.json"
+}

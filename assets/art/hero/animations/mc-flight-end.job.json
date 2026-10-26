@@ -1,0 +1,14 @@
+{
+  "label": "mc-flight-end",
+  "jobId": "81e15ee8-5025-4ada-9469-554672dc0bc2",
+  "assetId": "0310161c-1cd2-4e19-b826-5b41cdb3f672",
+  "characterAssetId": "3be92634-df7c-4fbe-9792-d3f2253e1417",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "rejected-needs-rework",
+  "nextStep": "Retry right-facing recovery with cape behind and to left of torso.",
+  "videoJobStatus": "succeeded",
+  "sourceVideo": "mc-flight-end-1792972281633.mp4",
+  "keyJobId": "4fd2f065-28fe-42db-ae1c-c1b3c70890e5",
+  "keyJobStatus": "succeeded",
+  "inspection": "Recovery rotates to front-facing body and cape obscures torso, violating side elevation."
+}

@@ -1,0 +1,14 @@
+{
+  "label": "mc-fall",
+  "jobId": "ce3dd3bb-d05f-4a2a-821f-c0acc5a036a3",
+  "assetId": "a21b636f-5033-406f-ae24-eb2a55254821",
+  "characterAssetId": "8e2956bd-f4ab-4235-bf95-811b88b66760",
+  "identityMasterAssetId": "1878869a-f704-40ed-a0dd-29485200c3f7",
+  "status": "rejected-motion",
+  "nextStep": "Create feet-down airborne start pose and retry once",
+  "videoJobStatus": "succeeded",
+  "keyJobId": "6fcce64a-8591-4061-ac57-0c19a71a39b5",
+  "sourceVideo": "mc-fall-1792969569152.mp4",
+  "creditsChargedForVideo": 12,
+  "keyJobStatus": "succeeded"
+}
