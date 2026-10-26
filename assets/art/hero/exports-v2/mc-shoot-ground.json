@@ -1,0 +1,672 @@
+{
+  "label": "mc-shoot-ground",
+  "image": "mc-shoot-ground.png",
+  "sourceImage": "../animations/mc-shoot-ground.png",
+  "sourceAssetId": "7cf4cbf0-1303-4394-9c32-dfdcc152d83d",
+  "sheet": {
+    "frameW": 768,
+    "frameH": 768,
+    "cols": 4,
+    "rows": 5,
+    "frameCount": 17,
+    "fps": 24
+  },
+  "tags": [
+    {
+      "name": "mc-shoot-ground",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "fromFrame": 0,
+      "toFrame": 16,
+      "fps": 24,
+      "loop": false,
+      "indexBase": 0
+    },
+    {
+      "name": "mc-shoot-ground-hold",
+      "frames": [
+        16
+      ],
+      "fromFrame": 16,
+      "toFrame": 16,
+      "fps": 24,
+      "loop": true,
+      "indexBase": 0
+    }
+  ],
+  "sourceFrameMap": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ],
+  "frames": [
+    {
+      "sourceFrame": 11,
+      "whiteHeadBounds": [
+        504,
+        108,
+        686,
+        282
+      ],
+      "alpha128Bounds": [
+        373,
+        99,
+        696,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        262,
+        369,
+        490,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 12,
+      "whiteHeadBounds": [
+        510,
+        108,
+        692,
+        281
+      ],
+      "alpha128Bounds": [
+        380,
+        99,
+        700,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        266,
+        369,
+        493,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 13,
+      "whiteHeadBounds": [
+        496,
+        97,
+        678,
+        270
+      ],
+      "alpha128Bounds": [
+        370,
+        88,
+        689,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        259,
+        361,
+        485,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 14,
+      "whiteHeadBounds": [
+        471,
+        80,
+        653,
+        254
+      ],
+      "alpha128Bounds": [
+        356,
+        70,
+        725,
+        510
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        250,
+        349,
+        510,
+        659
+      ]
+    },
+    {
+      "sourceFrame": 15,
+      "whiteHeadBounds": [
+        464,
+        76,
+        645,
+        250
+      ],
+      "alpha128Bounds": [
+        352,
+        67,
+        726,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        247,
+        346,
+        511,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 16,
+      "whiteHeadBounds": [
+        461,
+        75,
+        643,
+        249
+      ],
+      "alpha128Bounds": [
+        350,
+        66,
+        714,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        246,
+        346,
+        504,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 17,
+      "whiteHeadBounds": [
+        461,
+        75,
+        642,
+        248
+      ],
+      "alpha128Bounds": [
+        350,
+        66,
+        724,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        246,
+        345,
+        510,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 23,
+      "whiteHeadBounds": [
+        456,
+        73,
+        638,
+        247
+      ],
+      "alpha128Bounds": [
+        347,
+        65,
+        708,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        244,
+        345,
+        499,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 24,
+      "whiteHeadBounds": [
+        455,
+        73,
+        636,
+        247
+      ],
+      "alpha128Bounds": [
+        346,
+        64,
+        701,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        243,
+        344,
+        494,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 25,
+      "whiteHeadBounds": [
+        454,
+        73,
+        636,
+        247
+      ],
+      "alpha128Bounds": [
+        346,
+        64,
+        698,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        243,
+        344,
+        491,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 26,
+      "whiteHeadBounds": [
+        453,
+        72,
+        635,
+        246
+      ],
+      "alpha128Bounds": [
+        346,
+        64,
+        691,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        344,
+        486,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 27,
+      "whiteHeadBounds": [
+        452,
+        72,
+        634,
+        246
+      ],
+      "alpha128Bounds": [
+        346,
+        63,
+        683,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        344,
+        481,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 28,
+      "whiteHeadBounds": [
+        451,
+        72,
+        633,
+        245
+      ],
+      "alpha128Bounds": [
+        345,
+        63,
+        674,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        343,
+        475,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 29,
+      "whiteHeadBounds": [
+        449,
+        71,
+        631,
+        245
+      ],
+      "alpha128Bounds": [
+        345,
+        62,
+        660,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        343,
+        464,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 30,
+      "whiteHeadBounds": [
+        449,
+        71,
+        630,
+        245
+      ],
+      "alpha128Bounds": [
+        345,
+        62,
+        655,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        343,
+        461,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 31,
+      "whiteHeadBounds": [
+        447,
+        70,
+        629,
+        244
+      ],
+      "alpha128Bounds": [
+        345,
+        61,
+        644,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        342,
+        453,
+        661
+      ]
+    },
+    {
+      "sourceFrame": 32,
+      "whiteHeadBounds": [
+        446,
+        70,
+        628,
+        244
+      ],
+      "alpha128Bounds": [
+        345,
+        61,
+        638,
+        512
+      ],
+      "scale": 0.7032967032967034,
+      "translation": [
+        0,
+        300
+      ],
+      "sourcePivot": [
+        545.5,
+        512
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        242,
+        342,
+        449,
+        661
+      ]
+    }
+  ],
+  "anchors": {
+    "coordinates": "pixels from top-left",
+    "ground": [
+      384,
+      660
+    ],
+    "airborne": [
+      430,
+      320
+    ],
+    "alignment": "fixed measured support baseline; original bob retained"
+  },
+  "scaleMethod": "constant per clip; median opaque white head width normalized to 128px",
+  "reviewStatus": "Second full-sheet static curation complete; export and preview decode checks passed; live playback not verified.",
+  "curation": {
+    "status": "provisional",
+    "notes": "Keep extension and recovery in sequence; shorten extended-arm hold. Cut 17\u219223 joins similar extension poses. Generated torso/leg deformation remains.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames."
+  }
+}

@@ -1,0 +1,636 @@
+{
+  "label": "mc-hit",
+  "image": "mc-hit.png",
+  "sourceImage": "../animations/mc-hit.png",
+  "sourceAssetId": "b9b2b5e4-f378-4948-bac8-db53102b5927",
+  "sheet": {
+    "frameW": 768,
+    "frameH": 768,
+    "cols": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "fps": 24
+  },
+  "tags": [
+    {
+      "name": "mc-hit",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "fromFrame": 0,
+      "toFrame": 15,
+      "fps": 24,
+      "loop": false,
+      "indexBase": 0
+    },
+    {
+      "name": "mc-hit-hold",
+      "frames": [
+        15
+      ],
+      "fromFrame": 15,
+      "toFrame": 15,
+      "fps": 24,
+      "loop": true,
+      "indexBase": 0
+    }
+  ],
+  "sourceFrameMap": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    29,
+    30,
+    31,
+    32,
+    33
+  ],
+  "frames": [
+    {
+      "sourceFrame": 6,
+      "whiteHeadBounds": [
+        255,
+        205,
+        521,
+        464
+      ],
+      "alpha128Bounds": [
+        119,
+        193,
+        534,
+        872
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        253,
+        329,
+        453,
+        656
+      ]
+    },
+    {
+      "sourceFrame": 7,
+      "whiteHeadBounds": [
+        256,
+        218,
+        525,
+        472
+      ],
+      "alpha128Bounds": [
+        121,
+        206,
+        538,
+        874
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        254,
+        335,
+        455,
+        657
+      ]
+    },
+    {
+      "sourceFrame": 8,
+      "whiteHeadBounds": [
+        258,
+        242,
+        533,
+        490
+      ],
+      "alpha128Bounds": [
+        131,
+        230,
+        546,
+        880
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        259,
+        347,
+        459,
+        659
+      ]
+    },
+    {
+      "sourceFrame": 9,
+      "whiteHeadBounds": [
+        259,
+        249,
+        536,
+        496
+      ],
+      "alpha128Bounds": [
+        132,
+        237,
+        549,
+        881
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        259,
+        350,
+        460,
+        660
+      ]
+    },
+    {
+      "sourceFrame": 10,
+      "whiteHeadBounds": [
+        259,
+        250,
+        536,
+        496
+      ],
+      "alpha128Bounds": [
+        147,
+        238,
+        549,
+        882
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        267,
+        351,
+        461,
+        660
+      ]
+    },
+    {
+      "sourceFrame": 11,
+      "whiteHeadBounds": [
+        259,
+        249,
+        536,
+        496
+      ],
+      "alpha128Bounds": [
+        147,
+        237,
+        549,
+        881
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        267,
+        350,
+        461,
+        660
+      ]
+    },
+    {
+      "sourceFrame": 12,
+      "whiteHeadBounds": [
+        259,
+        244,
+        535,
+        492
+      ],
+      "alpha128Bounds": [
+        147,
+        233,
+        548,
+        880
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        267,
+        348,
+        460,
+        660
+      ]
+    },
+    {
+      "sourceFrame": 13,
+      "whiteHeadBounds": [
+        258,
+        224,
+        529,
+        477
+      ],
+      "alpha128Bounds": [
+        165,
+        212,
+        542,
+        876
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        275,
+        338,
+        457,
+        658
+      ]
+    },
+    {
+      "sourceFrame": 14,
+      "whiteHeadBounds": [
+        257,
+        208,
+        524,
+        466
+      ],
+      "alpha128Bounds": [
+        141,
+        196,
+        537,
+        873
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        264,
+        330,
+        455,
+        656
+      ]
+    },
+    {
+      "sourceFrame": 15,
+      "whiteHeadBounds": [
+        256,
+        205,
+        523,
+        463
+      ],
+      "alpha128Bounds": [
+        126,
+        192,
+        536,
+        872
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        257,
+        329,
+        454,
+        656
+      ]
+    },
+    {
+      "sourceFrame": 16,
+      "whiteHeadBounds": [
+        256,
+        204,
+        522,
+        463
+      ],
+      "alpha128Bounds": [
+        109,
+        192,
+        535,
+        872
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        248,
+        328,
+        454,
+        656
+      ]
+    },
+    {
+      "sourceFrame": 29,
+      "whiteHeadBounds": [
+        256,
+        204,
+        522,
+        463
+      ],
+      "alpha128Bounds": [
+        113,
+        192,
+        535,
+        872
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        250,
+        328,
+        454,
+        656
+      ]
+    },
+    {
+      "sourceFrame": 30,
+      "whiteHeadBounds": [
+        255,
+        204,
+        521,
+        463
+      ],
+      "alpha128Bounds": [
+        114,
+        191,
+        534,
+        872
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        251,
+        328,
+        453,
+        656
+      ]
+    },
+    {
+      "sourceFrame": 31,
+      "whiteHeadBounds": [
+        252,
+        203,
+        518,
+        462
+      ],
+      "alpha128Bounds": [
+        118,
+        191,
+        531,
+        872
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        253,
+        328,
+        452,
+        656
+      ]
+    },
+    {
+      "sourceFrame": 32,
+      "whiteHeadBounds": [
+        250,
+        202,
+        516,
+        462
+      ],
+      "alpha128Bounds": [
+        120,
+        191,
+        529,
+        872
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        254,
+        328,
+        451,
+        656
+      ]
+    },
+    {
+      "sourceFrame": 33,
+      "whiteHeadBounds": [
+        247,
+        202,
+        513,
+        461
+      ],
+      "alpha128Bounds": [
+        122,
+        190,
+        526,
+        872
+      ],
+      "scale": 0.4794007490636704,
+      "translation": [
+        197,
+        237
+      ],
+      "sourcePivot": [
+        390.0,
+        882
+      ],
+      "exportPivot": [
+        384,
+        660
+      ],
+      "exportAlpha16Bounds": [
+        255,
+        327,
+        450,
+        656
+      ]
+    }
+  ],
+  "anchors": {
+    "coordinates": "pixels from top-left",
+    "ground": [
+      384,
+      660
+    ],
+    "airborne": [
+      430,
+      320
+    ],
+    "alignment": "fixed measured support baseline; original bob retained"
+  },
+  "scaleMethod": "constant per clip; median opaque white head width normalized to 128px",
+  "reviewStatus": "Second full-sheet static curation complete; export and preview decode checks passed; live playback not verified.",
+  "curation": {
+    "status": "provisional",
+    "notes": "Restore consecutive recoil; cut long surprise hold. Join16\u219229 retains same broad pose but face/cape differ. Front-facing recoil remains.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames."
+  }
+}

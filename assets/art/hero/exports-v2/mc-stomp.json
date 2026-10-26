@@ -1,0 +1,85 @@
+{
+  "label": "mc-stomp",
+  "image": "mc-stomp.png",
+  "sourceImage": "../animations/mc-stomp.png",
+  "sourceAssetId": "7dfe29c7-97a8-4837-93dd-a201e37a39e0",
+  "sheet": {
+    "frameW": 768,
+    "frameH": 768,
+    "cols": 1,
+    "rows": 1,
+    "frameCount": 1,
+    "fps": 15
+  },
+  "tags": [
+    {
+      "name": "mc-stomp",
+      "frames": [
+        0
+      ],
+      "fromFrame": 0,
+      "toFrame": 0,
+      "fps": 15,
+      "loop": true,
+      "indexBase": 0
+    }
+  ],
+  "sourceFrameMap": [
+    33
+  ],
+  "frames": [
+    {
+      "sourceFrame": 33,
+      "whiteHeadBounds": [
+        492,
+        84,
+        622,
+        210
+      ],
+      "alpha128Bounds": [
+        402,
+        54,
+        634,
+        499
+      ],
+      "scale": 0.9846153846153847,
+      "translation": [
+        -118,
+        113
+      ],
+      "sourcePivot": [
+        557.0,
+        210
+      ],
+      "exportPivot": [
+        430,
+        320
+      ],
+      "exportAlpha16Bounds": [
+        277,
+        163,
+        507,
+        607
+      ]
+    }
+  ],
+  "anchors": {
+    "coordinates": "pixels from top-left",
+    "ground": [
+      384,
+      660
+    ],
+    "airborne": [
+      430,
+      320
+    ],
+    "alignment": "white-head bottom-center proxy per airborne frame"
+  },
+  "scaleMethod": "constant per clip; median opaque white head width normalized to 128px",
+  "reviewStatus": "Second full-sheet static curation complete; export and preview decode checks passed; live playback not verified.",
+  "curation": {
+    "status": "hold-preferred",
+    "notes": "Feet-leading hold removes bob and knee cycling. Game supplies downward travel.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames."
+  }
+}

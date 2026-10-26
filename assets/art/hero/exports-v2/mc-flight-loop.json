@@ -1,0 +1,158 @@
+{
+  "label": "mc-flight-loop",
+  "image": "mc-flight-loop.png",
+  "sourceImage": "../animations/mc-flight-loop.png",
+  "sourceAssetId": "ebfbdb9e-8ace-471d-a466-c3a2b1f2cba6",
+  "sheet": {
+    "frameW": 768,
+    "frameH": 768,
+    "cols": 3,
+    "rows": 1,
+    "frameCount": 3,
+    "fps": 10
+  },
+  "tags": [
+    {
+      "name": "mc-flight-loop",
+      "frames": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "fromFrame": 0,
+      "toFrame": 2,
+      "fps": 10,
+      "loop": true,
+      "indexBase": 0
+    }
+  ],
+  "sourceFrameMap": [
+    20,
+    21,
+    22
+  ],
+  "frames": [
+    {
+      "sourceFrame": 20,
+      "whiteHeadBounds": [
+        426,
+        150,
+        737,
+        448
+      ],
+      "alpha128Bounds": [
+        123,
+        136,
+        837,
+        824
+      ],
+      "scale": 0.4115755627009646,
+      "translation": [
+        191,
+        136
+      ],
+      "sourcePivot": [
+        581.5,
+        448
+      ],
+      "exportPivot": [
+        430,
+        320
+      ],
+      "exportAlpha16Bounds": [
+        241,
+        191,
+        536,
+        476
+      ]
+    },
+    {
+      "sourceFrame": 21,
+      "whiteHeadBounds": [
+        426,
+        152,
+        737,
+        449
+      ],
+      "alpha128Bounds": [
+        123,
+        137,
+        837,
+        824
+      ],
+      "scale": 0.4115755627009646,
+      "translation": [
+        191,
+        135
+      ],
+      "sourcePivot": [
+        581.5,
+        449
+      ],
+      "exportPivot": [
+        430,
+        320
+      ],
+      "exportAlpha16Bounds": [
+        241,
+        191,
+        536,
+        475
+      ]
+    },
+    {
+      "sourceFrame": 22,
+      "whiteHeadBounds": [
+        426,
+        152,
+        737,
+        449
+      ],
+      "alpha128Bounds": [
+        123,
+        138,
+        837,
+        824
+      ],
+      "scale": 0.4115755627009646,
+      "translation": [
+        191,
+        135
+      ],
+      "sourcePivot": [
+        581.5,
+        449
+      ],
+      "exportPivot": [
+        430,
+        320
+      ],
+      "exportAlpha16Bounds": [
+        241,
+        191,
+        536,
+        475
+      ]
+    }
+  ],
+  "anchors": {
+    "coordinates": "pixels from top-left",
+    "ground": [
+      384,
+      660
+    ],
+    "airborne": [
+      430,
+      320
+    ],
+    "alignment": "white-head bottom-center proxy per airborne frame"
+  },
+  "scaleMethod": "constant per clip; median opaque white head width normalized to 128px",
+  "reviewStatus": "Second full-sheet static curation complete; export and preview decode checks passed; live playback not verified.",
+  "curation": {
+    "status": "trimmed",
+    "notes": "Small cape-only-looking subsection with rear arm staying against cape; reverse at endpoint. Excludes dangling-arm swings.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames."
+  }
+}

@@ -7,10 +7,16 @@ from pathlib import Path
 import json
 import math
 import statistics
+import argparse
 from PIL import Image, ImageDraw, ImageChops
 
 ROOT = Path(__file__).resolve().parent
-OUT = ROOT / 'exports'
+parser = argparse.ArgumentParser()
+parser.add_argument('--curation', type=Path)
+parser.add_argument('--out', default='exports')
+args = parser.parse_args()
+curation = json.loads(args.curation.read_text()) if args.curation else {}
+OUT = ROOT / args.out
 OUT.mkdir(exist_ok=True)
 NAMES = ['run','idle','jump-rise','jump-apex','fall','land','flight-start',
          'flight-loop','flight-end','shoot-ground','shoot-air','hit','stomp',
@@ -26,6 +32,8 @@ manifest = []
 for ni, name in enumerate(NAMES):
     label = 'mc-' + name
     meta = json.loads((ROOT / 'animations' / (label + '.json')).read_text())
+    if label in curation:
+        meta['tags'] = curation[label]['tags']
     sheet = meta['sheet']
     source = Image.open(ROOT / 'animations' / meta['image']).convert('RGBA')
     ids = list(dict.fromkeys(i for tag in meta['tags'] for i in tag['frames']))
@@ -77,12 +85,14 @@ for ni, name in enumerate(NAMES):
         indices = [ids.index(i) for i in tag['frames']]
         tags.append(dict(name=tag['name'],frames=indices,fromFrame=min(indices),toFrame=max(indices),fps=tag['fps'],loop=tag['loop'],indexBase=0))
     export = dict(label=label,image=label+'.png',sourceImage='../animations/'+meta['image'],
-        sourceAssetId=meta['assetId'],sheet=dict(frameW=SIZE,frameH=SIZE,cols=cols,rows=rows,frameCount=len(packed),fps=15),
+        sourceAssetId=meta['assetId'],sheet=dict(frameW=SIZE,frameH=SIZE,cols=cols,rows=rows,frameCount=len(packed),fps=tags[0]['fps']),
         tags=tags,sourceFrameMap=ids,frames=records,
         anchors=dict(coordinates='pixels from top-left',ground=[384,GROUND],
             airborne=[430,320],alignment='white-head bottom-center proxy per airborne frame' if name in AIR else 'fixed measured support baseline; original bob retained'),
         scaleMethod='constant per clip; median opaque white head width normalized to 128px',
         reviewStatus='export checks passed; visual and playback review pending')
+    if label in curation:
+        export['curation'] = {k:v for k,v in curation[label].items() if k != 'tags'}
     (OUT/(label+'.json')).write_text(json.dumps(export,indent=2)+'\n')
     # Static inspection of every selected frame, with export pivot crosshairs.
     contact = Image.new('RGB',(cols*256,rows*280),'#c9d3dd'); cd=ImageDraw.Draw(contact)
@@ -90,6 +100,15 @@ for ni, name in enumerate(NAMES):
         thumb=f.resize((256,256));x=i%cols*256;y=i//cols*280
         contact.paste(thumb,(x,y+20),thumb);cd.text((x+4,y+3),f'{i} / source {ids[i]}',fill='black')
     contact.save(OUT/(label+'-contact.jpg'))
+    if args.curation:
+        tag = tags[0]
+        preview = []
+        for i in tag['frames']:
+            f = packed[i].resize((384,384),Image.Resampling.LANCZOS)
+            bg = Image.new('RGB',(384,384),'#c9d3dd');bg.paste(f,(0,0),f);preview.append(bg)
+        durations = [round(1000/tag['fps'])]*len(preview)
+        if not tag['loop']:durations[-1] += 600
+        preview[0].save(OUT/(label+'-preview.webp'),save_all=True,append_images=preview[1:],duration=durations,loop=0,lossless=True)
     thumb=packed[0].resize((280,280));x=ni%5*300;y=ni//5*300
     overview.paste(thumb,(x,y+20),thumb);od.text((x+5,y+4),label,fill='black')
     manifest.append(dict(label=label,manifest=label+'.json',frameCount=len(packed)))

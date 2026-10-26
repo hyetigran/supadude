@@ -1,0 +1,396 @@
+{
+  "mc-run": {
+    "status": "provisional",
+    "notes": "One consecutive stride cycle; removes repeated extension at cycle end. Leg ordering still does not convincingly alternate: redraw/regenerate recommended.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-run",
+        "frames": [
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "fps": 15,
+        "loop": true
+      }
+    ]
+  },
+  "mc-idle": {
+    "status": "trimmed",
+    "notes": "Short restrained section, ping-pong cape turnaround. Excludes later foot-lift and shortened-leg artifacts.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-idle",
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        "fps": 12,
+        "loop": true
+      }
+    ]
+  },
+  "mc-jump-rise": {
+    "status": "hold-preferred",
+    "notes": "Use a readable raised-knee pose. Removes unnecessary limb/cape changes while game supplies upward movement.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-jump-rise",
+        "frames": [
+          6
+        ],
+        "fps": 15,
+        "loop": true
+      }
+    ]
+  },
+  "mc-jump-apex": {
+    "status": "hold-preferred",
+    "notes": "One intact bent-knee pose; excludes flickering foot tips. Tuck is still loose.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-jump-apex",
+        "frames": [
+          6
+        ],
+        "fps": 15,
+        "loop": true
+      }
+    ]
+  },
+  "mc-fall": {
+    "status": "hold-preferred",
+    "notes": "One feet-down pose; removes cycling knees and changing arm positions.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-fall",
+        "frames": [
+          18
+        ],
+        "fps": 15,
+        "loop": true
+      }
+    ]
+  },
+  "mc-land": {
+    "status": "provisional",
+    "notes": "Retain consecutive compression and recovery; cut six-frame squat pause. End before unrelated running. Pose bridge 10\u219216 remains a cut; proportions differ from run.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-land",
+        "frames": [
+          7,
+          8,
+          9,
+          10,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22
+        ],
+        "fps": 24,
+        "loop": false
+      },
+      {
+        "name": "mc-land-hold",
+        "frames": [
+          22
+        ],
+        "fps": 24,
+        "loop": true
+      }
+    ]
+  },
+  "mc-flight-start": {
+    "status": "trimmed",
+    "notes": "Keep consecutive takeoff lean; end before cape collapses into a thin line. No repeated flight hold.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-flight-start",
+        "frames": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "fps": 24,
+        "loop": false
+      },
+      {
+        "name": "mc-flight-start-hold",
+        "frames": [
+          15
+        ],
+        "fps": 24,
+        "loop": true
+      }
+    ]
+  },
+  "mc-flight-loop": {
+    "status": "trimmed",
+    "notes": "Small cape-only-looking subsection with rear arm staying against cape; reverse at endpoint. Excludes dangling-arm swings.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-flight-loop",
+        "frames": [
+          20,
+          21,
+          22,
+          21
+        ],
+        "fps": 10,
+        "loop": true
+      }
+    ]
+  },
+  "mc-flight-end": {
+    "status": "provisional",
+    "notes": "Restore consecutive recovery frames instead of skipping across poses. Brief arm/torso overlap remains at 19\u201322; proportion mismatch persists.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-flight-end",
+        "frames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26
+        ],
+        "fps": 30,
+        "loop": false
+      },
+      {
+        "name": "mc-flight-end-hold",
+        "frames": [
+          26
+        ],
+        "fps": 30,
+        "loop": true
+      }
+    ]
+  },
+  "mc-shoot-ground": {
+    "status": "provisional",
+    "notes": "Keep extension and recovery in sequence; shorten extended-arm hold. Cut 17\u219223 joins similar extension poses. Generated torso/leg deformation remains.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-shoot-ground",
+        "frames": [
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32
+        ],
+        "fps": 24,
+        "loop": false
+      },
+      {
+        "name": "mc-shoot-ground-hold",
+        "frames": [
+          32
+        ],
+        "fps": 24,
+        "loop": true
+      }
+    ]
+  },
+  "mc-shoot-air": {
+    "status": "provisional",
+    "notes": "Remove tangled windup and recovery. Keep extension and initial recoil, excluding empty20\u201321. Short effect-ready gesture, not complete return to ready pose.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-shoot-air",
+        "frames": [
+          16,
+          17,
+          18,
+          19,
+          22,
+          23,
+          24,
+          25
+        ],
+        "fps": 24,
+        "loop": false
+      },
+      {
+        "name": "mc-shoot-air-hold",
+        "frames": [
+          25
+        ],
+        "fps": 24,
+        "loop": true
+      }
+    ]
+  },
+  "mc-hit": {
+    "status": "provisional",
+    "notes": "Restore consecutive recoil; cut long surprise hold. Join16\u219229 retains same broad pose but face/cape differ. Front-facing recoil remains.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-hit",
+        "frames": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          29,
+          30,
+          31,
+          32,
+          33
+        ],
+        "fps": 24,
+        "loop": false
+      },
+      {
+        "name": "mc-hit-hold",
+        "frames": [
+          33
+        ],
+        "fps": 24,
+        "loop": true
+      }
+    ]
+  },
+  "mc-stomp": {
+    "status": "hold-preferred",
+    "notes": "Feet-leading hold removes bob and knee cycling. Game supplies downward travel.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-stomp",
+        "frames": [
+          33
+        ],
+        "fps": 15,
+        "loop": true
+      }
+    ]
+  },
+  "mc-crash": {
+    "status": "trimmed",
+    "notes": "Keep only intact surprised splay; let separate crash effect cover exit. Removes malformed mouth12, empty24\u201325, and unrelated recovery.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-crash",
+        "frames": [
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "fps": 20,
+        "loop": false
+      },
+      {
+        "name": "mc-crash-hold",
+        "frames": [
+          19
+        ],
+        "fps": 20,
+        "loop": true
+      }
+    ]
+  },
+  "mc-victory": {
+    "status": "trimmed",
+    "notes": "One consecutive arm raise ending in hold, instead of repeated waving. Generated enlarged fist ends remain.",
+    "timing": "Editorial playback rate; source sampled at15fps. No interpolated frames.",
+    "tags": [
+      {
+        "name": "mc-victory",
+        "frames": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "fps": 18,
+        "loop": false
+      },
+      {
+        "name": "mc-victory-hold",
+        "frames": [
+          10
+        ],
+        "fps": 18,
+        "loop": true
+      }
+    ]
+  }
+}
