@@ -11,3 +11,5 @@ Small vertical bob: the body is lowest when a foot plants and highest during the
 Keep the side camera locked, facing right, identical head size, thin stick limbs, facial features, outline weight and red cape attachment. Preserve the chroma background. No zoom, camera movement, scenery, extra characters, text, powers, speed lines, dust or particles. Keep the character inside the frame with padding. Movement through the level is controlled by the game: do not animate the character travelling across the screen.
 
 Match the approved art style: clean bold rounded black outer outlines, sparse interior lines, rounded shapes, flat sunny colors and one broad cel-shadow patch. Keep the cleaner cartoon detail level. No textures, hatching, halftone, photorealism, 3D, lettering, logos or watermark.
+
+[Added after owner correction] Minimalistic stick figure: each leg ends in a plain rounded line tip with no feet, foot hooks, shoes or toe detail.

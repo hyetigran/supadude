@@ -35,7 +35,8 @@
       "arms mostly tucked; not clearly pumping fists past hips",
       "torso near-upright, ~15deg lean not evident",
       "large vertical bob (top bound 0..57px of 288) and head touches top edge in frames 10,18,26,39 (no padding)",
-      "frame size 512x288 differs from mc-run v1 (1024x576); scale needs reconciling"
+      "frame size 512x288 differs from mc-run v1 (1024x576); scale needs reconciling",
+      "foot hooks at leg ends (inherited from mc-master.png); violates no-feet rule"
     ],
     "inspectionImages": [
       "mc-run-v2-inspection-top-edge.png",

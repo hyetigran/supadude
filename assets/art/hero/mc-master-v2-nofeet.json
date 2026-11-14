@@ -1,0 +1,19 @@
+{
+  "character": "Supa Dude",
+  "width": 1024,
+  "height": 1536,
+  "background": "green chroma plate; not keyed",
+  "references": [
+    "../../../docs/art/references/approved-art-style.png",
+    "../../../docs/art/references/supa-dude-final.png"
+  ],
+  "name": "mc-master-v2-nofeet",
+  "image": "mc-master-v2-nofeet.png",
+  "derivedFrom": "mc-master.png",
+  "edit": "Local pixel edit: foot hooks removed; both legs continued along their fitted curves (20px stroke) to plain rounded tips at y=1272. Everything else unchanged.",
+  "reason": "Owner correction 2026-11-14: Supa Dude is a minimalistic stick figure with no feet detail.",
+  "autoSpriteCharacterAssetId": null,
+  "registrationStatus": "not registered; awaiting owner approval",
+  "groundAnchor": null,
+  "anchorStatus": "not measured"
+}
