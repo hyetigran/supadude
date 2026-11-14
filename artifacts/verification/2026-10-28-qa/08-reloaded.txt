@@ -1,0 +1,63 @@
+Browser tab: 1, Title: "Supa Dude", URL: "http://127.0.0.1:4173/".
+1 AXWebArea Supa Dude, URL: 127.0.0.1:4173/
+	2 container QA gameplay settings
+		3 container
+			4 heading QA · Gameplay settings, Value: 2
+				5 text QA · Gameplay settings
+			6 text The game is paused. Apply restarts the level. Settings last until you reload. Extreme settings may make the course impossible.
+			7 container Jump to boss fight
+				8 text Jump to boss fight
+				9 text Apply these settings and start the fight immediately. Battles are enabled automatically.
+				10 button Go to 50% fight
+				11 button Go to 90% fight
+			12 text Boss difficulty
+			13 pop up button (collapsed, settable) Boss difficulty, Value: Medium (default), Secondary Actions: Expand
+				14 menu
+					15 (selected) Medium (default)
+					16 Easy
+			17 text Easy: hold Jump to repeat and chain bounce attacks. Medium: fresh jump presses, landing recovery, and one stomp per jump. Robbers at 50% 
+			18 container Robbers at 50% 2
+				19 text 2
+			20 slider (settable, integer) Description: Robbers at 50%, Value: 2
+			21 text Robbers at 90% 
+			22 container Robbers at 90% 3
+				23 text 3
+			24 slider (settable, integer) Description: Robbers at 90%, Value: 3
+			25 text Speed 
+			26 container Speed 1
+				27 text 1.00×
+			28 slider (settable, integer) Description: Speed, Value: 1
+			29 text Jump height 
+			30 container Jump height 1
+				31 text 1.00×
+			32 slider (settable, integer) Description: Jump height, Value: 1
+			33 text Gravity 
+			34 container Gravity 1
+				35 text 1.00×
+			36 slider (settable, integer) Description: Gravity, Value: 1
+			37 text Obstacle frequency 
+			38 container Obstacle frequency 1
+				39 text 1.00×
+			40 slider (settable, integer) Description: Obstacle frequency, Value: 1
+			41 text Set each fight independently, from 1 to 50 robbers.
+			42 container Obstacle types
+				43 text Obstacle types
+				44 checkbox (settable, integer) Description: Bushes, Value: 1
+				45 checkbox (settable, integer) Description: Trash cans, Value: 1
+				46 checkbox (settable, integer) Description: Fire hydrants, Value: 1
+				47 checkbox (settable, integer) Description: Overhead trees, Value: 1
+				48 checkbox (settable, integer) Description: Fallen trees, Value: 1
+				49 checkbox (settable, integer) Description: Construction pits, Value: 1
+				50 checkbox (settable, integer) Description: Basketball hoops, Value: 1
+				51 checkbox (settable, integer) Description: Robber battles, Value: 1
+				52 checkbox (settable, integer) Description: Cars, Value: 1
+			53 container Power objects
+				54 text Power objects
+				55 checkbox (settable, integer) Description: Flight trampolines, Value: 1
+				56 checkbox (settable, integer) Description: Jump orbs, Value: 1
+			57 text Frequency changes spacing: 2× means half the distance between encounters. Speed multiplies the selected difficulty.
+			58 button Reset defaults
+			59 button Cancel
+			60 button Apply & restart
+
+The focused UI element is 10 button Go to 50% fight
