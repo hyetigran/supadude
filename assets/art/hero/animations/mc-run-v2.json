@@ -1,0 +1,328 @@
+{
+  "generatedBy": "WizardGenie sorceress_autosprite_key (cloud Corridor Key, defaults)",
+  "type": "sprite-sheet-pack",
+  "assetId": "13de7f0a-92f5-48a1-a801-45a29348c593",
+  "label": "mc-run-v2",
+  "image": "mc-run-v2.png",
+  "originalKeyedFile": "keyed-keyed-1794697820909.png",
+  "sourceVideo": "mc-run-v2-1794697586945.mp4",
+  "prompt": "mc-run-v2.prompt.txt",
+  "spriteSheetUrl": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/autosprite-v3-keyed/3c28c859-240d-491c-8f6d-267ebfaecb15/53541047-6b10-4f42-a0f5-2ff07ce1e582-hd/keyed_sheet.png",
+  "sheet": {
+    "url": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/autosprite-v3-keyed/3c28c859-240d-491c-8f6d-267ebfaecb15/53541047-6b10-4f42-a0f5-2ff07ce1e582-hd/keyed_sheet.png",
+    "cols": 8,
+    "rows": 6,
+    "frameW": 512,
+    "frameH": 288,
+    "imageW": 4096,
+    "imageH": 1728,
+    "frameCount": 46,
+    "fps": 15,
+    "sampleEvery": 2,
+    "sourceFps": 30
+  },
+  "tags": [],
+  "reviewStatus": "rejected-candidate",
+  "review": {
+    "passes": [
+      "facing right, locked camera, no horizontal travel",
+      "cape streams back horizontally in every frame",
+      "white head and black limbs survive keying",
+      "no scenery/particles/speed lines"
+    ],
+    "fails": [
+      "legs cross/tangle at passing poses (sheet frames ~0,7,8,15,23,29,36,44); lifted knee not clearly forward",
+      "arms mostly tucked; not clearly pumping fists past hips",
+      "torso near-upright, ~15deg lean not evident",
+      "large vertical bob (top bound 0..57px of 288) and head touches top edge in frames 10,18,26,39 (no padding)",
+      "frame size 512x288 differs from mc-run v1 (1024x576); scale needs reconciling"
+    ],
+    "inspectionImages": [
+      "mc-run-v2-inspection-top-edge.png",
+      "mc-run-v2-inspection-passing.png"
+    ]
+  },
+  "inspection": {
+    "frameBoundsAlpha128": [
+      [
+        171,
+        51,
+        350,
+        273
+      ],
+      [
+        174,
+        26,
+        348,
+        267
+      ],
+      [
+        181,
+        8,
+        348,
+        213
+      ],
+      [
+        142,
+        4,
+        348,
+        219
+      ],
+      [
+        140,
+        26,
+        350,
+        241
+      ],
+      [
+        145,
+        36,
+        352,
+        253
+      ],
+      [
+        158,
+        53,
+        352,
+        272
+      ],
+      [
+        167,
+        56,
+        352,
+        267
+      ],
+      [
+        174,
+        48,
+        349,
+        273
+      ],
+      [
+        174,
+        12,
+        348,
+        236
+      ],
+      [
+        169,
+        2,
+        348,
+        224
+      ],
+      [
+        138,
+        13,
+        348,
+        224
+      ],
+      [
+        143,
+        24,
+        350,
+        235
+      ],
+      [
+        146,
+        45,
+        352,
+        223
+      ],
+      [
+        173,
+        56,
+        352,
+        273
+      ],
+      [
+        169,
+        57,
+        350,
+        274
+      ],
+      [
+        173,
+        40,
+        348,
+        273
+      ],
+      [
+        174,
+        22,
+        348,
+        263
+      ],
+      [
+        148,
+        0,
+        348,
+        209
+      ],
+      [
+        137,
+        14,
+        350,
+        199
+      ],
+      [
+        141,
+        26,
+        350,
+        232
+      ],
+      [
+        150,
+        45,
+        352,
+        259
+      ],
+      [
+        154,
+        52,
+        352,
+        270
+      ],
+      [
+        168,
+        57,
+        350,
+        234
+      ],
+      [
+        175,
+        39,
+        348,
+        273
+      ],
+      [
+        176,
+        21,
+        348,
+        255
+      ],
+      [
+        166,
+        2,
+        347,
+        220
+      ],
+      [
+        136,
+        13,
+        348,
+        229
+      ],
+      [
+        150,
+        46,
+        350,
+        273
+      ],
+      [
+        168,
+        49,
+        349,
+        273
+      ],
+      [
+        162,
+        35,
+        348,
+        251
+      ],
+      [
+        139,
+        6,
+        348,
+        221
+      ],
+      [
+        134,
+        7,
+        349,
+        217
+      ],
+      [
+        138,
+        25,
+        350,
+        241
+      ],
+      [
+        148,
+        46,
+        350,
+        264
+      ],
+      [
+        155,
+        51,
+        350,
+        271
+      ],
+      [
+        169,
+        57,
+        349,
+        273
+      ],
+      [
+        169,
+        52,
+        349,
+        273
+      ],
+      [
+        158,
+        19,
+        348,
+        243
+      ],
+      [
+        171,
+        0,
+        348,
+        218
+      ],
+      [
+        152,
+        7,
+        348,
+        222
+      ],
+      [
+        140,
+        27,
+        350,
+        241
+      ],
+      [
+        143,
+        36,
+        350,
+        231
+      ],
+      [
+        153,
+        50,
+        352,
+        270
+      ],
+      [
+        175,
+        57,
+        352,
+        273
+      ],
+      [
+        177,
+        58,
+        350,
+        273
+      ]
+    ]
+  },
+  "anchors": {
+    "status": "not measured; no gameplay anchor invented"
+  }
+}
