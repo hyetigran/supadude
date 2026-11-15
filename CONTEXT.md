@@ -7,7 +7,7 @@ The mechanical reference is classic Geometry Dash cube-mode: fixed side camera, 
 ## Language
 
 **Supa Dude**:
-The player-controlled square superhero icon. Supa Dude auto-runs continuously and rotates in quarter-turns while airborne. A cape and chest emblem preserve the original character identity.
+The player-controlled stick-figure superhero: oversized white round head, black stick limbs with plain rounded tips (no feet), red cape. Supa Dude auto-runs continuously using the `mc-run` sprite loop and holds a stride pose while airborne (leaning slightly in flight). The collision box stays a fixed square; the sprite is drawn larger for forgiving play.
 
 **Level**:
 The one finite, hand-authored course from 0% to 100%. Its course definitions are fixed; Traffic moves deterministically toward Supa Dude as it approaches. There is no runtime random generation.

@@ -9,7 +9,7 @@ Use these in order in Wizard Genie. This pack covers the game's visual assets; t
 Upload:
 
 - [approved-art-style.png](references/approved-art-style.png): the selected cleaner-cartoon scene, with blue car, trampoline, and green Trash Can. This defines the visual treatment.
-- [supa-dude-final.png](references/supa-dude-final.png): the original MC. This defines character identity.
+- [mc-run.png](../../assets/art/hero/mc-run.png): the approved in-game MC run sheet. This defines character identity (the original MC image was removed 2026-11-14).
 
 Attach the relevant reference images to later generations too; do not rely only on chat memory. The file paths in this document identify local files, not public reference-image URLs.
 

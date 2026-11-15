@@ -1,0 +1,722 @@
+{
+  "type": "sprite-sheet-pack",
+  "label": "mc-run",
+  "status": "approved for game use (owner, 2026-11-14)",
+  "image": "mc-run.png",
+  "usedBy": "src/scenes/GameScene.ts (texture key hero-run, animation key hero-run)",
+  "sheet": {
+    "cols": 5,
+    "rows": 3,
+    "frameW": 336,
+    "frameH": 432,
+    "imageW": 1680,
+    "imageH": 1296,
+    "frameCount": 13,
+    "layout": "row-major; cells 13-14 are empty"
+  },
+  "tags": [
+    {
+      "name": "run",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "fps": 20,
+      "loop": true,
+      "indexBase": 0
+    }
+  ],
+  "anchors": {
+    "groundY": 380,
+    "torsoX": 173,
+    "note": "Cell pixels. groundY is the lowest leg tip across the loop; torsoX is the shoulder/torso column. The game uses origin (173/336, 380/432)."
+  },
+  "frames": [
+    {
+      "cell": 0,
+      "sourceSheetFrame": "78",
+      "bbox": [
+        51,
+        48,
+        283,
+        358
+      ]
+    },
+    {
+      "cell": 1,
+      "sourceSheetFrame": "79",
+      "bbox": [
+        50,
+        50,
+        283,
+        353
+      ]
+    },
+    {
+      "cell": 2,
+      "sourceSheetFrame": "80",
+      "bbox": [
+        46,
+        52,
+        281,
+        372
+      ]
+    },
+    {
+      "cell": 3,
+      "sourceSheetFrame": "81",
+      "bbox": [
+        45,
+        53,
+        269,
+        379
+      ]
+    },
+    {
+      "cell": 4,
+      "sourceSheetFrame": "83",
+      "bbox": [
+        46,
+        53,
+        259,
+        381
+      ]
+    },
+    {
+      "cell": 5,
+      "sourceSheetFrame": "85",
+      "bbox": [
+        46,
+        49,
+        268,
+        378
+      ]
+    },
+    {
+      "cell": 6,
+      "sourceSheetFrame": "86",
+      "bbox": [
+        45,
+        46,
+        282,
+        370
+      ]
+    },
+    {
+      "cell": 7,
+      "sourceSheetFrame": "88",
+      "bbox": [
+        46,
+        44,
+        284,
+        356
+      ]
+    },
+    {
+      "cell": 8,
+      "sourceSheetFrame": "89",
+      "bbox": [
+        49,
+        46,
+        284,
+        351
+      ]
+    },
+    {
+      "cell": 9,
+      "sourceSheetFrame": "90",
+      "bbox": [
+        60,
+        56,
+        281,
+        378
+      ]
+    },
+    {
+      "cell": 10,
+      "sourceSheetFrame": "91",
+      "bbox": [
+        62,
+        56,
+        268,
+        381
+      ]
+    },
+    {
+      "cell": 11,
+      "sourceSheetFrame": "95",
+      "bbox": [
+        46,
+        46,
+        268,
+        373
+      ]
+    },
+    {
+      "cell": 12,
+      "sourceSheetFrame": "96",
+      "bbox": [
+        46,
+        43,
+        282,
+        364
+      ]
+    }
+  ],
+  "provenance": {
+    "autoSpriteAssetId": "80e42915-2746-4c33-a051-0a89316f6c46",
+    "characterAssetId": "e3faaeee-0f7a-491f-a1f3-454d740605d8",
+    "sourceVideo": "mc-run-v5-1794701016722.mp4",
+    "keyingJobId": "f4a859c5-8878-47dd-a326-18b2624c1045",
+    "loopFromKeyedSheetFrames": [
+      78,
+      79,
+      80,
+      81,
+      83,
+      85,
+      86,
+      88,
+      89,
+      90,
+      91,
+      95,
+      96
+    ],
+    "edits": "Small background-removal holes restored from the source video; arms redrawn locally to swing front-to-back opposite the legs (+65 deg forward / -70 deg back). Intermediate files were removed.",
+    "armRedrawPerCell": [
+      {
+        "cell": 0,
+        "sourceVideoFrame": 63,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            190
+          ],
+          "elbow": [
+            227.3,
+            216.5
+          ],
+          "hand": [
+            280.5,
+            193.4
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            190
+          ],
+          "elbow": [
+            117.6,
+            211.8
+          ],
+          "hand": [
+            81.5,
+            257.3
+          ]
+        },
+        "erasedPx": 3088,
+        "strokeColor": [
+          10,
+          9,
+          10
+        ]
+      },
+      {
+        "cell": 1,
+        "sourceVideoFrame": 64,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            192
+          ],
+          "elbow": [
+            227.3,
+            218.5
+          ],
+          "hand": [
+            280.5,
+            195.4
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            192
+          ],
+          "elbow": [
+            117.6,
+            213.8
+          ],
+          "hand": [
+            81.5,
+            259.3
+          ]
+        },
+        "erasedPx": 2959,
+        "strokeColor": [
+          10,
+          9,
+          10
+        ]
+      },
+      {
+        "cell": 2,
+        "sourceVideoFrame": 65,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            195
+          ],
+          "elbow": [
+            222.1,
+            230.2
+          ],
+          "hand": [
+            278.7,
+            217.8
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            195
+          ],
+          "elbow": [
+            122.5,
+            226.6
+          ],
+          "hand": [
+            96.6,
+            278.5
+          ]
+        },
+        "erasedPx": 3287,
+        "strokeColor": [
+          10,
+          8,
+          10
+        ]
+      },
+      {
+        "cell": 3,
+        "sourceVideoFrame": 66,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            195
+          ],
+          "elbow": [
+            208.9,
+            243.5
+          ],
+          "hand": [
+            266.2,
+            251.9
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            195
+          ],
+          "elbow": [
+            135.8,
+            241.7
+          ],
+          "hand": [
+            131.3,
+            299.5
+          ]
+        },
+        "erasedPx": 2982,
+        "strokeColor": [
+          10,
+          9,
+          10
+        ]
+      },
+      {
+        "cell": 4,
+        "sourceVideoFrame": 67,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            195
+          ],
+          "elbow": [
+            186.7,
+            253.5
+          ],
+          "hand": [
+            234.0,
+            287.1
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            173.5,
+            195
+          ],
+          "elbow": [
+            159.3,
+            253.3
+          ],
+          "hand": [
+            183.3,
+            306.1
+          ]
+        },
+        "erasedPx": 2836,
+        "strokeColor": [
+          10,
+          9,
+          10
+        ]
+      },
+      {
+        "cell": 5,
+        "sourceVideoFrame": 69,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            173.0,
+            192
+          ],
+          "elbow": [
+            135.3,
+            238.7
+          ],
+          "hand": [
+            130.8,
+            296.5
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            173.0,
+            192
+          ],
+          "elbow": [
+            208.4,
+            240.5
+          ],
+          "hand": [
+            265.7,
+            248.9
+          ]
+        },
+        "erasedPx": 2815,
+        "strokeColor": [
+          10,
+          9,
+          10
+        ]
+      },
+      {
+        "cell": 6,
+        "sourceVideoFrame": 70,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            174.0,
+            188
+          ],
+          "elbow": [
+            123.0,
+            219.6
+          ],
+          "hand": [
+            97.1,
+            271.5
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            174.0,
+            188
+          ],
+          "elbow": [
+            222.6,
+            223.2
+          ],
+          "hand": [
+            279.2,
+            210.8
+          ]
+        },
+        "erasedPx": 2963,
+        "strokeColor": [
+          10,
+          9,
+          10
+        ]
+      },
+      {
+        "cell": 7,
+        "sourceVideoFrame": 71,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            174.0,
+            186
+          ],
+          "elbow": [
+            118.1,
+            207.8
+          ],
+          "hand": [
+            82.0,
+            253.3
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            174.0,
+            186
+          ],
+          "elbow": [
+            227.8,
+            212.5
+          ],
+          "hand": [
+            281.0,
+            189.4
+          ]
+        },
+        "erasedPx": 3447,
+        "strokeColor": [
+          10,
+          9,
+          10
+        ]
+      },
+      {
+        "cell": 8,
+        "sourceVideoFrame": 72,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            174.5,
+            188
+          ],
+          "elbow": [
+            118.6,
+            209.8
+          ],
+          "hand": [
+            82.5,
+            255.3
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            174.5,
+            188
+          ],
+          "elbow": [
+            228.3,
+            214.5
+          ],
+          "hand": [
+            281.5,
+            191.4
+          ]
+        },
+        "erasedPx": 3144,
+        "strokeColor": [
+          9,
+          8,
+          9
+        ]
+      },
+      {
+        "cell": 9,
+        "sourceVideoFrame": 73,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            173.0,
+            198
+          ],
+          "elbow": [
+            122.0,
+            229.6
+          ],
+          "hand": [
+            96.1,
+            281.5
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            173.0,
+            198
+          ],
+          "elbow": [
+            221.6,
+            233.2
+          ],
+          "hand": [
+            278.2,
+            220.8
+          ]
+        },
+        "erasedPx": 3033,
+        "strokeColor": [
+          11,
+          9,
+          11
+        ]
+      },
+      {
+        "cell": 10,
+        "sourceVideoFrame": 74,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            172.5,
+            198
+          ],
+          "elbow": [
+            134.8,
+            244.7
+          ],
+          "hand": [
+            130.3,
+            302.5
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            172.5,
+            198
+          ],
+          "elbow": [
+            207.9,
+            246.5
+          ],
+          "hand": [
+            265.2,
+            254.9
+          ]
+        },
+        "erasedPx": 3096,
+        "strokeColor": [
+          12,
+          10,
+          11
+        ]
+      },
+      {
+        "cell": 11,
+        "sourceVideoFrame": 77,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            173.0,
+            188
+          ],
+          "elbow": [
+            208.4,
+            236.5
+          ],
+          "hand": [
+            265.7,
+            244.9
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            173.0,
+            188
+          ],
+          "elbow": [
+            135.3,
+            234.7
+          ],
+          "hand": [
+            130.8,
+            292.5
+          ]
+        },
+        "erasedPx": 2939,
+        "strokeColor": [
+          11,
+          9,
+          10
+        ]
+      },
+      {
+        "cell": 12,
+        "sourceVideoFrame": 78,
+        "armA": {
+          "swing": null,
+          "shoulder": [
+            174.0,
+            185
+          ],
+          "elbow": [
+            222.6,
+            220.2
+          ],
+          "hand": [
+            279.2,
+            207.8
+          ]
+        },
+        "armB": {
+          "swing": null,
+          "shoulder": [
+            174.0,
+            185
+          ],
+          "elbow": [
+            123.0,
+            216.6
+          ],
+          "hand": [
+            97.1,
+            268.5
+          ]
+        },
+        "erasedPx": 3037,
+        "strokeColor": [
+          10,
+          9,
+          10
+        ]
+      }
+    ],
+    "savedToAutoSprite": false
+  }
+}

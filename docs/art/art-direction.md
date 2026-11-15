@@ -27,7 +27,9 @@ The visual direction is approved. Palette codes below are starting production va
 
 ## Character reference
 
-![Supa Dude character reference](references/supa-dude-final.png)
+![Supa Dude run sheet (identity reference)](../../assets/art/hero/mc-run.png)
+
+The approved in-game run sheet is now the only MC asset in the repo and the identity reference for new poses. The original reference image and older masters were removed on 2026-11-14 (recoverable from git commit 51c07b8).
 
 Preserve the oversized white round head, black oval eyes, friendly curved smile, black stick limbs with rounded ends, and red cape. Use a side-facing body with a slight face turn so the expression remains visible. Head proportions, limb weight, and cape attachment stay consistent across poses.
 

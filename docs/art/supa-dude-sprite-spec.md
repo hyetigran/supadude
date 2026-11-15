@@ -4,9 +4,9 @@ Use [the art direction](art-direction.md) for shared drawing rules, palette, env
 
 ## Identity
 
-The supplied [character reference](references/supa-dude-final.png) defines Supa Dude: an oversized white round head, black oval eyes and curved smile, black stick limbs, and a red cape. Preserve those proportions and simple construction.
+The approved [run sheet](../../assets/art/hero/mc-run.png) defines Supa Dude: an oversized white round head, black oval eyes and curved smile, black stick limbs, and a red cape. Preserve those proportions and simple construction.
 
-The approved direction is the [cleaner-cartoon style reference](references/approved-art-style.png), selected by the user on 2026-10-17: a sunny suburb, bold outlines, simple rounded shapes, a few deliberate details, and broad cel shadows. Use this image for visual treatment and the original character reference for MC identity. This replaces the square superhero icon, cyan body, rectangular eyes, and chest emblem. The square silhouette is no longer an art requirement.
+The approved direction is the [cleaner-cartoon style reference](references/approved-art-style.png), selected by the user on 2026-10-17: a sunny suburb, bold outlines, simple rounded shapes, a few deliberate details, and broad cel shadows. Use this image for visual treatment and the run sheet for MC identity. This replaces the square superhero icon, cyan body, rectangular eyes, and chest emblem. The square silhouette is no longer an art requirement.
 
 ## Drawing and orientation
 

@@ -25,19 +25,23 @@ import {
 import { formatCompletionTime } from "../game/formatCompletionTime";
 import { Fx } from "./Fx";
 import { PauseOverlay } from "./PauseOverlay";
+import heroRunSheetUrl from "../../assets/art/hero/mc-run.png";
+import heroRunMeta from "../../assets/art/hero/mc-run.json";
 
 const CHARACTER_X = 180;
+const HERO_RUN_TEXTURE = "hero-run";
+const HERO_RUN_ANIM = "hero-run";
+/** On-screen height of a full sheet cell; the figure itself is ~64px head-to-feet, cars are 48px. */
+const HERO_CELL_DISPLAY_HEIGHT = 82;
+/** Stride cell held while airborne (no jump/flight animations exist yet). */
+const HERO_AIR_FRAME = 0;
 const BACKGROUND_TEXTURE = "neighborhood-road";
 const SCENERY_TEXTURE = "neighborhood-houses";
 const TEXTURE_WIDTH = 960;
 
 const SKY_COLOR = 0xd7eaf0;
 const TRACK_EDGE_COLOR = 0xf4c76b;
-const PLAYER_COLOR = 0x38bdf8;
-const PLAYER_INSET_COLOR = 0x172554;
 const PLAYER_OUTLINE_COLOR = 0xf8fafc;
-const PLAYER_CAPE_COLOR = 0xef4444;
-const PLAYER_EMBLEM_COLOR = 0xfacc15;
 const PLAYER_SHADOW_COLOR = 0x020617;
 const COIN_BURST_COLOR = 0xffd166;
 const DEATH_BURST_COLOR = 0xff4d8d;
@@ -78,6 +82,7 @@ export class GameScene extends Phaser.Scene {
   private background?: Phaser.GameObjects.TileSprite;
   private scenery?: Phaser.GameObjects.TileSprite;
   private player?: Phaser.GameObjects.Container;
+  private heroSprite?: Phaser.GameObjects.Sprite;
   private powerAura?: Phaser.GameObjects.Arc;
   private carPowerText?: Phaser.GameObjects.Text;
   private playerShadow?: Phaser.GameObjects.Ellipse;
@@ -99,6 +104,15 @@ export class GameScene extends Phaser.Scene {
 
   constructor() {
     super("GameScene");
+  }
+
+  preload(): void {
+    const { frameW, frameH } = heroRunMeta.sheet;
+    this.load.spritesheet(HERO_RUN_TEXTURE, heroRunSheetUrl, {
+      frameWidth: frameW,
+      frameHeight: frameH,
+      endFrame: heroRunMeta.sheet.frameCount - 1,
+    });
   }
 
   create(data: { autoStart?: boolean; practiceBattle?: 0.5 | 0.9 } = {}): void {
@@ -172,7 +186,10 @@ export class GameScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     this.touchControls?.update(!this.isPaused && !this.isComplete && this.frame.phase === "running", !!this.frame.battle, this.frame.carPower);
-    if (this.isPaused || this.isComplete) return;
+    if (this.isPaused || this.isComplete) {
+      if (this.heroSprite?.anims.isPlaying) this.heroSprite.anims.pause();
+      return;
+    }
 
     const upPressed = this.playerInput.consumePress("up");
     this.frame = this.runner.step(delta, {
@@ -284,9 +301,11 @@ export class GameScene extends Phaser.Scene {
       this.player
         .setPosition(playerX, feetY - PLAYER_SIZE / 2 - altitude)
         .setAlpha(frame.battle?.invulnerable ? 0.55 : 1)
-        .setAngle(frame.battle ? 0 : frame.flightRemainingMs > 0 ? -12 : this.reducedMotion ? 0 : frame.rotation)
+        // The stick figure leans into flight but never spins like the old box icon did.
+        .setAngle(!frame.battle && frame.flightRemainingMs > 0 && !this.reducedMotion ? -12 : 0)
         .setVisible(playerVisible);
     }
+    this.updateHeroAnimation(frame);
 
     const powerColor = frame.carPower === "fire" ? 0xf97316 : frame.carPower === "water" ? 0x38bdf8 : 0xfacc15;
     this.powerAura?.setPosition(playerX, feetY - PLAYER_SIZE / 2 - altitude)
@@ -367,25 +386,40 @@ export class GameScene extends Phaser.Scene {
     g.generateTexture(SCENERY_TEXTURE, TEXTURE_WIDTH, VIEWPORT.height); g.destroy();
   }
 
+  /**
+   * The container stays centred on the collision box (fx and auras use its y);
+   * the sprite inside is anchored at its feet on the container's bottom edge.
+   */
   private createPlayerIcon(): Phaser.GameObjects.Container {
-    const cape = this.add
-      .triangle(-PLAYER_SIZE * 0.44, 5, 0, -12, -18, 4, 0, 15, PLAYER_CAPE_COLOR)
-      .setStrokeStyle(2, PLAYER_OUTLINE_COLOR, 0.85);
-    const body = this.add
-      .rectangle(0, 0, PLAYER_SIZE, PLAYER_SIZE, PLAYER_COLOR)
-      .setStrokeStyle(3, PLAYER_OUTLINE_COLOR, 1);
-    const inset = this.add
-      .rectangle(0, 1, PLAYER_SIZE - 13, PLAYER_SIZE - 13, PLAYER_INSET_COLOR)
-      .setStrokeStyle(2, PLAYER_COLOR, 0.9);
-    const eyeLeft = this.add.rectangle(-6, -5, 4, 7, PLAYER_OUTLINE_COLOR);
-    const eyeRight = this.add.rectangle(6, -5, 4, 7, PLAYER_OUTLINE_COLOR);
-    const emblem = this.add
-      .polygon(0, 8, [0, -6, 6, 0, 0, 7, -6, 0], PLAYER_EMBLEM_COLOR)
-      .setStrokeStyle(1, PLAYER_OUTLINE_COLOR, 0.8);
-
+    const { sheet, anchors, tags } = heroRunMeta;
+    if (!this.anims.exists(HERO_RUN_ANIM)) {
+      this.anims.create({
+        key: HERO_RUN_ANIM,
+        frames: this.anims.generateFrameNumbers(HERO_RUN_TEXTURE, { frames: tags[0].frames }),
+        frameRate: tags[0].fps,
+        repeat: -1,
+      });
+    }
+    this.heroSprite = this.add
+      .sprite(0, PLAYER_SIZE / 2, HERO_RUN_TEXTURE, 0)
+      .setOrigin(anchors.torsoX / sheet.frameW, anchors.groundY / sheet.frameH)
+      .setScale(HERO_CELL_DISPLAY_HEIGHT / sheet.frameH);
     return this.add
-      .container(CHARACTER_X, this.groundY - PLAYER_SIZE / 2, [cape, body, inset, eyeLeft, eyeRight, emblem])
+      .container(CHARACTER_X, this.groundY - PLAYER_SIZE / 2, [this.heroSprite])
       .setDepth(DEPTH_PLAYER);
+  }
+
+  private updateHeroAnimation(frame: RunnerFrame): void {
+    const sprite = this.heroSprite;
+    if (!sprite) return;
+    const grounded = frame.battle ? frame.battle.jumpHeight <= 0 : frame.grounded && frame.flightRemainingMs <= 0;
+    if (!grounded || this.isPaused || this.isComplete) {
+      if (sprite.anims.isPlaying) sprite.anims.pause();
+      if (!grounded) sprite.setFrame(HERO_AIR_FRAME);
+      return;
+    }
+    if (sprite.anims.currentAnim?.key !== HERO_RUN_ANIM) sprite.play(HERO_RUN_ANIM);
+    else if (sprite.anims.isPaused) sprite.anims.resume();
   }
 
   private createHud(): void {

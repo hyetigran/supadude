@@ -4,7 +4,7 @@ These prompts create assets in Wizard Genie. They do not change the game or wire
 
 ## Start here
 
-1. Upload `references/approved-art-style.png` and `references/supa-dude-final.png` to Wizard Genie.
+1. Upload `references/approved-art-style.png` and `../../assets/art/hero/mc-run.png` (the approved MC; it replaces the removed `supa-dude-final.png`) to Wizard Genie.
 2. Paste the two setup prompts in `01-setup.md`.
 3. Generate `mc-master`, then `mc-run`, `mc-jump-rise` and `mc-flight-loop` from `02-hero.md`.
 4. Generate five proof assets: `car-blue`, `trashcan`, `trampoline`, `house-cream`, and `tree`. Compare them with the approved reference and hero at gameplay size before expanding the library.
