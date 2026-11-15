@@ -71,7 +71,10 @@ type CourseToken =
   | { type: "basketballHoop" }
   | { type: "gap"; width: number }
   | { type: "garden"; count: 1 | 2 | 3; kind?: "fireHydrant" | "constructionPit" | "fallenTree"; coin?: boolean }
-  | { type: "car"; width: 64 | 96 | 128 | 160; height: 48 | 72; coin?: boolean };
+  | { type: "car" | "van"; coin?: boolean };
+
+/** Every car and van is one standard size, matching its art's natural proportions. */
+const VEHICLE_SIZE = { car: { width: 96, height: 48 }, van: { width: 128, height: 72 } } as const;
 
 const GARDEN_UNIT_WIDTH = 30;
 const GARDEN_HEIGHT = 30;
@@ -84,14 +87,14 @@ const INTRO: readonly CourseToken[] = [
   { type: "gap", width: 240 },
   { type: "garden", count: 2 },
   { type: "gap", width: 210 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 190 },
   { type: "garden", count: 1 },
   { type: "gap", width: 180 },
   { type: "garden", count: 2, coin: true },
-  { type: "gap", width: 230 },
-  { type: "car", width: 128, height: 48, coin: true },
-  { type: "gap", width: 200 },
+  { type: "gap", width: 246 },
+  { type: "car", coin: true },
+  { type: "gap", width: 216 },
   { type: "garden", count: 3, coin: true },
   { type: "gap", width: 190 },
   { type: "garden", kind: "constructionPit", count: 1 },
@@ -126,22 +129,22 @@ const RHYTHM: readonly CourseToken[] = [
 
 // Land on car roofs, then jump again to clear the hedges at the exit.
 const STEPS: readonly CourseToken[] = [
-  { type: "car", width: 128, height: 48, coin: true },
-  { type: "gap", width: 100 },
+  { type: "car", coin: true },
+  { type: "gap", width: 132 },
   { type: "garden", count: 2, coin: true },
-  { type: "gap", width: 210 },
-  { type: "car", width: 96, height: 72, coin: true },
-  { type: "gap", width: 170 },
+  { type: "gap", width: 194 },
+  { type: "van", coin: true },
+  { type: "gap", width: 154 },
   { type: "garden", count: 3 },
-  { type: "gap", width: 200 },
-  { type: "car", width: 160, height: 48, coin: true },
-  { type: "car", width: 96, height: 72, coin: true },
-  { type: "gap", width: 180 },
+  { type: "gap", width: 216 },
+  { type: "car", coin: true },
+  { type: "van", coin: true },
+  { type: "gap", width: 196 },
   { type: "garden", kind: "fallenTree", count: 2 },
-  { type: "gap", width: 170 },
-  { type: "car", width: 64, height: 48, coin: true },
-  { type: "gap", width: 180 },
-  { type: "car", width: 128, height: 72, coin: true },
+  { type: "gap", width: 154 },
+  { type: "car", coin: true },
+  { type: "gap", width: 164 },
+  { type: "van", coin: true },
   { type: "gap", width: 100 },
   { type: "garden", count: 2, coin: true },
   { type: "gap", width: 210 },
@@ -160,44 +163,44 @@ const SYNCOPATION: readonly CourseToken[] = [
   { type: "gap", width: 140 },
   { type: "garden", count: 2 },
   { type: "gap", width: 220 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 180 },
   { type: "garden", count: 2 },
   { type: "gap", width: 150 },
   { type: "garden", kind: "constructionPit", count: 1 },
   { type: "gap", width: 40 },
   { type: "garden", count: 1, coin: true },
-  { type: "gap", width: 210 },
-  { type: "car", width: 96, height: 72, coin: true },
-  { type: "gap", width: 160 },
+  { type: "gap", width: 194 },
+  { type: "van", coin: true },
+  { type: "gap", width: 144 },
   { type: "garden", count: 3 },
   { type: "gap", width: 190 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 190 },
   { type: "garden", kind: "fallenTree", count: 2 },
 ];
 
 // Linked car roofs and hedge exits reward controlled landings.
 const ROOFTOPS: readonly CourseToken[] = [
-  { type: "car", width: 160, height: 48, coin: true },
-  { type: "car", width: 128, height: 72, coin: true },
-  { type: "gap", width: 100 },
+  { type: "car", coin: true },
+  { type: "van", coin: true },
+  { type: "gap", width: 164 },
   { type: "garden", count: 3, coin: true },
   { type: "gap", width: 210 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 170 },
   { type: "garden", count: 2 },
-  { type: "gap", width: 180 },
-  { type: "car", width: 96, height: 72, coin: true },
-  { type: "gap", width: 100 },
+  { type: "gap", width: 164 },
+  { type: "van", coin: true },
+  { type: "gap", width: 84 },
   { type: "garden", count: 2, coin: true },
-  { type: "gap", width: 190 },
-  { type: "car", width: 160, height: 48, coin: true },
-  { type: "car", width: 96, height: 72, coin: true },
-  { type: "gap", width: 160 },
+  { type: "gap", width: 206 },
+  { type: "car", coin: true },
+  { type: "van", coin: true },
+  { type: "gap", width: 176 },
   { type: "garden", count: 3 },
   { type: "gap", width: 180 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 170 },
   { type: "garden", count: 2 },
 ];
@@ -207,12 +210,12 @@ const GAUNTLET: readonly CourseToken[] = [
   { type: "garden", kind: "fireHydrant", count: 3, coin: true },
   { type: "gap", width: 140 },
   { type: "garden", count: 2 },
-  { type: "gap", width: 180 },
-  { type: "car", width: 96, height: 72, coin: true },
-  { type: "gap", width: 100 },
+  { type: "gap", width: 164 },
+  { type: "van", coin: true },
+  { type: "gap", width: 84 },
   { type: "garden", count: 2, coin: true },
   { type: "gap", width: 190 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 170 },
   { type: "garden", kind: "constructionPit", count: 1 },
   { type: "gap", width: 40 },
@@ -221,24 +224,24 @@ const GAUNTLET: readonly CourseToken[] = [
   { type: "garden", count: 3, coin: true },
   { type: "gap", width: 140 },
   { type: "garden", kind: "fallenTree", count: 2 },
-  { type: "gap", width: 190 },
-  { type: "car", width: 160, height: 48, coin: true },
-  { type: "car", width: 96, height: 72, coin: true },
-  { type: "gap", width: 170 },
+  { type: "gap", width: 206 },
+  { type: "car", coin: true },
+  { type: "van", coin: true },
+  { type: "gap", width: 186 },
   { type: "garden", count: 3, coin: true },
 ];
 
 // A final rhythm change before the closing combinations.
 const PRESSURE: readonly CourseToken[] = [
   { type: "garden", count: 2, coin: true },
-  { type: "gap", width: 160 },
-  { type: "car", width: 96, height: 72, coin: true },
-  { type: "gap", width: 180 },
+  { type: "gap", width: 144 },
+  { type: "van", coin: true },
+  { type: "gap", width: 164 },
   { type: "garden", count: 3 },
   { type: "gap", width: 150 },
   { type: "garden", count: 2, coin: true },
   { type: "gap", width: 190 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 180 },
   { type: "garden", count: 1 },
   { type: "gap", width: 40 },
@@ -249,18 +252,18 @@ const PRESSURE: readonly CourseToken[] = [
 
 // Combine the learned patterns with only short recovery windows.
 const FINALE: readonly CourseToken[] = [
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 170 },
   { type: "garden", count: 3 },
   { type: "gap", width: 140 },
   { type: "garden", kind: "constructionPit", count: 2, coin: true },
-  { type: "gap", width: 180 },
-  { type: "car", width: 160, height: 48, coin: true },
-  { type: "car", width: 128, height: 72, coin: true },
-  { type: "gap", width: 100 },
+  { type: "gap", width: 212 },
+  { type: "car", coin: true },
+  { type: "van", coin: true },
+  { type: "gap", width: 132 },
   { type: "garden", count: 3, coin: true },
   { type: "gap", width: 190 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 170 },
   { type: "garden", count: 1 },
   { type: "gap", width: 40 },
@@ -277,17 +280,17 @@ const FINALE: readonly CourseToken[] = [
 const FLIGHT_STREET: readonly CourseToken[] = [
   { type: "flightPad" },
   { type: "gap", width: 220 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
   { type: "gap", width: 110 },
-  { type: "car", width: 128, height: 72, coin: true },
+  { type: "van", coin: true },
   { type: "gap", width: 110 },
-  { type: "car", width: 96, height: 48, coin: true },
+  { type: "car", coin: true },
 ];
 
 const ORB_GARDEN: readonly CourseToken[] = [
   { type: "jumpOrb" },
   { type: "gap", width: 110 },
-  { type: "car", width: 128, height: 72, coin: true },
+  { type: "van", coin: true },
   { type: "gap", width: 260 },
   { type: "tree" },
   { type: "gap", width: 240 },
@@ -297,7 +300,7 @@ const ORB_GARDEN: readonly CourseToken[] = [
   { type: "gap", width: 240 },
   { type: "jumpOrb" },
   { type: "gap", width: 110 },
-  { type: "car", width: 128, height: 72, coin: true },
+  { type: "van", coin: true },
 ];
 
 /** Fixed phrases progress from isolated jumps to linked combinations. */
@@ -372,12 +375,13 @@ export function buildLevel(script: readonly CourseToken[] = SCRIPT): Level {
       continue;
     }
 
-    const x = cursor + token.width / 2;
+    const { width, height } = VEHICLE_SIZE[token.type];
+    const x = cursor + width / 2;
     const power: CarPower | undefined = solidIndex % 4 === 0 ? "fire" : solidIndex % 4 === 1 ? "water" : solidIndex % 4 === 2 ? "electricity" : undefined;
-    solids.push({ id: `solid-${solidIndex++}`, x, width: token.width, height: token.height, kind: "car", power });
+    solids.push({ id: `solid-${solidIndex++}`, x, width, height, kind: "car", power });
 
-    if (token.coin) addCoin(x, token.height + 54);
-    cursor += token.width;
+    if (token.coin) addCoin(x, height + 54);
+    cursor += width;
   }
 
   const length = cursor + FINISH_CLEARANCE;
