@@ -2,20 +2,20 @@
   "label": "mailbox",
   "image": "mailbox.png",
   "status": "generated, not wired into game",
-  "width": 402,
-  "height": 634,
-  "view": "side elevation",
+  "width": 469,
+  "height": 840,
+  "view": "front elevation",
   "opaqueBounds": {
     "left": 24,
     "top": 24,
-    "right": 377,
-    "bottom": 609
+    "right": 444,
+    "bottom": 815
   },
   "anchors": {
-    "groundY": 609,
-    "groundCenterX": 191.5,
+    "groundY": 815,
+    "groundCenterX": 197.5,
     "topY": 24
   },
-  "source": "nano-banana-2 gen 7e43bedf (approved-art-style.png reference) on a green chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding",
-  "note": "Regenerated as a true side elevation (replaces gen d3d199a7, which showed both arched ends)."
+  "source": "nano-banana-2 gen 2867492c (approved-art-style.png reference) on a green chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding",
+  "note": "Front elevation at owner request (door face only). groundCenterX is the post centre."
 }
