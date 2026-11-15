@@ -1,0 +1,223 @@
+{
+  "type": "sprite-sheet-pack",
+  "label": "mc-run-v5b",
+  "replaces": "mc-run-v5 sprite sheet (same video). v5 files kept.",
+  "assetId": "80e42915-2746-4c33-a051-0a89316f6c46",
+  "characterAssetId": "e3faaeee-0f7a-491f-a1f3-454d740605d8",
+  "characterMaster": "../mc-master-v3-nofists.png",
+  "sourceVideo": "mc-run-v5-1794701016722.mp4",
+  "keying": {
+    "tool": "sorceress_autosprite_key cloud Corridor Key",
+    "jobId": "f4a859c5-8878-47dd-a326-18b2624c1045",
+    "sampleEvery": 1,
+    "maxSide": 1024,
+    "keyColor": "#18e808",
+    "tolerance": 80,
+    "credits": 32,
+    "fullSheet": {
+      "file": "mc-run-v5b-full.png",
+      "originalFile": "keyed-keyed-1794703652219.png",
+      "url": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/autosprite-v3-keyed/3c28c859-240d-491c-8f6d-267ebfaecb15/f4a859c5-8878-47dd-a326-18b2624c1045-hd/keyed_sheet.png",
+      "cols": 8,
+      "rows": 19,
+      "frameW": 663,
+      "frameH": 500,
+      "frameCount": 151,
+      "fps": 30
+    }
+  },
+  "image": "mc-run-v5b.png",
+  "sheet": {
+    "cols": 13,
+    "rows": 1,
+    "frameW": 336,
+    "frameH": 432,
+    "imageW": 4368,
+    "imageH": 432,
+    "frameCount": 13,
+    "cropFromFullFrame": {
+      "x": 165,
+      "y": 39,
+      "w": 336,
+      "h": 432
+    }
+  },
+  "tags": [
+    {
+      "name": "run",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "fps": 20,
+      "loop": true,
+      "indexBase": 0,
+      "sourceFullSheetFrames": [
+        78,
+        79,
+        80,
+        81,
+        83,
+        85,
+        86,
+        88,
+        89,
+        90,
+        91,
+        95,
+        96
+      ],
+      "selection": "One full stride from the full-rate sheet, frames 78-97 (98 matches 78, so the loop is seamless). The video is 24fps padded to 30, so the duplicate frames 82, 87, 92 and 97 are skipped. Frames 84, 93 and 94 are dropped because the legs knot or cross. 20fps keeps the video's real-time pace (about 0.65 s per stride)."
+    }
+  ],
+  "anchors": {
+    "groundY_maxLegTip": 380,
+    "note": "Lowest opaque leg-tip pixel across loop frames, in cell pixels. The body is not ground-locked: the video drifts a few px."
+  },
+  "frames": [
+    {
+      "cell": 0,
+      "sourceSheetFrame": "78",
+      "bbox": [
+        51,
+        48,
+        291,
+        357
+      ]
+    },
+    {
+      "cell": 1,
+      "sourceSheetFrame": "79",
+      "bbox": [
+        50,
+        50,
+        288,
+        353
+      ]
+    },
+    {
+      "cell": 2,
+      "sourceSheetFrame": "80",
+      "bbox": [
+        47,
+        53,
+        285,
+        371
+      ]
+    },
+    {
+      "cell": 3,
+      "sourceSheetFrame": "81",
+      "bbox": [
+        46,
+        53,
+        279,
+        379
+      ]
+    },
+    {
+      "cell": 4,
+      "sourceSheetFrame": "83",
+      "bbox": [
+        46,
+        53,
+        259,
+        380
+      ]
+    },
+    {
+      "cell": 5,
+      "sourceSheetFrame": "85",
+      "bbox": [
+        47,
+        50,
+        258,
+        376
+      ]
+    },
+    {
+      "cell": 6,
+      "sourceSheetFrame": "86",
+      "bbox": [
+        46,
+        47,
+        283,
+        370
+      ]
+    },
+    {
+      "cell": 7,
+      "sourceSheetFrame": "88",
+      "bbox": [
+        46,
+        45,
+        290,
+        356
+      ]
+    },
+    {
+      "cell": 8,
+      "sourceSheetFrame": "89",
+      "bbox": [
+        49,
+        46,
+        286,
+        351
+      ]
+    },
+    {
+      "cell": 9,
+      "sourceSheetFrame": "90",
+      "bbox": [
+        61,
+        57,
+        284,
+        378
+      ]
+    },
+    {
+      "cell": 10,
+      "sourceSheetFrame": "91",
+      "bbox": [
+        62,
+        56,
+        261,
+        380
+      ]
+    },
+    {
+      "cell": 11,
+      "sourceSheetFrame": "95",
+      "bbox": [
+        47,
+        46,
+        264,
+        373
+      ]
+    },
+    {
+      "cell": 12,
+      "sourceSheetFrame": "96",
+      "bbox": [
+        47,
+        44,
+        286,
+        364
+      ]
+    }
+  ],
+  "savedToAutoSprite": false,
+  "autoSpriteNote": "save_tags was rejected: the asset's active sheet still points to the older 76-frame sheet (c273d1c8...). Tag in the AutoSprite UI after it switches to the new sheet, or keep this local metadata.",
+  "reviewStatus": "candidate - owner review"
+}
