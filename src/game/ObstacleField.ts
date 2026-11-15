@@ -3,6 +3,8 @@ import Phaser from "phaser";
 import { solidWorldX, solidBottom, type HazardEvent, type Level, type SolidEvent } from "./Level";
 import { type RunnerFrame } from "./Runner";
 import { DEPTH_TRACK } from "./VisualScale";
+import { createTrafficSprite } from "./TrafficArt";
+import { wheelRotation } from "./TrafficFit";
 
 interface TrackObject {
   x: number;
@@ -11,7 +13,8 @@ interface TrackObject {
   powerId?: string;
   hazardId?: string;
   powerLabel?: Phaser.GameObjects.Text;
-  wheels?: Phaser.GameObjects.Graphics[];
+  wheels?: Phaser.GameObjects.Image[];
+  wheelRadius?: number;
 }
 
 /** The same world positions drive traffic collision and its approaching artwork. */
@@ -73,40 +76,20 @@ export class ObstacleField {
       item.object.setPosition(screenX, item.object.y).setVisible(!frame.battle && screenX > -180 && screenX < VIEWPORT.width + 180 && !frame.clearedHazardIds.includes(item.hazardId ?? ""));
       item.object.setAlpha(item.powerId && frame.usedPowerIds.includes(item.powerId) ? 0.3 : 1);
       item.powerLabel?.setAlpha(frame.usedCarIds.includes(item.solid?.id ?? "") ? 0.3 : 1);
-      for (const wheel of item.wheels ?? []) wheel.rotation = -frame.distance / 12;
+      if (item.solid && item.wheelRadius) {
+        const rotation = wheelRotation(worldX, item.solid.x, item.wheelRadius);
+        for (const wheel of item.wheels ?? []) wheel.rotation = rotation;
+      }
     }
   }
 
   private createCar(solid: SolidEvent): void {
     const { width: w, height: h } = solid;
-    const g = this.scene.add.graphics();
-    const color = solid.power === "fire" ? 0xef4444 : solid.power === "water" ? 0x2563eb : solid.power === "electricity" ? 0xfacc15 : 0x8b6bb1;
-    g.fillStyle(0x172033, 0.18);
-    g.fillEllipse(0, 1, w + 12, 10);
-    g.fillStyle(color);
-    g.fillRoundedRect(-w / 2, -h, w, h - 6, 6);
-    g.lineStyle(2, 0x243c4b);
-    g.strokeRoundedRect(-w / 2, -h, w, h - 6, 6);
-    g.fillStyle(0xd7eff5);
-    g.fillRoundedRect(-w / 2 + 7, -h + 6, w * 0.35, h * 0.4, 3);
-    g.fillStyle(0x8fc2d4);
-    g.fillRoundedRect(-w / 2 + w * 0.44, -h + 6, w * 0.42, h * 0.4, 3);
-    g.lineStyle(2, 0xffffff, 0.6);
-    g.lineBetween(-w / 2 + 8, -h + 8, -w / 2 + 18, -h + 8);
-    g.fillStyle(0xfff3b0);
-    g.fillRect(-w / 2, -19, 6, 8);
-    g.fillStyle(0x991b1b);
-    g.fillRect(w / 2 - 5, -19, 5, 8);
-    g.fillStyle(0x243c4b);
-    g.fillRect(-5, -h * 0.45, 9, 3);
-    const wheels = [-w * 0.3, w * 0.3].map((x) => {
-      const wheel = this.scene.add.graphics({ x, y: -8 });
-      wheel.fillStyle(0x202b38); wheel.fillCircle(0, 0, 10);
-      wheel.fillStyle(0xcbd5e1); wheel.fillCircle(0, 0, 5);
-      wheel.lineStyle(2, 0x64748b); wheel.lineBetween(-4, 0, 4, 0);
-      return wheel;
-    });
-    const object = this.scene.add.container(0, this.groundY - solidBottom(solid), [g, ...wheels]).setDepth(DEPTH_TRACK);
+    const shadow = this.scene.add.graphics();
+    shadow.fillStyle(0x172033, 0.18);
+    shadow.fillEllipse(0, 1, w + 12, 10);
+    const { rig, wheels, wheelRadius } = createTrafficSprite(this.scene, solid);
+    const object = this.scene.add.container(0, this.groundY - solidBottom(solid), [shadow, rig]).setDepth(DEPTH_TRACK);
     const powerLabel = solid.power ? this.scene.add.text(0, -h - 16,
       `${solid.power.toUpperCase()} ↓`, {
         fontFamily: "Arial, sans-serif", fontSize: "10px", fontStyle: "bold",
@@ -114,7 +97,7 @@ export class ObstacleField {
         padding: { x: 5, y: 3 },
       }).setOrigin(0.5) : undefined;
     if (powerLabel) object.add(powerLabel);
-    this.objects.push({ x: solid.x, solid, object, wheels, powerLabel });
+    this.objects.push({ x: solid.x, solid, object, wheels, wheelRadius, powerLabel });
   }
 
   private createHazard(hazard: HazardEvent): void {

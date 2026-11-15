@@ -2,7 +2,7 @@
   "type": "body-with-wheels",
   "label": "car-red",
   "image": "car-red.png",
-  "status": "wheel layer split, awaiting owner review",
+  "status": "in game",
   "width": 900,
   "height": 483,
   "facing": "left",

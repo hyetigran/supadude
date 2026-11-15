@@ -9,6 +9,7 @@ import { defaultQASettings, qaLevel, qaTuning } from "../game/QASettings";
 import { BattleField } from "../game/BattleField";
 import { QAPanel } from "./QAPanel";
 import { ObstacleField } from "../game/ObstacleField";
+import { preloadTraffic } from "../game/TrafficArt";
 import { type Difficulty } from "../game/Difficulty";
 import { Runner, type RunnerEvent, type RunnerFrame } from "../game/Runner";
 import { Sfx } from "../game/Sfx";
@@ -113,6 +114,7 @@ export class GameScene extends Phaser.Scene {
       frameHeight: frameH,
       endFrame: heroRunMeta.sheet.frameCount - 1,
     });
+    preloadTraffic(this);
   }
 
   create(data: { autoStart?: boolean; practiceBattle?: 0.5 | 0.9 } = {}): void {

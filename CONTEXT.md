@@ -26,7 +26,7 @@ The primary gameplay action. Jump applies a fixed upward impulse while Supa Dude
 The continuous baseline beneath the Level. Supa Dude may run and jump from it.
 
 **Traffic**:
-Approaching cars and vans replacing the old Solid Blocks. Cars sit 24 world pixels below the sidewalk on the road. Their roofs remain reachable from the sidewalk; roof landing and side/underside collisions use the same lowered position as the artwork. The same deterministic world position is used for drawing and collision. Traffic freezes on Pause or Crash and resets on retry.
+Approaching cars and vans replacing the old Solid Blocks. Cars sit 24 world pixels below the sidewalk on the road. Their roofs remain reachable from the sidewalk; roof landing and side/underside collisions use the same lowered position as the artwork. The same deterministic world position is used for drawing and collision. Traffic freezes on Pause or Crash and resets on retry. Low Traffic is drawn as the compact car and tall Traffic as the van; body colour shows its Car Power (unpowered Traffic is silver) and the wheels roll with the car's own movement.
 
 **Hazard**:
 Fatal suburban obstacles: Bushes, Trash Cans, Fire Hydrants, Fallen Trees, Construction Pits, low Tree branches, and Basketball Hoops. Hydrants and fallen trunks are jumped over; construction pits are ground-level hazards that must be cleared in a jump. Low overhead obstacles are marked “STAY LOW”; the current one-button version passes beneath them by staying grounded.
