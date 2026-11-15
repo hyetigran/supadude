@@ -1,7 +1,7 @@
 {
   "label": "fence",
   "image": "fence.png",
-  "status": "generated, not wired into game",
+  "status": "wired into game (src/game/SceneryFit.ts)",
   "width": 888,
   "height": 481,
   "view": "side elevation",

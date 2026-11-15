@@ -11,6 +11,9 @@ import { QAPanel } from "./QAPanel";
 import { ObstacleField } from "../game/ObstacleField";
 import { preloadTraffic } from "../game/TrafficArt";
 import { preloadObjects } from "../game/ObjectArt";
+import { CONTACT_SHADOW_KEY, SceneryLayer, preloadScenery } from "../game/SceneryArt";
+import { cloudStrip, streetStrip } from "../game/SceneryFit";
+import contactShadowMeta from "../../assets/art/scenery/contact-shadow.json";
 import { type Difficulty } from "../game/Difficulty";
 import { Runner, type RunnerEvent, type RunnerFrame } from "../game/Runner";
 import { Sfx } from "../game/Sfx";
@@ -38,13 +41,21 @@ const HERO_CELL_DISPLAY_HEIGHT = 82;
 /** Stride cell held while airborne (no jump/flight animations exist yet). */
 const HERO_AIR_FRAME = 0;
 const BACKGROUND_TEXTURE = "neighborhood-road";
-const SCENERY_TEXTURE = "neighborhood-houses";
+/** Houses sit in the grass verge, this far above the ground line. */
+const SCENERY_BASE_OFFSET = 29;
+/**
+ * Scroll speed of each backdrop layer relative to the road. The houses sit just across a flat-coloured
+ * lawn, so they move at half speed; the curb is the only seam between speeds. Clouds drift far behind.
+ */
+const STREET_PARALLAX = 0.5;
+const CLOUD_PARALLAX = 0.08;
 const TEXTURE_WIDTH = 960;
 
 const SKY_COLOR = 0xd7eaf0;
 const TRACK_EDGE_COLOR = 0xf4c76b;
 const PLAYER_OUTLINE_COLOR = 0xf8fafc;
-const PLAYER_SHADOW_COLOR = 0x020617;
+/** The contact-shadow art is opaque; this is the strength the old flat ellipse had. */
+const PLAYER_SHADOW_ALPHA = 0.42;
 const COIN_BURST_COLOR = 0xffd166;
 const DEATH_BURST_COLOR = 0xff4d8d;
 const RESTART_BURST_COLOR = 0x67e8f9;
@@ -82,12 +93,15 @@ export class GameScene extends Phaser.Scene {
   private readonly sfx = new Sfx();
 
   private background?: Phaser.GameObjects.TileSprite;
-  private scenery?: Phaser.GameObjects.TileSprite;
+  private scenery?: SceneryLayer;
+  private clouds?: SceneryLayer;
   private player?: Phaser.GameObjects.Container;
   private heroSprite?: Phaser.GameObjects.Sprite;
   private powerAura?: Phaser.GameObjects.Arc;
   private carPowerText?: Phaser.GameObjects.Text;
-  private playerShadow?: Phaser.GameObjects.Ellipse;
+  private playerShadow?: Phaser.GameObjects.Image;
+  /** Image scale that makes the shadow's opaque oval PLAYER_SHADOW_WIDTH x PLAYER_SHADOW_HEIGHT. */
+  private shadowBaseScale = { x: 1, y: 1 };
   private hudPanel?: Phaser.GameObjects.Rectangle;
   private hudText?: Phaser.GameObjects.Text;
   private progressFill?: Phaser.GameObjects.Rectangle;
@@ -117,6 +131,7 @@ export class GameScene extends Phaser.Scene {
     });
     preloadTraffic(this);
     preloadObjects(this);
+    preloadScenery(this);
   }
 
   create(data: { autoStart?: boolean; practiceBattle?: 0.5 | 0.9 } = {}): void {
@@ -136,15 +151,13 @@ export class GameScene extends Phaser.Scene {
       typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     this.createBackgroundTexture();
-    this.createSceneryTexture();
     this.background = this.add
       .tileSprite(0, 0, VIEWPORT.width, VIEWPORT.height, BACKGROUND_TEXTURE)
       .setOrigin(0, 0)
       .setDepth(DEPTH_BACKGROUND);
-    this.scenery = this.add
-      .tileSprite(0, 0, VIEWPORT.width, VIEWPORT.height, SCENERY_TEXTURE)
-      .setOrigin(0, 0)
-      .setDepth(DEPTH_SCENERY);
+    const sceneryGroundY = this.groundY - SCENERY_BASE_OFFSET;
+    this.clouds = new SceneryLayer(this, cloudStrip(), "scenery-clouds", sceneryGroundY, DEPTH_SCENERY);
+    this.scenery = new SceneryLayer(this, streetStrip(), "scenery-street", sceneryGroundY, DEPTH_SCENERY);
 
     this.battleField = new BattleField(this, this.groundY);
     this.obstacleField = new ObstacleField(this, this.groundY, CHARACTER_X, this.level);
@@ -152,8 +165,15 @@ export class GameScene extends Phaser.Scene {
     this.player = this.createPlayerIcon();
     this.powerAura = this.add.circle(CHARACTER_X, this.groundY, 27, 0xef4444, 0.16)
       .setStrokeStyle(3, 0xef4444, 0.9).setDepth(DEPTH_PLAYER - 0.1).setVisible(false);
+    const shadowBounds = contactShadowMeta.opaqueBounds;
+    this.shadowBaseScale = {
+      x: PLAYER_SHADOW_WIDTH / (shadowBounds.right - shadowBounds.left),
+      y: PLAYER_SHADOW_HEIGHT / (shadowBounds.bottom - shadowBounds.top),
+    };
     this.playerShadow = this.add
-      .ellipse(CHARACTER_X, this.groundY + 3, PLAYER_SHADOW_WIDTH, PLAYER_SHADOW_HEIGHT, PLAYER_SHADOW_COLOR, 0.42)
+      .image(CHARACTER_X, this.groundY + 3, CONTACT_SHADOW_KEY)
+      .setOrigin(contactShadowMeta.anchors.groundCenterX / contactShadowMeta.width,
+        (shadowBounds.top + shadowBounds.bottom) / 2 / contactShadowMeta.height)
       .setDepth(DEPTH_PLAYER - 0.5);
 
     this.createHud();
@@ -323,13 +343,14 @@ export class GameScene extends Phaser.Scene {
       const restingSurface = !frame.battle && frame.grounded ? frame.altitude : 0;
       this.playerShadow
         .setPosition(playerX, feetY - restingSurface + 3)
-        .setScale(shadowScale, shadowScale)
-        .setAlpha(playerVisible ? 0.18 + shadowScale * 0.24 : 0)
+        .setScale(this.shadowBaseScale.x * shadowScale, this.shadowBaseScale.y * shadowScale)
+        .setAlpha(playerVisible ? PLAYER_SHADOW_ALPHA * (0.18 + shadowScale * 0.24) : 0)
         .setVisible(playerVisible);
     }
 
     if (this.background) this.background.tilePositionX = frame.renderDistance;
-    if (this.scenery) this.scenery.tilePositionX = frame.renderDistance * (this.reducedMotion ? 1 : 0.24);
+    this.scenery?.setScroll(frame.renderDistance * (this.reducedMotion ? 1 : STREET_PARALLAX));
+    this.clouds?.setScroll(frame.renderDistance * (this.reducedMotion ? 1 : CLOUD_PARALLAX));
     this.obstacleField.render(frame);
     this.collectibleField.render(frame.renderDistance, !frame.battle);
     this.battleField.render(frame.battle, frame.carPower, frame.phase === "dead");
@@ -349,47 +370,6 @@ export class GameScene extends Phaser.Scene {
     g.fillStyle(0xecc46a);
     for (let x = 0; x < TEXTURE_WIDTH; x += 120) g.fillRoundedRect(x, this.groundY + 46, 62, 3, 1);
     g.generateTexture(BACKGROUND_TEXTURE, TEXTURE_WIDTH, VIEWPORT.height); g.destroy();
-  }
-
-  private createSceneryTexture(): void {
-    if (this.textures.exists(SCENERY_TEXTURE)) return;
-    const g = this.add.graphics();
-    // Quiet, warm houses sit behind the sidewalk; interactive obstacles have darker outlines.
-    g.fillStyle(0xffffff, 0.75);
-    for (const [x, y] of [[70, 78], [390, 112], [730, 72]]) {
-      g.fillEllipse(x, y, 86, 22); g.fillEllipse(x + 24, y - 9, 57, 28);
-    }
-    const houses = [
-      { x: 22, w: 150, h: 114, color: 0xdab998, roof: 0x986c63 },
-      { x: 247, w: 154, h: 138, color: 0xa8bbc0, roof: 0x687d86 },
-      { x: 489, w: 142, h: 103, color: 0xdecda4, roof: 0x9c8770 },
-      { x: 731, w: 166, h: 130, color: 0xc3b3bd, roof: 0x827684 },
-    ];
-    const base = this.groundY - 29;
-    for (const house of houses) {
-      const top = base - house.h;
-      g.fillStyle(house.color); g.fillRect(house.x, top, house.w, house.h);
-      g.fillStyle(house.roof); g.fillTriangle(house.x - 12, top, house.x + house.w / 2, top - 50, house.x + house.w + 12, top);
-      g.fillRect(house.x + house.w - 30, top - 43, 15, 36);
-      g.lineStyle(1, 0xffffff, 0.3);
-      for (let y = top + 8; y < base; y += 10) g.lineBetween(house.x, y, house.x + house.w, y);
-      g.fillStyle(0x677e87); g.fillRoundedRect(house.x + house.w / 2 - 13, base - 47, 26, 47, 3);
-      for (const x of [house.x + 20, house.x + house.w - 46]) {
-        g.fillStyle(0xffedba); g.fillRect(x, top + 23, 27, 33);
-        g.lineStyle(3, 0xf6eddf); g.strokeRect(x, top + 23, 27, 33);
-        g.lineBetween(x + 13, top + 23, x + 13, top + 56); g.lineBetween(x, top + 39, x + 27, top + 39);
-      }
-      g.fillStyle(0xe7dfcf); g.fillRect(house.x + house.w / 2 - 19, base, 38, 15);
-      const treeX = house.x + house.w + 25;
-      g.fillStyle(0x967e62); g.fillRect(treeX - 4, base - 81, 9, 81);
-      g.fillStyle(0x8caf79); g.fillCircle(treeX, base - 88, 28); g.fillCircle(treeX - 14, base - 67, 23);
-      g.fillStyle(0xf5edd8); for (let x = house.x - 10; x < house.x + 50; x += 12) g.fillRoundedRect(x, base - 17, 7, 31, 2);
-      g.fillRect(house.x - 10, base - 7, 60, 4);
-      // Mailboxes and driveways make the backdrop read as a neighborhood.
-      g.fillStyle(0x8e7966); g.fillRect(house.x + house.w - 5, base - 20, 4, 29);
-      g.fillStyle(0x77929a); g.fillRoundedRect(house.x + house.w - 13, base - 30, 24, 13, 4);
-    }
-    g.generateTexture(SCENERY_TEXTURE, TEXTURE_WIDTH, VIEWPORT.height); g.destroy();
   }
 
   /**

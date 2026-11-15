@@ -1,7 +1,7 @@
 {
   "label": "house-blue",
   "image": "house-blue.png",
-  "status": "generated, not wired into game",
+  "status": "wired into game (src/game/SceneryFit.ts)",
   "width": 703,
   "height": 587,
   "view": "side elevation",

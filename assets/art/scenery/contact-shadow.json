@@ -1,7 +1,7 @@
 {
   "label": "contact-shadow",
   "image": "contact-shadow.png",
-  "status": "generated, not wired into game",
+  "status": "wired into game (src/scenes/GameScene.ts player shadow)",
   "width": 902,
   "height": 335,
   "view": "side elevation",

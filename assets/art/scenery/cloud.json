@@ -1,7 +1,7 @@
 {
   "label": "cloud",
   "image": "cloud.png",
-  "status": "generated, not wired into game",
+  "status": "wired into game (src/game/SceneryFit.ts)",
   "width": 840,
   "height": 479,
   "view": "side elevation",
