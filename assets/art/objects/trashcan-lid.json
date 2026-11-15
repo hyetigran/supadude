@@ -1,0 +1,21 @@
+{
+  "label": "trashcan-lid",
+  "image": "trashcan-lid.png",
+  "status": "asset only (not wired into game)",
+  "width": 833,
+  "height": 350,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 808,
+    "bottom": 325
+  },
+  "anchors": {
+    "centerX": 416.0,
+    "centerY": 174.5,
+    "bottomY": 325,
+    "topY": 24
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding; second reference: trashcan master"
+}

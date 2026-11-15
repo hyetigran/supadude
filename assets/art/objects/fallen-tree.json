@@ -1,0 +1,20 @@
+{
+  "label": "fallen-tree",
+  "image": "fallen-tree.png",
+  "status": "asset only (not wired into game)",
+  "width": 869,
+  "height": 340,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 844,
+    "bottom": 315
+  },
+  "anchors": {
+    "groundY": 315,
+    "groundCenterX": 434.0,
+    "topY": 24
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding"
+}

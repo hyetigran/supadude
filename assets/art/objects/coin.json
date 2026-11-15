@@ -1,0 +1,20 @@
+{
+  "label": "coin",
+  "image": "coin.png",
+  "status": "asset only (not wired into game)",
+  "width": 840,
+  "height": 839,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 815,
+    "bottom": 814
+  },
+  "anchors": {
+    "centerX": 419.5,
+    "centerY": 419.0,
+    "radius": 395.2
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding"
+}

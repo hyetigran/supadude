@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { type SolidEvent } from "./Level";
-import { RENDER_SCALE } from "./Viewport";
+import { RENDER_SCALE, snapToPixel } from "./Viewport";
 import { TRAFFIC_META, fitTraffic, trafficColor, trafficModel, type TrafficColor, type TrafficModel } from "./TrafficFit";
 import carBlueUrl from "../../assets/art/traffic/car-blue.png";
 import carRedUrl from "../../assets/art/traffic/car-red.png";
@@ -35,7 +35,10 @@ export function createTrafficSprite(scene: Phaser.Scene, solid: SolidEvent): Tra
   const meta = TRAFFIC_META[model];
   const fit = fitTraffic(model, solid.height);
   const body = downscaled(scene, `traffic-${model}-${trafficColor(solid.power)}`, fit.scale * RENDER_SCALE);
-  const bodyImage = scene.add.image(fit.left, fit.top, body.texture.key).setOrigin(0, 0).setDisplaySize(fit.width, fit.height);
+  // Texels land 1:1 on device pixels; any fractional offset or scale would resample the outlines into a blur.
+  const source = body.texture.getSourceImage();
+  const bodyImage = scene.add.image(snapToPixel(fit.left), snapToPixel(fit.top), body.texture.key).setOrigin(0, 0)
+    .setDisplaySize(source.width / RENDER_SCALE, source.height / RENDER_SCALE);
   const wheelScale = meta.wheelLayer.scale * fit.scale;
   const wheelKey = downscaled(scene, WHEEL_TEXTURE, wheelScale * RENDER_SCALE).texture.key;
   const [wheelW, wheelH] = meta.wheelLayer.imageSize;

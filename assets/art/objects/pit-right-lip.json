@@ -1,0 +1,22 @@
+{
+  "label": "pit-right-lip",
+  "image": "pit-right-lip.png",
+  "status": "asset only (not wired into game)",
+  "width": 340,
+  "height": 330,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 315,
+    "bottom": 160
+  },
+  "anchors": {
+    "slabTopY": 29,
+    "slabBottomY": 157,
+    "brokenEdge": "left",
+    "innerEdgeX": 24,
+    "outerEdgeX": 315
+  },
+  "source": "cut from pit-overlay.png (same scale and rows)"
+}

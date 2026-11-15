@@ -1,4 +1,4 @@
-import { VIEWPORT } from "./Viewport";
+import { VIEWPORT, snapToPixel } from "./Viewport";
 import Phaser from "phaser";
 import { solidWorldX, solidBottom, type HazardEvent, type Level, type SolidEvent } from "./Level";
 import { type RunnerFrame } from "./Runner";
@@ -72,7 +72,8 @@ export class ObstacleField {
   render(frame: RunnerFrame): void {
     for (const item of this.objects) {
       const worldX = item.solid ? solidWorldX(item.solid, frame.distance) : item.x;
-      const screenX = this.characterX + worldX - frame.distance;
+      // Traffic snaps to whole device pixels so its outlines are never resampled between frames.
+      const screenX = item.solid ? snapToPixel(this.characterX + worldX - frame.distance) : this.characterX + worldX - frame.distance;
       item.object.setPosition(screenX, item.object.y).setVisible(!frame.battle && screenX > -180 && screenX < VIEWPORT.width + 180 && !frame.clearedHazardIds.includes(item.hazardId ?? ""));
       item.object.setAlpha(item.powerId && frame.usedPowerIds.includes(item.powerId) ? 0.3 : 1);
       item.powerLabel?.setAlpha(frame.usedCarIds.includes(item.solid?.id ?? "") ? 0.3 : 1);
@@ -89,7 +90,7 @@ export class ObstacleField {
     shadow.fillStyle(0x172033, 0.18);
     shadow.fillEllipse(0, 1, w + 12, 10);
     const { rig, wheels, wheelRadius } = createTrafficSprite(this.scene, solid);
-    const object = this.scene.add.container(0, this.groundY - solidBottom(solid), [shadow, rig]).setDepth(DEPTH_TRACK);
+    const object = this.scene.add.container(0, snapToPixel(this.groundY - solidBottom(solid)), [shadow, rig]).setDepth(DEPTH_TRACK);
     const powerLabel = solid.power ? this.scene.add.text(0, -h - 16,
       `${solid.power.toUpperCase()} ↓`, {
         fontFamily: "Arial, sans-serif", fontSize: "10px", fontStyle: "bold",

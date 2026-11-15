@@ -1,0 +1,27 @@
+{
+  "label": "trampoline-rebound",
+  "image": "trampoline-rebound.png",
+  "status": "asset only (not wired into game)",
+  "width": 807,
+  "height": 418,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 782,
+    "bottom": 393
+  },
+  "anchors": {
+    "groundY": 393,
+    "groundCenterX": 403.0,
+    "masterMatTopY": 44,
+    "matTopAtCenterY": 25,
+    "matBottomAtCenterY": 242
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding; image edit of the trampoline master, then only the changed mat region (master px [261, 132, 762, 242]) pasted onto the master so frame, legs and canvas are identical",
+  "sharedCanvasWith": [
+    "trampoline",
+    "trampoline-compressed",
+    "trampoline-rebound"
+  ]
+}

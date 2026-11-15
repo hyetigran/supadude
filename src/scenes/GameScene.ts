@@ -51,7 +51,7 @@ const RESTART_BURST_COLOR = 0x67e8f9;
 const HUD_COLOR = 0x0f172a;
 const HUD_TEXT_COLOR = "#f8fafc";
 const HUD_FONT = "Arial, Helvetica, sans-serif";
-const TEXT_RESOLUTION = typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+const TEXT_RESOLUTION = RENDER_SCALE;
 const PROGRESS_HEIGHT = 7;
 const PAUSE_BUTTON_SIZE = 44;
 const PAUSE_BUTTON_PAD = 12;

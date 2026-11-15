@@ -1,0 +1,20 @@
+{
+  "label": "jump-orb",
+  "image": "jump-orb.png",
+  "status": "asset only (not wired into game)",
+  "width": 808,
+  "height": 813,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 783,
+    "bottom": 788
+  },
+  "anchors": {
+    "centerX": 403.5,
+    "centerY": 406.0,
+    "radius": 380.8
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding"
+}

@@ -1,0 +1,29 @@
+{
+  "label": "tree-overhead",
+  "image": "tree-overhead.png",
+  "status": "asset only (not wired into game)",
+  "width": 878,
+  "height": 869,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 853,
+    "bottom": 844
+  },
+  "anchors": {
+    "groundY": 844,
+    "groundCenterX": 438.5,
+    "topY": 24,
+    "trunkBaseX": [
+      162,
+      282
+    ],
+    "undersideRightOfTrunk": {
+      "fromX": 288,
+      "minY": 329,
+      "maxY": 446
+    }
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding"
+}

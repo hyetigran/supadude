@@ -1,10 +1,10 @@
-import { VIEWPORT } from "../game/Viewport";
+import { VIEWPORT, RENDER_SCALE } from "../game/Viewport";
 import Phaser from "phaser";
 import type { Difficulty } from "../game/Difficulty";
 import { DEPTH_HUD } from "../game/VisualScale";
 
 const OVERLAY_DEPTH = DEPTH_HUD + 20;
-const TEXT_RESOLUTION = typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+const TEXT_RESOLUTION = RENDER_SCALE;
 
 export type PauseOverlayKind = "start" | "pause";
 

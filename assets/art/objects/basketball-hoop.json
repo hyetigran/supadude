@@ -1,0 +1,31 @@
+{
+  "label": "basketball-hoop",
+  "image": "basketball-hoop.png",
+  "status": "asset only (not wired into game)",
+  "width": 453,
+  "height": 919,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 428,
+    "bottom": 894
+  },
+  "anchors": {
+    "groundY": 894,
+    "groundCenterX": 226.0,
+    "topY": 24,
+    "poleX": [
+      57,
+      99
+    ],
+    "rim": {
+      "left": 249,
+      "right": 421,
+      "top": 247,
+      "bottom": 277
+    },
+    "overhangUndersideY": 373
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding"
+}

@@ -1,0 +1,27 @@
+{
+  "label": "pit-overlay",
+  "image": "pit-overlay.png",
+  "status": "asset only (not wired into game)",
+  "width": 1040,
+  "height": 330,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 1015,
+    "bottom": 305
+  },
+  "anchors": {
+    "slabTopY": 29,
+    "slabBottomY": 157,
+    "openingWallX": [
+      288,
+      756
+    ],
+    "openingFloorY": 304,
+    "leftLipInnerX": 330,
+    "rightLipInnerX": 724
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding",
+  "note": "Visual only; collision stays in the game's hazard data. Use pit-left-lip/pit-right-lip with a game-drawn dark gap so width follows the level."
+}

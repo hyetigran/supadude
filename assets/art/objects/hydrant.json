@@ -1,0 +1,20 @@
+{
+  "label": "hydrant",
+  "image": "hydrant.png",
+  "status": "asset only (not wired into game)",
+  "width": 609,
+  "height": 791,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 584,
+    "bottom": 766
+  },
+  "anchors": {
+    "groundY": 766,
+    "groundCenterX": 304.0,
+    "topY": 24
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding"
+}

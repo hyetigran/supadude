@@ -1,0 +1,27 @@
+{
+  "label": "trampoline",
+  "image": "trampoline.png",
+  "status": "asset only (not wired into game)",
+  "width": 807,
+  "height": 418,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 43,
+    "right": 782,
+    "bottom": 393
+  },
+  "anchors": {
+    "groundY": 393,
+    "groundCenterX": 403.0,
+    "masterMatTopY": 44,
+    "matTopAtCenterY": 44,
+    "matBottomAtCenterY": 242
+  },
+  "source": "nano-banana-2-1 (1K, approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding",
+  "sharedCanvasWith": [
+    "trampoline",
+    "trampoline-compressed",
+    "trampoline-rebound"
+  ]
+}
