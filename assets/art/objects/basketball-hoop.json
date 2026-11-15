@@ -1,7 +1,7 @@
 {
   "label": "basketball-hoop",
   "image": "basketball-hoop.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 453,
   "height": 919,
   "view": "side elevation",

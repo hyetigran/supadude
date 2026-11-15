@@ -1,7 +1,7 @@
 {
   "label": "trashcan",
   "image": "trashcan.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 606,
   "height": 764,
   "view": "side elevation",

@@ -1,7 +1,7 @@
 {
   "label": "finish-gate",
   "image": "finish-gate.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 987,
   "height": 831,
   "view": "side elevation",

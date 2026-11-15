@@ -1,7 +1,7 @@
 {
   "label": "pit-right-lip",
   "image": "pit-right-lip.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 340,
   "height": 330,
   "view": "side elevation",

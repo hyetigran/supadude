@@ -5,6 +5,11 @@ import { type RunnerFrame } from "./Runner";
 import { DEPTH_TRACK } from "./VisualScale";
 import { createTrafficSprite } from "./TrafficArt";
 import { wheelRotation } from "./TrafficFit";
+import { createObjectImage, objectTextureKey } from "./ObjectArt";
+import {
+  PIT_FLOOR, SIDEWALK_DEPTH, finishGatePlacement, hazardPlacements, jumpOrbPlacement, trampolinePlacement,
+  trashcanLidOffsetY, trashcanLidPlacement, type TrampolineState,
+} from "./ObjectFit";
 
 interface TrackObject {
   x: number;
@@ -15,7 +20,11 @@ interface TrackObject {
   powerLabel?: Phaser.GameObjects.Text;
   wheels?: Phaser.GameObjects.Image[];
   wheelRadius?: number;
+  hazard?: HazardEvent;
+  pad?: Phaser.GameObjects.Image;
 }
+
+const TRAMPOLINE_BOUNCE: readonly [TrampolineState, number][] = [["trampoline-compressed", 90], ["trampoline-rebound", 140], ["trampoline", 0]];
 
 /** The same world positions drive traffic collision and its approaching artwork. */
 export class ObstacleField {
@@ -30,50 +39,47 @@ export class ObstacleField {
     for (const solid of level.solids) this.createCar(solid);
     for (const hazard of level.hazards) this.createHazard(hazard);
     for (const power of level.powers ?? []) {
-      const g = scene.add.graphics();
       const isPad = power.kind === "flightPad";
-      if (isPad) {
-        g.lineStyle(4, 0x64748b);
-        g.lineBetween(-23, -8, -23, 0);
-        g.lineBetween(23, -8, 23, 0);
-        g.fillStyle(0x1e293b);
-        g.fillRoundedRect(-30, -17, 60, 9, 4);
-        g.lineStyle(3, 0x22d3ee);
-        g.strokeEllipse(0, -12, 58, 8);
-        g.fillStyle(0xa5f3fc);
-        g.fillTriangle(-7, -27, 0, -36, 7, -27);
-      } else {
-        g.fillStyle(0xfbbf24, 0.16);
-        g.fillCircle(0, 0, 23);
-        g.lineStyle(2, 0xfffbeb);
-        g.strokeCircle(0, 0, 15);
-        g.fillStyle(0xf59e0b);
-        g.fillCircle(0, 0, 11);
-        g.fillStyle(0xfffbeb);
-        g.fillTriangle(-6, 2, 0, -6, 6, 2);
-      }
+      const art = createObjectImage(scene, isPad ? trampolinePlacement() : jumpOrbPlacement());
       const label = scene.add.text(0, isPad ? -54 : -40, isPad ? "FLY · 4s" : "DOUBLE JUMP", {
         fontFamily: "Arial, sans-serif", fontSize: "10px", fontStyle: "bold", color: isPad ? "#075985" : "#92400e",
         backgroundColor: "#fffbeb", padding: { x: 5, y: 3 },
       }).setOrigin(0.5);
-      this.objects.push({ x: power.x, powerId: power.id, object: scene.add.container(0, isPad ? groundY : groundY - power.altitude, [g, label]).setDepth(DEPTH_TRACK + 1) });
+      this.objects.push({ x: power.x, powerId: power.id, pad: isPad ? art : undefined,
+        object: scene.add.container(0, isPad ? groundY : groundY - power.altitude, [art, label]).setDepth(DEPTH_TRACK + 1) });
     }
-    const finish = scene.add.graphics();
-    finish.fillStyle(0x334155);
-    finish.fillRect(-3, -140, 6, 140);
-    finish.fillStyle(0xfef3c7);
-    finish.fillRect(3, -140, 74, 34);
-    for (let x = 0; x < 8; x++) for (let y = 0; y < 3; y++) {
-      if ((x + y) % 2 === 0) { finish.fillStyle(0x334155); finish.fillRect(3 + x * 9, -140 + y * 11, 9, 11); }
-    }
+    const finish = createObjectImage(scene, finishGatePlacement());
     this.objects.push({ x: level.length, object: scene.add.container(0, groundY, [finish]).setDepth(DEPTH_TRACK) });
+  }
+
+  /** Squash and rebound the trampoline mat when Supa Dude launches from it. */
+  bouncePad(powerId: string): void {
+    const pad = this.objects.find((item) => item.powerId === powerId)?.pad;
+    if (!pad) return;
+    let delay = 0;
+    for (const [state, duration] of TRAMPOLINE_BOUNCE) {
+      this.scene.time.delayedCall(delay, () => pad.setTexture(objectTextureKey(this.scene, trampolinePlacement(state))));
+      delay += duration;
+    }
+  }
+
+  /** A cleared Trash Can throws its lid; other hazards just disappear. */
+  popLid(hazardId: string, distance: number): void {
+    const item = this.objects.find((candidate) => candidate.hazardId === hazardId);
+    if (item?.hazard?.kind !== "trashCan") return;
+    const canScale = hazardPlacements(item.hazard)[0].scale;
+    const lid = createObjectImage(this.scene, trashcanLidPlacement(canScale));
+    const container = this.scene.add.container(this.characterX + item.x - distance, this.groundY + trashcanLidOffsetY(canScale), [lid])
+      .setDepth(DEPTH_TRACK + 0.5);
+    this.scene.tweens.add({ targets: container, y: container.y - 46, x: container.x + 26, angle: 200, alpha: 0, duration: 520,
+      ease: "Quad.easeOut", onComplete: () => container.destroy() });
   }
 
   render(frame: RunnerFrame): void {
     for (const item of this.objects) {
       const worldX = item.solid ? solidWorldX(item.solid, frame.distance) : item.x;
-      // Traffic snaps to whole device pixels so its outlines are never resampled between frames.
-      const screenX = item.solid ? snapToPixel(this.characterX + worldX - frame.distance) : this.characterX + worldX - frame.distance;
+      // Art snaps to whole device pixels so its outlines are never resampled between frames.
+      const screenX = snapToPixel(this.characterX + worldX - frame.distance);
       item.object.setPosition(screenX, item.object.y).setVisible(!frame.battle && screenX > -180 && screenX < VIEWPORT.width + 180 && !frame.clearedHazardIds.includes(item.hazardId ?? ""));
       item.object.setAlpha(item.powerId && frame.usedPowerIds.includes(item.powerId) ? 0.3 : 1);
       item.powerLabel?.setAlpha(frame.usedCarIds.includes(item.solid?.id ?? "") ? 0.3 : 1);
@@ -102,50 +108,18 @@ export class ObstacleField {
   }
 
   private createHazard(hazard: HazardEvent): void {
-    const { width: w, height: h } = hazard;
-    const g = this.scene.add.graphics();
-    if (hazard.kind === "fireHydrant") {
-      g.fillStyle(0xfacc15); g.fillRoundedRect(-w / 2 + 5, -h + 4, w - 10, h - 4, 4);
-      g.fillStyle(0xeab308); g.fillRect(-w / 2, -h * 0.65, w, 9);
-      g.fillStyle(0x854d0e); g.fillRect(-w / 2 + 2, -4, w - 4, 4);
-      g.fillStyle(0xfef08a); g.fillEllipse(0, -h + 3, w - 6, 9);
-      g.lineStyle(2, 0x854d0e); g.strokeCircle(0, -h / 2, 5);
-    } else if (hazard.kind === "constructionPit") {
-      g.fillStyle(0x172033); g.fillRect(-w / 2, -3, w, 22);
-      g.fillStyle(0x806344); g.fillRect(-w / 2 + 4, 10, w - 8, 9);
-      g.lineStyle(4, 0xfbbf24); g.lineBetween(-w / 2, -3, w / 2, -3);
-      g.lineStyle(3, 0x172033);
-      for (let x = -w / 2 + 4; x < w / 2; x += 12) g.lineBetween(x, -5, x + 4, -1);
-    } else if (hazard.kind === "fallenTree") {
-      g.fillStyle(0x795032); g.fillRoundedRect(-w / 2, -h, w, h, 9);
-      g.lineStyle(2, 0xc49a6c); g.lineBetween(-w / 2 + 8, -h + 8, w / 2 - 6, -h + 8);
-      g.fillStyle(0xd5b382); g.fillEllipse(w / 2 - 7, -h / 2, 13, h - 4);
-      g.lineStyle(2, 0x795032); g.strokeEllipse(w / 2 - 7, -h / 2, 7, h - 12);
-    } else if (hazard.kind === "tree") {
-      // The trunk stands behind the curb; the outlined low branch is in the player's path.
-      g.fillStyle(0x9b7653, 0.65); g.fillRect(w / 2 - 8, -h + 12, 12, h + 24);
-      g.fillStyle(0x467c44); g.fillRoundedRect(-w / 2, -h, w, h, 18);
-      g.fillStyle(0x669c50); g.fillCircle(-20, -h + 12, 31); g.fillCircle(22, -h + 8, 34);
-      g.lineStyle(4, 0x5b442e); g.lineBetween(-w / 2 + 5, -3, w / 2 - 6, -3);
-    } else if (hazard.kind === "basketballHoop") {
-      g.fillStyle(0x718096, 0.65); g.fillRect(w / 2 - 8, -h + 8, 7, h + hazard.bottom - 15);
-      g.fillStyle(0xf8fafc); g.fillRoundedRect(-w / 2, -h, w, h, 3);
-      g.lineStyle(3, 0x345565); g.strokeRect(-w / 2, -h, w, h);
-      g.lineStyle(2, 0xe76f51); g.strokeRect(-18, -h + 15, 36, h - 24);
-      g.lineStyle(4, 0xef6c35); g.lineBetween(-23, -3, 23, -3);
-      g.lineStyle(1, 0xffffff); for (let x = -18; x < 20; x += 9) g.lineBetween(x, 0, x * 0.65, 15);
-    } else if (hazard.kind === "trashCan") {
-      g.fillStyle(0x557780); g.fillRoundedRect(-w / 2, -h, w, h, 3);
-      g.fillStyle(0x304d59); g.fillRoundedRect(-w / 2 - 2, -h, w + 4, 5, 2);
-      g.lineStyle(2, 0xa2bfc4); for (let x = -w / 2 + 6; x < w / 2; x += 8) g.lineBetween(x, -h + 8, x, -5);
-    } else {
-      g.fillStyle(0x427747); g.fillRoundedRect(-w / 2, -h * 0.7, w, h * 0.7, 6);
-      g.fillStyle(0x62994b);
-      for (let x = -w / 2 + 10; x < w / 2; x += 14) g.fillCircle(x, -h * 0.6, Math.min(17, h * 0.55));
-      g.fillStyle(0xf4cf6c); g.fillCircle(-w / 4, -h * 0.65, 2); g.fillCircle(w / 4, -h * 0.5, 2);
+    const parts: Phaser.GameObjects.GameObject[] = [];
+    if (hazard.kind === "constructionPit") {
+      // The level's pit width cuts the sidewalk; the slab art only frames it.
+      const gap = this.scene.add.graphics();
+      gap.fillStyle(0x261b17); gap.fillRect(-hazard.width / 2 - 2, -SIDEWALK_DEPTH, hazard.width + 4, SIDEWALK_DEPTH + PIT_FLOOR);
+      gap.fillStyle(0x3b2b24); gap.fillRect(-hazard.width / 2 - 2, PIT_FLOOR - 5, hazard.width + 4, 5);
+      gap.lineStyle(1.5, 0x111111); gap.strokeRect(-hazard.width / 2 - 2, -SIDEWALK_DEPTH, hazard.width + 4, SIDEWALK_DEPTH + PIT_FLOOR);
+      parts.push(gap);
     }
-    const object = this.scene.add.container(0, this.groundY - hazard.bottom, [g]).setDepth(DEPTH_TRACK);
-    if (hazard.bottom > 0) object.add(this.scene.add.text(0, -h - 17, "STAY LOW", { fontSize: "10px", fontFamily: "Arial", color: "#334155", backgroundColor: "#fffbeb", padding: { x: 4, y: 2 } }).setOrigin(0.5));
-    this.objects.push({ x: hazard.x, hazardId: hazard.id, object });
+    for (const placement of hazardPlacements(hazard)) parts.push(createObjectImage(this.scene, placement));
+    const object = this.scene.add.container(0, this.groundY - hazard.bottom, parts).setDepth(DEPTH_TRACK);
+    if (hazard.bottom > 0) object.add(this.scene.add.text(0, -hazard.height - 17, "STAY LOW", { fontSize: "10px", fontFamily: "Arial", color: "#334155", backgroundColor: "#fffbeb", padding: { x: 4, y: 2 } }).setOrigin(0.5));
+    this.objects.push({ x: hazard.x, hazardId: hazard.id, hazard, object });
   }
 }

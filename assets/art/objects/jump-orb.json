@@ -1,7 +1,7 @@
 {
   "label": "jump-orb",
   "image": "jump-orb.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 808,
   "height": 813,
   "view": "side elevation",

@@ -1,7 +1,7 @@
 {
   "label": "fallen-tree",
   "image": "fallen-tree.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 869,
   "height": 340,
   "view": "side elevation",

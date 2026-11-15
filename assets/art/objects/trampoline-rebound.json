@@ -1,7 +1,7 @@
 {
   "label": "trampoline-rebound",
   "image": "trampoline-rebound.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 807,
   "height": 418,
   "view": "side elevation",

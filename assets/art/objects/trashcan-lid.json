@@ -1,7 +1,7 @@
 {
   "label": "trashcan-lid",
   "image": "trashcan-lid.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 833,
   "height": 350,
   "view": "side elevation",

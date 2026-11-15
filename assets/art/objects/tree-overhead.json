@@ -1,7 +1,7 @@
 {
   "label": "tree-overhead",
   "image": "tree-overhead.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 878,
   "height": 869,
   "view": "side elevation",

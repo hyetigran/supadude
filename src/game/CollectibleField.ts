@@ -2,6 +2,8 @@ import { VIEWPORT } from "./Viewport";
 import Phaser from "phaser";
 import type { CoinEvent } from "./Level";
 import { COIN_RADIUS, DEPTH_TRACK } from "./VisualScale";
+import { createObjectImage } from "./ObjectArt";
+import { coinPlacement } from "./ObjectFit";
 
 const VIEW_MARGIN = 80;
 
@@ -33,7 +35,8 @@ export class CollectibleField {
       const x = this.characterX + event.x - distance;
       const onScreen = x > -VIEW_MARGIN && x < VIEWPORT.width + VIEW_MARGIN;
       gameObject.x = x;
-      gameObject.angle = this.reducedMotion ? 0 : distance * 0.8 % 360;
+      // A flat coin face reads as spinning by narrowing, not by rotating in the screen plane.
+      gameObject.scaleX = this.reducedMotion ? 1 : Math.max(0.2, Math.abs(Math.cos(distance * 0.014)));
       gameObject.setVisible(visible && onScreen && !this.collected.has(event.id));
     }
   }
@@ -48,11 +51,9 @@ export class CollectibleField {
   }
 
   private createCoin(event: CoinEvent): Phaser.GameObjects.Container {
-    const rim = this.scene.add.circle(0, 0, COIN_RADIUS, 0xffd166).setStrokeStyle(2, 0xfff4b8, 1);
-    const center = this.scene.add.circle(0, 0, COIN_RADIUS * 0.48, 0xf59e0b).setStrokeStyle(1, 0x8a5a00, 0.8);
-    const shine = this.scene.add.rectangle(-3, -2, 3, 9, 0xfff9db, 0.9).setAngle(25);
+    const coin = createObjectImage(this.scene, coinPlacement(COIN_RADIUS));
     return this.scene.add
-      .container(0, this.groundY - event.altitude, [rim, center, shine])
+      .container(0, this.groundY - event.altitude, [coin])
       .setDepth(DEPTH_TRACK + 0.5);
   }
 }

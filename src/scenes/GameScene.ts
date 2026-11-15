@@ -10,6 +10,7 @@ import { BattleField } from "../game/BattleField";
 import { QAPanel } from "./QAPanel";
 import { ObstacleField } from "../game/ObstacleField";
 import { preloadTraffic } from "../game/TrafficArt";
+import { preloadObjects } from "../game/ObjectArt";
 import { type Difficulty } from "../game/Difficulty";
 import { Runner, type RunnerEvent, type RunnerFrame } from "../game/Runner";
 import { Sfx } from "../game/Sfx";
@@ -115,6 +116,7 @@ export class GameScene extends Phaser.Scene {
       endFrame: heroRunMeta.sheet.frameCount - 1,
     });
     preloadTraffic(this);
+    preloadObjects(this);
   }
 
   create(data: { autoStart?: boolean; practiceBattle?: 0.5 | 0.9 } = {}): void {
@@ -232,6 +234,7 @@ export class GameScene extends Phaser.Scene {
         return;
       case "hazardCleared": {
         const hazard = this.level.hazards.find(({ id }) => id === event.hazardId);
+        this.obstacleField.popLid(event.hazardId, this.frame.distance);
         if (hazard) this.fx.burst(CHARACTER_X + hazard.x - this.frame.distance,
           this.groundY - hazard.height / 2, event.power === "fire" ? 0xf97316 : event.power === "water" ? 0x38bdf8 : 0xfacc15,
           { count: 12, lifespanMs: 300, speedMax: 130, gravityY: 100 });
@@ -241,6 +244,7 @@ export class GameScene extends Phaser.Scene {
         return;
       case "flightStarted":
       case "orbActivated":
+        if (event.type === "flightStarted") this.obstacleField.bouncePad(event.powerId);
         this.sfx.play(event.type === "flightStarted" ? "flight" : "orb");
         this.fx.burst(CHARACTER_X, this.player?.y ?? this.groundY, event.type === "flightStarted" ? 0x22d3ee : 0xfbbf24, {
           count: 16, lifespanMs: 420, speedMax: 140,

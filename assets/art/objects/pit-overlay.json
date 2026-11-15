@@ -1,7 +1,7 @@
 {
   "label": "pit-overlay",
   "image": "pit-overlay.png",
-  "status": "asset only (not wired into game)",
+  "status": "reference only (game uses pit-left-lip/pit-right-lip)",
   "width": 1040,
   "height": 330,
   "view": "side elevation",

@@ -1,7 +1,7 @@
 {
   "label": "bush",
   "image": "bush.png",
-  "status": "asset only (not wired into game)",
+  "status": "wired into game (src/game/ObjectFit.ts)",
   "width": 832,
   "height": 518,
   "view": "side elevation",
