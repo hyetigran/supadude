@@ -1,8 +1,8 @@
 {
-  "type": "static-sprite",
+  "type": "body-with-wheels",
   "label": "van-red",
   "image": "van-red.png",
-  "status": "generated, awaiting owner review",
+  "status": "wheel layer split, awaiting owner review",
   "width": 818,
   "height": 479,
   "facing": "left",
@@ -22,24 +22,24 @@
     "groundY": 453,
     "wheels": [
       {
-        "centerX": 175,
-        "centerY": 380,
-        "radius": 74,
-        "groundContactX": 175,
+        "centerX": 175.1,
+        "centerY": 383.9,
+        "radius": 69.5,
+        "groundContactX": 175.1,
         "groundContactY": 453
       },
       {
-        "centerX": 654,
-        "centerY": 380,
-        "radius": 74,
-        "groundContactX": 654,
+        "centerX": 654.6,
+        "centerY": 383.9,
+        "radius": 69.5,
+        "groundContactX": 654.6,
         "groundContactY": 453
       }
     ],
     "bodyLeftX": 24,
     "bodyRightX": 792
   },
-  "anchorNote": "Cell pixels, origin top-left. groundY = lowest tire pixel (sits on road). roof.left/right = ends of the top edge within tolerancePx of the highest roof pixel (landing surface). wheels = tire centres/radius measured from the contact column. Suggested origin (0.5, groundY/height).",
+  "anchorNote": "Cell pixels, origin top-left. groundY = lowest tire pixel (sits on road). roof.left/right = ends of the top edge within tolerancePx of the highest roof pixel (landing surface). wheels = hub centres (rotation pivots, measured from the hub ring) and outer tire radius. Suggested origin (0.5, groundY/height).",
   "suggestedOrigin": [
     0.5,
     0.9457
@@ -50,5 +50,22 @@
     "generationJob": "4a6d4052-becb-4eb0-a120-b44a3c174ae8",
     "corridorKey": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/perfectchroma/3c28c859-240d-491c-8f6d-267ebfaecb15/258842ed-41df-44ff-b6f6-fbb991f7d49b/corridor-keyed.png (maxSide 1024, keyColor #00FF00)",
     "process": "Corridor Key alpha at 1024x572; fully opaque pixels restored to original generation colours; alpha <6 cleared; green spill clamped; cropped to content + 24px padding. Recoloured in code from van-blue: only saturated blue body-paint pixels re-hued (150936 px); geometry, alpha, canvas, windows, tires, lights and outlines identical."
+  },
+  "wheelLayer": {
+    "image": "wheel.png",
+    "imageSize": [
+      200,
+      200
+    ],
+    "pivot": [
+      100,
+      100
+    ],
+    "imageRadius": 93.5,
+    "scale": 0.7433,
+    "drawOrder": "after body (wheel on top)",
+    "placement": "draw wheel.png centred on each anchors.wheels[i] centre (sprite pixels), scaled by scale, rotated by angle",
+    "spin": "angle(rad) -= distanceTravelledPx / (radius * spriteDisplayScale); car faces left and drives left, so wheels turn counter-clockwise on screen",
+    "note": "Body PNG has the tire interior cut out (transparent within radius-5 of each centre); the outer tire outline ring stays on the body so the seam is hidden. Without the wheel layer the body shows empty wheel holes."
   }
 }

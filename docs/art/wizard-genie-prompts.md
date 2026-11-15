@@ -11,7 +11,7 @@ Upload:
 - [approved-art-style.png](references/approved-art-style.png): the selected cleaner-cartoon scene, with blue car, trampoline, and green Trash Can. This defines the visual treatment.
 - [mc-run.png](../../assets/art/hero/mc-run.png): the approved in-game MC run sheet. This defines character identity (the original MC image was removed 2026-11-14).
 
-Generated Traffic sprites (2026-11-14, awaiting owner review, not wired into the game): `assets/art/traffic/{car,van}-{blue,red,yellow}.png`, each with a `.json` recording dimensions, roof endpoints, groundY and wheel anchors. Red/yellow are code recolors of the blue body only, on identical canvases.
+Generated Traffic sprites (2026-11-14, awaiting owner review, not wired into the game): `assets/art/traffic/{car,van}-{blue,red,yellow}.png`, each with a `.json` recording dimensions, roof endpoints, groundY and wheel anchors. Red/yellow are code recolors of the blue body only, on identical canvases. The wheels are a separate layer: the body PNGs have the tire interiors cut out (the outer tire outline stays on the body), and one shared spoked `assets/art/traffic/wheel.png` (200x200, pivot at its centre, outer radius 93.5) is drawn on top at each `anchors.wheels` hub centre, scaled by `wheelLayer.scale` (car 1.0, van 0.7433) and rotated by distance / radius. The wheel's tire colours and ring radii are measured from the approved tires. A 5-spoke hub was added so the rotation is visible.
 
 Attach the relevant reference images to later generations too; do not rely only on chat memory. The file paths in this document identify local files, not public reference-image URLs.
 
@@ -118,7 +118,7 @@ Use the approved blue car result as the reference for the other car colors. Crea
 | `van-red` | Recolor only the approved van body to red. Preserve roof, geometry, wheels and canvas. |
 | `van-yellow` | Recolor only the approved van body to yellow. Preserve roof, geometry, wheels and canvas. |
 
-Keep plain hubs if using still assets. Wheel rotation is optional later; do not animate a complete car driving across its source canvas. If separate rotating wheels are needed, export the approved wheels and wheel-less body with measured matching anchors rather than independently redrawing them.
+Rotating wheels were adopted (2026-11-14, option A): the shared `wheel.png` with a 5-spoke hub is layered over wheel-free bodies, as described above. Keep plain hubs only for still assets; do not animate a complete car driving across its source canvas. If separate rotating wheels are needed, export the approved wheels and wheel-less body with measured matching anchors rather than independently redrawing them.
 
 ## 7. Obstacles, interactive objects and finish
 
