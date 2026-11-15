@@ -1,0 +1,19 @@
+{
+  "label": "mc-run-v5",
+  "jobId": "114bab7e-6714-4781-b244-2026505f3e63",
+  "assetId": "80e42915-2746-4c33-a051-0a89316f6c46",
+  "characterAssetId": "e3faaeee-0f7a-491f-a1f3-454d740605d8",
+  "startPoseId": "3d592a10-f11f-438b-9423-8f479254b677",
+  "model": "imagine-1.5",
+  "resolution": "720p",
+  "requestedDurationSeconds": 5,
+  "creditsChargedForVideo": 20,
+  "video": "mc-run-v5-1794701016722.mp4",
+  "keyJobId": "c273d1c8-75a6-4736-9fd0-46c7d137cdff",
+  "keyMaxSide": 1024,
+  "creditsChargedForKey": 16,
+  "sheet": "mc-run-v5.png",
+  "metadata": "mc-run-v5.json",
+  "prompt": "mc-run-v5.prompt.txt",
+  "status": "complete"
+}

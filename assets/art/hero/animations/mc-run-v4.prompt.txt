@@ -1,0 +1,11 @@
+Side view, facing right. The stick figure runs in place with a smooth, steady, rhythmic running cycle at a moderate pace, about one and a half strides per second. Smooth continuous motion, no jerks, no motion blur. Torso leans slightly forward.
+
+Legs: clear alternating stride. The front knee lifts forward and bends; the back leg extends behind. The two legs stay clearly separated in every frame and never cross or merge into one line. Each leg is a thin black line ending in a plain rounded tip: no feet, no shoes, no foot hooks, no toes.
+
+Arms: both arms always visible, swinging opposite to the legs with bent elbows. Each arm is a thin black line ending in a plain rounded tip: no hands, no fists, no fingers, no balls or blobs at the ends.
+
+Cape: red cape streams straight back horizontally from the neck with a gentle flutter, never hanging down.
+
+Keep the exact same character design in every frame: same round white head size, same face, same constant line thickness, same proportions. Lines stay crisp, smooth and unbroken. No stretching, warping, morphing or distortion of the head or limbs.
+
+Camera locked, no zoom. Character stays centered with padding; no horizontal travel across the screen. Preserve the flat green background. No scenery, shadows, speed lines, dust, particles, text or extra characters.
