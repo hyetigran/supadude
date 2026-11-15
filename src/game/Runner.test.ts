@@ -23,6 +23,20 @@ describe("Runner", () => {
     expect(moved.distance).toBeCloseTo(26, 4);
   });
 
+  it("scrolls evenly every display frame even when frame times jitter around the fixed step", () => {
+    const runner = new Runner(EMPTY_LEVEL);
+    let previous = runner.step(0, { jumpHeld: false }).renderDistance;
+    const advances: number[] = [];
+    for (let i = 0; i < 60; i++) {
+      const frame = runner.step(i % 2 ? 15.9 : 17.4, { jumpHeld: false });
+      advances.push(frame.renderDistance - previous);
+      previous = frame.renderDistance;
+    }
+    const perMs = RUNNER_TUNING.runSpeed / 1_000;
+    // Each frame moves by its own duration, never by a whole extra or missing fixed step.
+    advances.slice(1).forEach((advance, i) => expect(advance).toBeCloseTo(perMs * ((i + 1) % 2 ? 15.9 : 17.4), 6));
+  });
+
   it("jumps once, rotates in air, and lands square", () => {
     const runner = new Runner(EMPTY_LEVEL);
     const takeoff = runner.step(10, { jumpHeld: true });

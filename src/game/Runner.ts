@@ -71,6 +71,11 @@ export interface RunnerFrame {
   usedPowerIds: readonly string[];
   phase: RunnerPhase;
   distance: number;
+  /**
+   * Distance blended between the last two fixed steps by the leftover frame time. Rendering scrolls by this
+   * so every displayed frame advances evenly, instead of by however many whole steps fit into it.
+   */
+  renderDistance: number;
   /** Feet above the implicit ground, in world pixels. */
   altitude: number;
   velocityY: number;
@@ -105,6 +110,7 @@ export class Runner {
   private readonly usedPowerIds = new Set<string>();
   private phase: RunnerPhase = "running";
   private distance = 0;
+  private stepStartDistance = 0;
   private altitude = 0;
   private velocityY = 0;
   private rotation = 0;
@@ -150,6 +156,7 @@ export class Runner {
 
     while (this.accumulatorMs >= fixedStepMs - 1e-7) {
       this.accumulatorMs -= fixedStepMs;
+      this.stepStartDistance = this.distance;
       this.fixedStep(input, events);
     }
 
@@ -468,6 +475,14 @@ export class Runner {
     events.push({ type: "restarted" });
   }
 
+  private renderDistance(): number {
+    const travelled = this.distance - this.stepStartDistance;
+    // Restarts and battle exits teleport; blending across them would sweep the whole street past in one frame.
+    if (travelled < 0 || travelled > this.tuning.runSpeed * this.tuning.fixedStepSeconds * 1.5) return this.distance;
+    const alpha = Math.max(0, Math.min(1, this.accumulatorMs / (this.tuning.fixedStepSeconds * 1_000)));
+    return this.stepStartDistance + travelled * alpha;
+  }
+
   private frame(events: readonly RunnerEvent[]): RunnerFrame {
     return {
       carPower: this.carPower,
@@ -479,6 +494,7 @@ export class Runner {
       usedPowerIds: [...this.usedPowerIds],
       phase: this.phase,
       distance: this.distance,
+      renderDistance: this.renderDistance(),
       altitude: this.altitude,
       velocityY: this.velocityY,
       rotation: this.rotation,

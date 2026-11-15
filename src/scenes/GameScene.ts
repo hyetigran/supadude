@@ -216,7 +216,7 @@ export class GameScene extends Phaser.Scene {
         return;
       case "shotFired": {
         const color = event.power === "fire" ? 0xf97316 : event.power === "water" ? 0x38bdf8 : 0xfacc15;
-        const targetX = CHARACTER_X + event.targetX - this.frame.distance;
+        const targetX = CHARACTER_X + event.targetX - this.frame.renderDistance;
         const targetY = this.groundY - event.targetY;
         const blast = this.add.graphics().setDepth(DEPTH_PLAYER + 1);
         blast.lineStyle(7, color, 0.75);
@@ -234,8 +234,8 @@ export class GameScene extends Phaser.Scene {
         return;
       case "hazardCleared": {
         const hazard = this.level.hazards.find(({ id }) => id === event.hazardId);
-        this.obstacleField.popLid(event.hazardId, this.frame.distance);
-        if (hazard) this.fx.burst(CHARACTER_X + hazard.x - this.frame.distance,
+        this.obstacleField.popLid(event.hazardId, this.frame.renderDistance);
+        if (hazard) this.fx.burst(CHARACTER_X + hazard.x - this.frame.renderDistance,
           this.groundY - hazard.height / 2, event.power === "fire" ? 0xf97316 : event.power === "water" ? 0x38bdf8 : 0xfacc15,
           { count: 12, lifespanMs: 300, speedMax: 130, gravityY: 100 });
         return;
@@ -328,10 +328,10 @@ export class GameScene extends Phaser.Scene {
         .setVisible(playerVisible);
     }
 
-    if (this.background) this.background.tilePositionX = frame.distance;
-    if (this.scenery) this.scenery.tilePositionX = frame.distance * (this.reducedMotion ? 1 : 0.24);
+    if (this.background) this.background.tilePositionX = frame.renderDistance;
+    if (this.scenery) this.scenery.tilePositionX = frame.renderDistance * (this.reducedMotion ? 1 : 0.24);
     this.obstacleField.render(frame);
-    this.collectibleField.render(frame.distance, !frame.battle);
+    this.collectibleField.render(frame.renderDistance, !frame.battle);
     this.battleField.render(frame.battle, frame.carPower, frame.phase === "dead");
     this.updateHud(frame);
   }
