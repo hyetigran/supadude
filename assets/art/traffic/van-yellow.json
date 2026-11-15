@@ -1,0 +1,54 @@
+{
+  "type": "static-sprite",
+  "label": "van-yellow",
+  "image": "van-yellow.png",
+  "status": "generated, awaiting owner review",
+  "width": 818,
+  "height": 479,
+  "facing": "left",
+  "anchors": {
+    "roof": {
+      "peakY": 25,
+      "left": [
+        303,
+        37
+      ],
+      "right": [
+        745,
+        37
+      ],
+      "tolerancePx": 12
+    },
+    "groundY": 453,
+    "wheels": [
+      {
+        "centerX": 175,
+        "centerY": 380,
+        "radius": 74,
+        "groundContactX": 175,
+        "groundContactY": 453
+      },
+      {
+        "centerX": 654,
+        "centerY": 380,
+        "radius": 74,
+        "groundContactX": 654,
+        "groundContactY": 453
+      }
+    ],
+    "bodyLeftX": 24,
+    "bodyRightX": 792
+  },
+  "anchorNote": "Cell pixels, origin top-left. groundY = lowest tire pixel (sits on road). roof.left/right = ends of the top edge within tolerancePx of the highest roof pixel (landing surface). wheels = tire centres/radius measured from the contact column. Suggested origin (0.5, groundY/height).",
+  "suggestedOrigin": [
+    0.5,
+    0.9457
+  ],
+  "padding": 24,
+  "provenance": {
+    "generator": "Sorceress nano-banana-2 (16:9, 1376x768 on #00FF00 chroma), ref approved-art-style.png",
+    "generationJob": "4a6d4052-becb-4eb0-a120-b44a3c174ae8",
+    "corridorKey": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/perfectchroma/3c28c859-240d-491c-8f6d-267ebfaecb15/258842ed-41df-44ff-b6f6-fbb991f7d49b/corridor-keyed.png (maxSide 1024, keyColor #00FF00)",
+    "process": "Corridor Key alpha at 1024x572; fully opaque pixels restored to original generation colours; alpha <6 cleared; green spill clamped; cropped to content + 24px padding. Recoloured in code from van-blue: only saturated blue body-paint pixels re-hued (150936 px); geometry, alpha, canvas, windows, tires, lights and outlines identical."
+  }
+}

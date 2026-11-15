@@ -1,0 +1,54 @@
+{
+  "type": "static-sprite",
+  "label": "car-blue",
+  "image": "car-blue.png",
+  "status": "generated, awaiting owner review",
+  "width": 900,
+  "height": 483,
+  "facing": "left",
+  "anchors": {
+    "roof": {
+      "peakY": 25,
+      "left": [
+        428,
+        37
+      ],
+      "right": [
+        673,
+        37
+      ],
+      "tolerancePx": 12
+    },
+    "groundY": 457,
+    "wheels": [
+      {
+        "centerX": 228,
+        "centerY": 363,
+        "radius": 94,
+        "groundContactX": 228,
+        "groundContactY": 457
+      },
+      {
+        "centerX": 700,
+        "centerY": 363,
+        "radius": 94,
+        "groundContactX": 700,
+        "groundContactY": 457
+      }
+    ],
+    "bodyLeftX": 25,
+    "bodyRightX": 874
+  },
+  "anchorNote": "Cell pixels, origin top-left. groundY = lowest tire pixel (sits on road). roof.left/right = ends of the top edge within tolerancePx of the highest roof pixel (landing surface). wheels = tire centres/radius measured from the contact column. Suggested origin (0.5, groundY/height).",
+  "suggestedOrigin": [
+    0.5,
+    0.9462
+  ],
+  "padding": 24,
+  "provenance": {
+    "generator": "Sorceress nano-banana-2 (16:9, 1376x768 on #00FF00 chroma), ref approved-art-style.png",
+    "generationJob": "0818b5e9-4abd-4888-8f59-121f0bf196d3",
+    "corridorKey": "https://wizardgenie-media.s3.us-west-004.backblazeb2.com/perfectchroma/3c28c859-240d-491c-8f6d-267ebfaecb15/cfeea1a3-3307-4f25-b509-b966ed666484/corridor-keyed.png (maxSide 1024, keyColor #00FF00)",
+    "process": "Corridor Key alpha at 1024x572; fully opaque pixels restored to original generation colours; alpha <6 cleared; green spill clamped; cropped to content + 24px padding."
+  }
+}

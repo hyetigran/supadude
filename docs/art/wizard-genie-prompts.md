@@ -11,6 +11,8 @@ Upload:
 - [approved-art-style.png](references/approved-art-style.png): the selected cleaner-cartoon scene, with blue car, trampoline, and green Trash Can. This defines the visual treatment.
 - [mc-run.png](../../assets/art/hero/mc-run.png): the approved in-game MC run sheet. This defines character identity (the original MC image was removed 2026-11-14).
 
+Generated Traffic sprites (2026-11-14, awaiting owner review, not wired into the game): `assets/art/traffic/{car,van}-{blue,red,yellow}.png`, each with a `.json` recording dimensions, roof endpoints, groundY and wheel anchors. Red/yellow are code recolors of the blue body only, on identical canvases.
+
 Attach the relevant reference images to later generations too; do not rely only on chat memory. The file paths in this document identify local files, not public reference-image URLs.
 
 Paste this setup prompt:
