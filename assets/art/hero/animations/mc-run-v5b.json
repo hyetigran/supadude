@@ -219,5 +219,33 @@
   ],
   "savedToAutoSprite": false,
   "autoSpriteNote": "save_tags was rejected: the asset's active sheet still points to the older 76-frame sheet (c273d1c8...). Tag in the AutoSprite UI after it switches to the new sheet, or keep this local metadata.",
-  "reviewStatus": "candidate - owner review"
+  "reviewStatus": "candidate - owner review",
+  "repairs": {
+    "date": "2026-11-14",
+    "backup": "mc-run-v5b.pre-holefix.png",
+    "note": "Background removal had cut small holes in thin black lines (cell 2 torso and front-arm tip; cell 8 torso; cell 12 back-arm tip and front-leg tip; tiny line-tip fades in cells 3, 5, 9). Only those pixels (within 3 px of a detected hole) were refilled from the matching source-video frame, keyed locally against #11f00a with despill. All other pixels are unchanged.",
+    "cellSourceVideoFrames1Based": [
+      63,
+      64,
+      65,
+      66,
+      67,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      77,
+      78
+    ],
+    "pixelsChangedPerCell": {
+      "2": 89,
+      "3": 37,
+      "5": 19,
+      "8": 38,
+      "9": 33,
+      "12": 159
+    }
+  }
 }
