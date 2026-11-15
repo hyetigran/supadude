@@ -1,0 +1,21 @@
+{
+  "label": "cloud",
+  "image": "cloud.png",
+  "status": "generated, not wired into game",
+  "width": 840,
+  "height": 479,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 815,
+    "bottom": 454
+  },
+  "anchors": {
+    "groundY": 454,
+    "groundCenterX": 377.0,
+    "topY": 24
+  },
+  "source": "nano-banana-2 gen 1aee7d03 (approved-art-style.png reference) on a green chroma plate, Sorceress Corridor Key, cropped with 24px padding",
+  "note": "Sky element: groundY/groundCenterX are just the measured bottom row and its center, not a ground contact."
+}

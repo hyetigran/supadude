@@ -1,0 +1,21 @@
+{
+  "label": "fence",
+  "image": "fence.png",
+  "status": "generated, not wired into game",
+  "width": 888,
+  "height": 481,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 863,
+    "bottom": 456
+  },
+  "anchors": {
+    "groundY": 456,
+    "groundCenterX": 443.5,
+    "topY": 24
+  },
+  "source": "nano-banana-2 gen cb67f8c5 (approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key, cropped with 24px padding",
+  "note": "Two crossbars instead of the brief's one; approved by owner."
+}

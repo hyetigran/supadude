@@ -1,0 +1,20 @@
+{
+  "label": "house-cream",
+  "image": "house-cream.png",
+  "status": "generated, not wired into game",
+  "width": 702,
+  "height": 587,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 677,
+    "bottom": 562
+  },
+  "anchors": {
+    "groundY": 562,
+    "groundCenterX": 350.5,
+    "topY": 24
+  },
+  "source": "nano-banana-2 gen c912d160 (approved-art-style.png reference) on a chroma plate, Sorceress Corridor Key, cropped with 24px padding"
+}

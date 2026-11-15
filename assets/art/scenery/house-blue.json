@@ -1,0 +1,20 @@
+{
+  "label": "house-blue",
+  "image": "house-blue.png",
+  "status": "generated, not wired into game",
+  "width": 703,
+  "height": 587,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 678,
+    "bottom": 562
+  },
+  "anchors": {
+    "groundY": 562,
+    "groundCenterX": 351.0,
+    "topY": 24
+  },
+  "source": "nano-banana-2 gen f6110fdf (approved-art-style.png reference) on a green chroma plate, Sorceress Corridor Key, cropped with 24px padding"
+}

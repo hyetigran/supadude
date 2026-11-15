@@ -1,0 +1,21 @@
+{
+  "label": "contact-shadow",
+  "image": "contact-shadow.png",
+  "status": "generated, not wired into game",
+  "width": 902,
+  "height": 335,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 877,
+    "bottom": 310
+  },
+  "anchors": {
+    "groundY": 310,
+    "groundCenterX": 449.5,
+    "topY": 24
+  },
+  "source": "nano-banana-2 gen 1f471c12 (approved-art-style.png reference) on a green chroma plate, Sorceress Corridor Key, cropped with 24px padding",
+  "note": "Interior is opaque dark grey with soft edges; draw at reduced alpha. groundY/groundCenterX are the oval's bottom row and center."
+}

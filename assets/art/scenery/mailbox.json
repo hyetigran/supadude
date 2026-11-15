@@ -1,0 +1,21 @@
+{
+  "label": "mailbox",
+  "image": "mailbox.png",
+  "status": "generated, not wired into game",
+  "width": 402,
+  "height": 634,
+  "view": "side elevation",
+  "opaqueBounds": {
+    "left": 24,
+    "top": 24,
+    "right": 377,
+    "bottom": 609
+  },
+  "anchors": {
+    "groundY": 609,
+    "groundCenterX": 191.5,
+    "topY": 24
+  },
+  "source": "nano-banana-2 gen 7e43bedf (approved-art-style.png reference) on a green chroma plate, Sorceress Corridor Key maxSide 1024, cropped with 24px padding",
+  "note": "Regenerated as a true side elevation (replaces gen d3d199a7, which showed both arched ends)."
+}
